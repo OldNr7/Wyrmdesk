@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Handouts</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Black until the DM shows a handout; rotated to face the players at the table. -->
+  <div id="stage">
+    <div id="handout" hidden>
+      <h1 id="title"></h1>
+      <div id="frame">
+        <img id="image" alt="" hidden />
+        <div id="text" hidden></div>
+      </div>
+    </div>
+  </div>
+  <div id="fs-hint">Klicken für Vollbild</div>
+  <script src="/ui-lang.js"></script>
+  <script src="/shared/vendor/marked.min.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

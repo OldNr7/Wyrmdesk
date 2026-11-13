@@ -1,0 +1,26 @@
+# Charaktererstellung: kann öffentlich erreichbar sein, dann hinter einem Reverse-Proxy mit HTTPS.
+# Eigener Stack, unabhängig vom Kampagnenbuch.
+#
+#   docker compose up -d --build
+#
+# Admin-Passwort: ADMIN_PASSWORD in einer .env-Datei neben dieser compose.yaml (nicht eingecheckt,
+# Vorlage .env.example).
+# Ohne erzeugt der erste Start ein zufälliges Passwort, schreibt es einmal ins Log und legt es im
+# Volume ab:  docker compose logs charcreator  bzw.  docker compose exec charcreator cat /data/admin-password
+
+services:
+  charcreator:
+    build: ./backend
+    container_name: charcreator
+    restart: unless-stopped
+    ports:
+      - "8450:8000"
+    environment:
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      # Sprache der Oberfläche: de (Standard) oder en.
+      - UI_LANG=${UI_LANG:-de}
+    volumes:
+      - charcreator_data:/data
+
+volumes:
+  charcreator_data:

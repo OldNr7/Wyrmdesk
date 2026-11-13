@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Charakterblatt</title>
+  <link rel="stylesheet" href="/shared/charsheet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="top">
+  <header>
+    <select id="char-select" aria-label="Charakter"></select>
+    <span class="spacer"></span>
+    <button id="init-toggle" class="ghost" aria-pressed="false">⚔ Kampfreihenfolge</button>
+    <button id="levelup-btn" class="ghost" hidden>⬆ Stufenaufstieg</button>
+    <button id="edit-btn" hidden>Bearbeiten</button>
+    <button id="save-btn" hidden>Speichern</button>
+    <button id="cancel-btn" class="ghost" hidden>Abbrechen</button>
+  </header>
+  <section id="initiative" hidden>
+    <iframe id="init-frame" title="Kampfreihenfolge"></iframe>
+  </section>
+  </div>
+  <div id="status" class="status" hidden></div>
+  <main id="sheet">
+    <p class="empty">Wähle oben deinen Charakter.</p>
+  </main>
+  <script src="/ui-lang.js"></script>
+  <script src="/shared/charsheet-rules.js"></script>
+  <script src="/shared/charsheet.js"></script>
+  <script src="/shared/levelup.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

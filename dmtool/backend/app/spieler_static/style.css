@@ -1,0 +1,141 @@
+:root {
+  /* Elfenbein und Tinte: helles Papier, dunkle Tinte, Lederleiste oben; Drachenblut-Rot (accent),
+     Bronze für Flächen (accent-2), Gold für Linien. Der Beamer bleibt dunkel (eigene Werte dort). */
+  color-scheme: light;
+  --bg: #f5f0e6;
+  --panel: #fffdf8;
+  --panel-alt: #ece4d4;
+  --border: #d6c8ad;
+  --text: #2a2520;
+  --muted: #74695a;
+  --accent: #8c2a24;
+  --accent-2: #8a5d1f;
+  --gold: #b08a2a;
+  --heading: #5c2e1a;
+  --good: #3f6b22;
+  --warn: #b8661a;
+  --danger-text: #a3302a;
+  --font-head: Georgia, "Palatino Linotype", "Book Antiqua", serif;
+  --link: #2f5d62;
+  --secret: #f6e3df;
+  --on-accent: #fff;
+  --leather: #5c2e1a;
+  --leather-border: #4a2414;
+  --leather-text: #f3dca0;
+  --leather-muted: #e2c9a8;
+  --shadow: rgba(60, 40, 20, 0.2);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+/* Header and turn order stay in view while scrolling the sheet */
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--leather);
+  border-bottom: 2px solid var(--accent);
+}
+
+.spacer { flex: 1; }
+
+select,
+button {
+  font: inherit;
+  color: var(--text);
+  border-radius: 6px;
+  padding: 7px 12px;
+}
+
+header select {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 200px;
+}
+
+button {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+header button.ghost { color: var(--leather-text); border-color: var(--leather-muted); }
+
+button.ghost.active {
+  border-color: var(--gold);
+  background: rgba(243, 220, 160, 0.18);
+}
+
+button[hidden] { display: none; }
+
+/* Turn order: the display page from / (dark, like the beamer) */
+#initiative {
+  background: #120e0a;
+  border-bottom: 1px solid var(--border);
+}
+
+#initiative[hidden] { display: none; }
+
+#init-frame {
+  display: block;
+  width: 100%;
+  height: 190px;
+  border: 0;
+}
+
+main {
+  padding: 8px 16px 32px;
+}
+
+main .char-sheet {
+  margin: 8px auto;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  margin-top: 48px;
+}
+
+.status {
+  margin: 8px 16px 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+.status.ok { border-left: 4px solid var(--good); }
+.status.error { border-left: 4px solid var(--accent); }
+.status[hidden] { display: none; }
+
+/* Phones: a little less frame around the sheet */
+@media (max-width: 600px) {
+  header { padding: 8px; }
+  main { padding: 4px 6px 24px; }
+  #init-frame { height: 170px; }
+}

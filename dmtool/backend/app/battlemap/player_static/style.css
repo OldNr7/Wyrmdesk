@@ -1,0 +1,81 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+body.idle { cursor: none; }
+
+#stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+#stage canvas { display: block; }
+
+/* A DM-chosen image shown instead of the battlemap; replaces the canvas and tracker strip. */
+#beamer-image {
+  position: absolute;
+  left: 0;
+  top: 0;
+  object-fit: contain;
+  background: #000;
+}
+#beamer-image[hidden] { display: none; }
+body.image-mode #view, body.image-mode #tracker-strip { display: none; }
+
+/* Tracker display, turned so its top edge lies along the left beamer edge (sized in app.js). */
+#tracker-strip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+#tracker-strip[hidden] { display: none; }
+
+.handle {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border-radius: 50%;
+  border: 3px solid #e8c15a;
+  background: rgba(232, 193, 90, 0.25);
+  cursor: grab;
+  touch-action: none;
+}
+
+#hint {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #666;
+  font-size: 14px;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+
+body.fullscreen #hint, body.idle #hint { opacity: 0; }
+
+/* Kampagnenbuch handout over the blurred map; its page is transparent outside the handout. */
+#handout {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: none;
+}
+#handout[hidden] { display: none; }
+
+#view, #tracker-strip, #beamer-image { transition: filter 0.4s; }
+body.handout-shown #view, body.handout-shown #tracker-strip, body.handout-shown #beamer-image {
+  filter: blur(14px) brightness(0.75);
+}

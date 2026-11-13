@@ -1,0 +1,283 @@
+:root {
+  /* Elfenbein und Tinte: helles Papier, dunkle Tinte, Lederleiste oben; Drachenblut-Rot (accent),
+     Bronze für Flächen (accent-2), Gold für Linien. Der Beamer bleibt dunkel (eigene Werte dort). */
+  color-scheme: light;
+  --bg: #f5f0e6;
+  --panel: #fffdf8;
+  --panel-alt: #ece4d4;
+  --border: #d6c8ad;
+  --text: #2a2520;
+  --muted: #74695a;
+  --accent: #8c2a24;
+  --accent-2: #8a5d1f;
+  --gold: #b08a2a;
+  --heading: #5c2e1a;
+  --good: #3f6b22;
+  --warn: #b8661a;
+  --danger-text: #a3302a;
+  --font-head: Georgia, "Palatino Linotype", "Book Antiqua", serif;
+  --link: #2f5d62;
+  --secret: #f6e3df;
+  --on-accent: #fff;
+  --leather: #5c2e1a;
+  --leather-border: #4a2414;
+  --leather-text: #f3dca0;
+  --leather-muted: #e2c9a8;
+  --shadow: rgba(60, 40, 20, 0.2);
+  --icon-bg: #2a221a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.top { position: sticky; top: 0; z-index: 10; }
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--leather);
+  border-bottom: 2px solid var(--accent);
+  font-family: var(--font-head);
+  color: var(--leather-text);
+}
+
+.spacer { flex: 1; }
+
+/* Only the page's own controls (header, list, password): the character sheet styles its fields
+   itself, as in the Kampagnenbuch's player view. */
+.new-char-form input, .password-gate input, header select, button {
+  font: inherit;
+  color: var(--text);
+  border-radius: 6px;
+  padding: 7px 12px;
+}
+
+.new-char-form input, .password-gate input, header select {
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+button {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.ghost { background: transparent; border-color: var(--border); color: var(--text); }
+header button.ghost { color: var(--leather-text); border-color: var(--leather-muted); }
+button[hidden] { display: none; }
+
+/* The sheet gets the full width (up to its own 1180px), like the Kampagnenbuch's player view, so
+   it shows three columns there too; only the character list stays narrow. */
+main { padding: 8px 16px 32px; }
+main .char-sheet { margin: 8px auto; }
+
+.empty { color: var(--muted); text-align: center; margin-top: 48px; }
+
+.status {
+  margin: 8px 16px 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--panel);
+}
+.status.ok { border-left: 4px solid var(--good); }
+.status.error { border-left: 4px solid var(--accent); }
+.status[hidden] { display: none; }
+
+/* ---------- character list ---------- */
+
+.char-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+}
+
+.char-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.char-list li:hover { border-color: var(--gold); }
+
+.char-list .char-pic {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  object-fit: cover;
+  background: var(--panel-alt);
+}
+.char-list .char-pic.no-pic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-size: 1.3em;
+  color: var(--muted);
+}
+.char-list .char-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.char-list .name { font-weight: 600; }
+.char-list .facts { color: var(--muted); font-size: 0.88em; }
+.char-list .player { color: var(--muted); font-size: 0.9em; }
+
+.badge {
+  font-size: 0.8em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.badge.fertig { color: var(--good); border-color: var(--good); }
+.badge.draft { color: var(--warn); border-color: var(--warn); }
+
+.new-char-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.new-char-form input { flex: 1 1 160px; }
+
+.dates-link {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-weight: 600;
+  text-align: center;
+}
+.dates-link:hover { border-color: var(--gold); }
+
+/* ---------- Termine (session date poll) ---------- */
+
+.dates-page { max-width: 560px; margin: 0 auto; }
+
+.name-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+.name-field select, .name-field input {
+  flex: 1 1 220px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font: inherit;
+  color: var(--text);
+}
+.name-field input[hidden] { display: none; }
+
+/* A bordered card around the grid, so the legend below it reads as a caption under the
+   calendar, not as part of it. */
+#dates-calendar {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 0;
+}
+.cal-legend { margin: 14px 0 20px; padding-top: 10px; border-top: 1px solid var(--border); }
+
+/* Read-only: who answered what for a day. Answering itself happens in the popover the
+   calendar opens (.date-popover, .vote-buttons below), not here. */
+.dates-list { list-style: none; margin: 20px 0 0; padding: 0; }
+
+.date-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+}
+.date-card.mark-open { background: var(--panel-alt); border-color: var(--accent-2); }
+.date-card.mark-yes { background: color-mix(in srgb, var(--good) 25%, var(--panel)); border-color: var(--good); }
+.date-card.mark-maybe { background: color-mix(in srgb, var(--warn) 25%, var(--panel)); border-color: var(--warn); }
+.date-card.mark-no { background: color-mix(in srgb, var(--accent) 20%, var(--panel)); border-color: var(--accent); }
+.date-card .date-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.date-card .date-title { font-weight: 600; }
+.date-card .date-note { color: var(--muted); font-size: 0.9em; }
+
+.date-popover-note-text { color: var(--muted); font-size: 0.9em; }
+
+.vote-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.vote-buttons button {
+  flex: 1 1 auto;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 4px;
+  font-size: 0.92em;
+}
+.vote-buttons button.active.yes { background: var(--good); border-color: var(--good); color: var(--on-accent); }
+.vote-buttons button.active.maybe { background: var(--warn); border-color: var(--warn); color: var(--on-accent); }
+.vote-buttons button.active.no { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+.vote-list { font-size: 0.85em; color: var(--muted); }
+.vote-list .yes { color: var(--good); }
+.vote-list .maybe { color: var(--warn); }
+.vote-list .no { color: var(--accent); }
+.date-card .vote-list { margin-top: 8px; }
+
+/* ---------- campaign password ---------- */
+
+.password-gate {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 320px;
+  margin: 64px auto 0;
+  padding: 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+.password-gate p { margin: 0; color: var(--muted); }
+.password-gate .status { margin: 0; }
+
+/* The list page stays narrow and centered; the sheet takes the full width (see main above). */
+.char-list, .new-char-form, .dates-link, main > .empty {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 600px) {
+  header { padding: 8px; }
+  main { padding: 4px 6px 24px; }
+}

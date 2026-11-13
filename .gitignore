@@ -1,0 +1,32 @@
+# Game data belongs in the tools' own backups, not in Git.
+backups/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.zip
+
+# Saved D&D Beyond pages (bought content), only for building and testing the imports
+/*.html
+/*.htm
+/*_files/
+
+# Python
+__pycache__/
+*.pyc
+
+# Secrets (ADMIN_PASSWORD, DEEPL_API_KEY …) — live next to each tool's compose.yaml; templates: .env.example
+.env
+.env.*
+*.env
+!.env.example
+
+# Private notes about one's own installation (server, remote), never published
+privat/
+
+# Editors and OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store

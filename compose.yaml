@@ -1,0 +1,56 @@
+# Wyrmdesk for local use as one Docker stack: Kampagnenbuch, Combat Tracker and Battlemap in one
+# container (the Charaktererstellung has its own stack in charcreator/).
+#
+#   docker compose up -d --build     start (or update after code changes)
+#   docker compose down              stop; data stays in the dnd-local_* volumes
+#
+# Spielleiter   http://localhost:8440          Kampagnenbuch
+#               http://localhost:8440/tracker/ Combat Tracker
+#               http://localhost:8440/map/     Battlemap
+# Beamer        http://localhost:8441          handouts, /spieler/, /anzeige/tracker/, /beamer/
+# Old addresses (bookmarks, Stream Deck), served by the same process until phase 3:
+#               8420 tracker, 8421 tracker display, 8430 battlemap, 8431 -> 8441/beamer/
+#
+# One database for all three (phase 2). The tracker's and the battlemap's old volumes stay mounted:
+# merge.py copied them in once on the first start and reads them again only for a restore of a backup
+# from before. Automatic backups go to ./backups/auto (see backup.py), the newest 14.
+
+name: dnd-local
+
+services:
+  dmtool:
+    build: ./dmtool/backend
+    pull_policy: build
+    container_name: dnd-dmtool
+    restart: unless-stopped
+    command: ["python", "-m", "app.run"]
+    ports:
+      - "8440:8000"
+      - "8441:8001"
+      - "8420:8002"
+      - "8421:8003"
+      - "8430:8004"
+      - "8431:8005"
+    environment:
+      # German translation of the library (Einrichtung → Deutsche Übersetzung): the DeepL key,
+      # from a .env file next to this one (not checked in). Empty: no translating.
+      - DEEPL_API_KEY=${DEEPL_API_KEY:-}
+      # Sprache der Oberfläche: de (Standard) oder en.
+      - UI_LANG=${UI_LANG:-de}
+      - COMBAT_DB_PATH=/data/combat/combattracker.db
+      - MAP_DB_PATH=/data/battlemap/battlemap.db
+      - BACKUP_DIR=/backups
+      # Swiss time for backup file names; written as a rule because the image has no time zone files.
+      - TZ=CET-1CEST,M3.5.0,M10.5.0/3
+    volumes:
+      - dmtool_data:/data
+      # The old databases of the tracker and the battlemap (read by merge.py, see above).
+      - combattracker_data:/data/combat
+      - battlemap_data:/data/battlemap
+      - ./dmtool/backend/app:/srv/app:ro
+      - ./backups/auto:/backups
+
+volumes:
+  dmtool_data:
+  combattracker_data:
+  battlemap_data:

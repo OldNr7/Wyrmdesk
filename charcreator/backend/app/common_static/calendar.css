@@ -1,0 +1,149 @@
+/* Month-grid calendar for Termine (session date poll); relies on the page's own :root
+   variables (--panel, --panel-alt, --border, --muted, --gold, --good, --warn, --accent, …),
+   which the admin and player pages both define with the same names. */
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+.cal-title { font-family: var(--font-head); font-weight: 600; }
+.cal-nav { padding: 2px 10px; }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-dow {
+  text-align: center;
+  font-size: 0.78em;
+  color: var(--muted);
+  padding-bottom: 2px;
+}
+/* Square sizing lives on `.cal-cell` (a padding-top trick), not on `.cal-day` itself: a plain
+   `aspect-ratio` here would do it more simply, but with `grid-template-columns: repeat(7, 1fr)`
+   and implicit rows, browsers size a 1fr column unevenly once it holds a different number of
+   aspect-ratio items than its neighbors - which the Sunday column always does (5 of its own
+   weeks vs. 6 for Monday-Saturday). The wrapper sidesteps that entirely. */
+.cal-cell { position: relative; }
+.cal-cell::before { content: ""; display: block; padding-top: 100%; }
+
+.cal-day {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  font-size: 0.9em;
+}
+.cal-day.empty { border-color: transparent; background: transparent; }
+.cal-day.today { font-weight: 700; outline: 2px solid var(--gold); outline-offset: -2px; }
+.cal-day[data-date] { cursor: pointer; }
+.cal-day[data-date]:hover { border-color: var(--gold); }
+
+.cal-day.mark-open { background: var(--panel-alt); border-color: var(--accent-2); }
+.cal-day.mark-yes { background: color-mix(in srgb, var(--good) 25%, var(--panel)); border-color: var(--good); }
+.cal-day.mark-maybe { background: color-mix(in srgb, var(--warn) 25%, var(--panel)); border-color: var(--warn); }
+.cal-day.mark-no { background: color-mix(in srgb, var(--accent) 20%, var(--panel)); border-color: var(--accent); }
+
+/* The picture(s) of whoever has answered a day, instead of a plain tinted square - each
+   ringed in that person's own answer color. */
+.cal-day.has-avatar { padding: 3px; }
+.cal-avatar-stack {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 2px;
+  place-items: center;
+}
+.cal-avatar-stack.single { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.cal-avatar, .cal-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+}
+.cal-avatar-fallback {
+  background: var(--panel-alt);
+  color: var(--muted);
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 0.85em;
+}
+.cal-avatar-more {
+  background: var(--panel-alt);
+  color: var(--muted);
+  font-size: 0.7em;
+  font-weight: 600;
+}
+.avatar-ring-yes { border-color: var(--good); }
+.avatar-ring-maybe { border-color: var(--warn); }
+.avatar-ring-no { border-color: var(--accent); }
+.cal-daynum {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.62em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+.cal-legend .dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.cal-legend .dot.open { background: var(--panel-alt); border: 1px solid var(--accent-2); }
+.cal-legend .dot.yes { background: color-mix(in srgb, var(--good) 25%, var(--panel)); border: 1px solid var(--good); }
+.cal-legend .dot.maybe { background: color-mix(in srgb, var(--warn) 25%, var(--panel)); border: 1px solid var(--warn); }
+.cal-legend .dot.no { background: color-mix(in srgb, var(--accent) 20%, var(--panel)); border: 1px solid var(--accent); }
+
+/* A small popover anchored to a clicked day - the admin's "propose this day" form and the
+   player's "answer for this day" buttons are both built on this. Needs `#dates-calendar` (or
+   whatever container it's appended to) to be `position: relative`. */
+.date-popover {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 240px;
+  padding: 10px;
+  background: var(--panel);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  box-shadow: 0 4px 14px var(--shadow);
+}
+.date-popover-title { font-weight: 600; }

@@ -1,0 +1,86 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #000; color: #f4ecd8; cursor: none; }
+
+#stage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 100vh;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Quarter turns swap width and height so the handout still fills the table. */
+body.sideways #stage { width: 100vh; height: 100vw; }
+
+#handout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Title and handout stay together in the middle, as far apart as the screen edge margin. */
+  justify-content: center;
+  gap: 4vmin;
+  width: 100%;
+  height: 100%;
+  padding: 4vmin;
+  container-type: size;
+  opacity: 1;
+  transition: opacity 0.4s;
+}
+#handout[hidden] { display: flex; opacity: 0; }
+
+#title {
+  margin: 0;
+  font-family: Georgia, "Palatino Linotype", serif;
+  font-size: 4.5vmin;
+  font-weight: normal;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+#title:empty { display: none; }
+
+/* Room left under the title: the full height minus title line and gap. */
+#frame { --room: calc(100cqh - 10vmin); width: 100%; display: flex; gap: 4vmin; align-items: center; justify-content: center; }
+#title:empty + #frame { --room: 100cqh; }
+#image { max-width: 100%; max-height: var(--room); object-fit: contain; border-radius: 6px; box-shadow: 0 0 40px rgba(0, 0, 0, 0.8); }
+#image[hidden], #text[hidden] { display: none; }
+#frame.both #image { max-width: 55%; }
+
+#text {
+  max-width: 70ch;
+  max-height: var(--room);
+  overflow: hidden;
+  padding: 3vmin 4vmin;
+  background: #efe3c4;
+  color: #2b2116;
+  border-radius: 4px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+  font-family: Georgia, "Palatino Linotype", serif;
+  font-size: 2.6vmin;
+  line-height: 1.5;
+}
+#text h2, #text h3 { margin: 0 0 1vmin; }
+#text p { margin: 0 0 1.2vmin; }
+#text img { max-width: 100%; }
+#text blockquote { margin: 0; font-style: italic; }
+
+#fs-hint {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #222;
+  color: #888;
+  font: 13px "Segoe UI", sans-serif;
+  cursor: pointer;
+}
+body.fullscreen #fs-hint { display: none; }
+
+/* Embedded over the blurred battlemap: no backdrop of its own, title readable on any map. */
+html.overlay, html.overlay body { background: transparent; }
+html.overlay #fs-hint { display: none; }
+html.overlay #title { text-shadow: 0 0 6px #000, 0 0 18px #000, 0 2px 3px #000; }

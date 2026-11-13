@@ -1,0 +1,65 @@
+# Server stack: Kampagnenbuch with Combat Tracker and Battlemap in one container. The
+# Charaktererstellung is its own stack (charcreator/compose.yaml). No login: keep it in your own network.
+#
+#   Spielleiter   http://<host>:8440           Kampagnenbuch, /tracker/, /map/
+#   Beamer        http://<host>:8441           handouts, /spieler/, /anzeige/tracker/, /beamer/
+#   Old addresses (bookmarks, Stream Deck): 8420 tracker, 8421 tracker display, 8430 battlemap,
+#                 8431 -> 8441/beamer/
+#
+# Before the first start the old stacks (Kampagnenbuch, Combat Tracker, Battlemap) must be stopped: this
+# one takes over their ports and their data volumes. On the first start merge.py copies the tracker's
+# and the battlemap's databases into the Kampagnenbuch's once (before-merge.db is saved first); the old
+# files stay as they are, so the old stacks can be started again if needed.
+#
+# Set in a .env next to this file or in the stack's environment (not checked in, see .env.example):
+#   DEEPL_API_KEY     German translation of the library; empty: no translating
+#   UI_LANG           language of the UI: de (default) or en
+#   BACKUP_HOST_DIR   where the automatic backups go on the host (default: the volume dnd-tools_backups)
+
+services:
+  dmtool:
+    build: ./backend
+    # Rebuild on every deploy, so changes to requirements.txt are picked up.
+    pull_policy: build
+    # Not "dmtool": the stopped container of the old stack may still carry that name.
+    container_name: dnd-tools
+    restart: unless-stopped
+    command: ["python", "-m", "app.run"]
+    ports:
+      - "8440:8000"   # Spielleiter: Kampagnenbuch, /tracker/, /map/
+      - "8441:8001"   # Beamer and players
+      - "8420:8002"   # old address: Combat Tracker
+      - "8421:8003"   # old address: tracker display
+      - "8430:8004"   # old address: Battlemap
+      - "8431:8005"   # old address: battlemap beamer (redirects to 8441/beamer/)
+    environment:
+      - DEEPL_API_KEY=${DEEPL_API_KEY:-}
+      # Sprache der Oberfläche: de (Standard) oder en.
+      - UI_LANG=${UI_LANG:-de}
+      # The old databases, read once by merge.py (volumes below).
+      - COMBAT_DB_PATH=/data/combat/combattracker.db
+      - MAP_DB_PATH=/data/battlemap/battlemap.db
+      # Automatic backups (hourly check, at most every 12 hours, the newest 14 kept), see backup.py.
+      - BACKUP_DIR=/backups
+      # Swiss time for backup file names; written as a rule because the image has no time zone files.
+      - TZ=CET-1CEST,M3.5.0,M10.5.0/3
+    volumes:
+      - dmtool_data:/data
+      - combattracker_data:/data/combat
+      - battlemap_data:/data/battlemap
+      - ${BACKUP_HOST_DIR:-backups}:/backups
+      - ./backend/app:/srv/app:ro
+
+volumes:
+  # The volumes the three old stacks have on the server, taken over by name.
+  dmtool_data:
+    external: true
+    name: dnd-tools_dmtool_data
+  combattracker_data:
+    external: true
+    name: dnd-tools_combattracker_data
+  battlemap_data:
+    external: true
+    name: dnd-tools_battlemap_data
+  backups:
+    name: dnd-tools_backups

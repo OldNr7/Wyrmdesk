@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Battlemap – Beamer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="stage">
+    <canvas id="view"></canvas>
+    <img id="beamer-image" alt="" hidden />
+    <iframe id="tracker-strip" title="Combat Tracker" hidden></iframe>
+    <iframe id="handout" title="Handout" hidden></iframe>
+  </div>
+  <div id="handles"></div>
+  <div id="hint">Klicken für Vollbild</div>
+  <script src="ui-lang.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

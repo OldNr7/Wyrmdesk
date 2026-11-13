@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Charaktererstellung – Verwaltung · Wyrmdesk</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/common/calendar.css">
+</head>
+<body>
+  <header><h1>Charaktererstellung – Verwaltung</h1></header>
+
+  <main id="login-gate">
+    <section class="panel">
+      <h2>Anmelden</h2>
+      <form id="login">
+        <input type="password" name="password" placeholder="Admin-Passwort" required autofocus>
+        <button type="submit">Anmelden</button>
+      </form>
+      <p id="login-error" class="hint"></p>
+    </section>
+  </main>
+
+  <main id="app" hidden>
+    <section class="panel">
+      <h2>Kampagnen</h2>
+      <div class="campaign-head">
+        <div>Name</div>
+        <div>Passwort</div>
+        <div>Charaktere</div>
+        <div></div>
+      </div>
+      <div id="campaigns" class="campaign-list"></div>
+      <form id="new-campaign">
+        <input type="text" name="name" placeholder="Name der Kampagne" required>
+        <input type="password" name="password" placeholder="Passwort (optional)">
+        <button type="submit">Anlegen</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Inhalte</h2>
+      <p id="content-status">lädt…</p>
+      <form id="upload-content">
+        <input type="file" name="file" accept="application/json" required>
+        <button type="submit">Hochladen</button>
+      </form>
+      <p class="hint">Export aus dem Kampagnenbuch unter „⚙ Einrichtung → Charakterinhalte exportieren“.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Termine</h2>
+      <label class="row">Kampagne
+        <select id="dates-campaign"></select>
+      </label>
+      <div id="dates-calendar"></div>
+      <div class="cal-legend">
+        <span><span class="dot open"></span>vorgeschlagen, noch keine Rückmeldungen</span>
+        <span><span class="dot yes"></span>alle zugesagt</span>
+        <span><span class="dot maybe"></span>mindestens ein Vielleicht</span>
+        <span><span class="dot no"></span>mindestens eine Absage</span>
+      </div>
+      <p class="hint">Tag im Kalender anklicken: freien Tag als Termin vorschlagen, vorgeschlagenen Tag unten ansehen.</p>
+      <ul id="dates-list" class="dates-list"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Charaktere</h2>
+      <label class="row">Kampagne
+        <select id="characters-campaign">
+          <option value="">Alle Kampagnen</option>
+        </select>
+      </label>
+      <table id="characters">
+        <thead><tr><th>Kampagne</th><th>Spieler</th><th>Name</th><th>Status</th><th>Geändert</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <button id="export-characters">Fertige Charaktere exportieren</button>
+    </section>
+  </main>
+
+  <script src="/ui-lang.js"></script>
+  <script src="/common/calendar.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

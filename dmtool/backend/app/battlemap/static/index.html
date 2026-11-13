@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Battlemap · Wyrmdesk</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Battlemap</h1>
+    <select id="campaign-select" title="Kampagne"></select>
+    <div id="scene-title" class="muted">Keine Szene gewählt</div>
+    <div class="spacer"></div>
+    <span id="tracker-badge" class="badge">Tracker: –</span>
+    <button id="btn-blackout" class="toggle" title="Beamer schwarz schalten (B)">Blackout</button>
+    <a id="player-link" class="button" target="_blank">Beamer-Ansicht ↗</a>
+    <button id="btn-setup" title="Einrichtung: Beamer, Tisch, Raster, Stream Deck">⚙ Einrichtung</button>
+  </header>
+
+  <main>
+    <!-- Topic rail: one click opens the topic's panel, another click (or a different topic) closes it. -->
+    <nav id="rail">
+      <button data-panel="scenes"><span class="icon">🗺</span>Szenen</button>
+      <button data-panel="tools" class="needs-scene-btn"><span class="icon">🖌</span>Werkzeuge</button>
+      <button data-panel="sight" class="needs-scene-btn"><span class="icon">👁</span>Sicht</button>
+      <button data-panel="areas" class="needs-scene-btn"><span class="icon">⬠</span>Bereiche</button>
+      <button data-panel="tokens" class="needs-scene-btn"><span class="icon">●</span>Tokens</button>
+      <button data-panel="tracker"><span class="icon">⚔</span>Tracker</button>
+    </nav>
+
+    <aside id="panel" hidden>
+      <section data-panel="scenes">
+        <h2>Szenen</h2>
+        <ul id="scene-list" class="list"></ul>
+        <label class="button file-button">
+          + Neue Szene aus Bild
+          <input type="file" id="new-scene-file" accept="image/*" hidden />
+        </label>
+        <label class="button file-button">
+          + Szene aus Dungeondraft (.dd2vtt)
+          <input type="file" id="new-scene-uvtt" accept=".dd2vtt,.uvtt,.df2vtt,application/json" hidden />
+        </label>
+        <div class="muted small">Dungeondraft: Datei → Exportieren → Universal VTT. Karte, Raster, Wände und Türen werden übernommen.</div>
+      </section>
+
+      <section data-panel="sight">
+        <h2>Sicht</h2>
+        <label class="row"><input type="checkbox" id="vision-enabled" /> Sichtlinien aktiv</label>
+        <div class="tool-grid">
+          <button data-tool="viewer" title="Sichtpunkt setzen oder verschieben, nur für dich sichtbar (S)">👁 Sichtpunkt</button>
+          <button data-tool="wall" title="Wand zeichnen: Punkte klicken, Doppelklick oder Enter beendet (W)">▬ Wand</button>
+          <button data-tool="door" title="Tür: Anfang und Ende klicken (D)">🚪 Tür</button>
+          <button data-tool="wall-erase" title="Wand oder Tür anklicken zum Löschen (X)">✂ Löschen</button>
+        </div>
+        <label class="row"><input type="checkbox" id="show-walls" /> Wände anzeigen</label>
+        <div id="wall-info" class="muted small"></div>
+        <button id="btn-clear-walls" class="wide danger">Alle Wände löschen</button>
+        <div class="muted small" style="margin-top:8px">Türen mit „Auswahl" anklicken zum Öffnen und Schliessen. Was ein Sichtpunkt sieht, wird aufgedeckt und bleibt als erkundet sichtbar, gedimmt, solange es gerade niemand sieht.</div>
+      </section>
+
+      <section data-panel="tools">
+        <h2>Werkzeuge</h2>
+        <div class="tool-grid">
+          <button data-tool="select" title="Auswählen, Tokens ziehen, Beamer-Rahmen verschieben (V)">✋ Auswahl</button>
+          <button data-tool="token" title="Token setzen (T)">● Token</button>
+          <button data-tool="reveal-rect" title="Rechteck aufdecken (R)">▭ Aufdecken</button>
+          <button data-tool="hide-rect" title="Rechteck verdecken (Shift+R)">▭ Verdecken</button>
+          <button data-tool="reveal-brush" title="Mit Pinsel aufdecken (P)">🖌 Aufdecken</button>
+          <button data-tool="hide-brush" title="Mit Pinsel verdecken (Shift+P)">🖌 Verdecken</button>
+          <button data-tool="reveal-poly" title="Polygon aufdecken: klicken, Doppelklick schliesst (O)">⬠ Aufdecken</button>
+          <button data-tool="area" title="Raum als Bereich definieren: klicken, Doppelklick schliesst (A)">⬠ Bereich</button>
+        </div>
+        <label class="row">Pinsel <input type="range" id="brush-size" min="0.25" max="4" step="0.25" value="1" /> <span id="brush-size-label">1 Feld</span></label>
+        <div class="row buttons">
+          <button id="btn-fog-undo" title="Strg+Z">↶ Rückgängig</button>
+          <button id="btn-reveal-all">Alles aufdecken</button>
+          <button id="btn-hide-all">Alles verdecken</button>
+        </div>
+        <label class="row"><input type="checkbox" id="fog-enabled" /> Fog of War aktiv</label>
+      </section>
+
+      <section data-panel="tools">
+        <h2>Zauberbereiche</h2>
+        <input type="text" id="spell-search" placeholder="Zauber suchen, z.B. Fireball" autocomplete="off" />
+        <ul id="spell-results" class="list spell-results"></ul>
+        <div class="tool-grid">
+          <button data-tool="tpl-cone" title="Viertelkreis (Kegel): klicken setzt die Spitze, ziehen richtet aus">◔ Viertelkreis</button>
+          <button data-tool="tpl-circle" title="Kreis: klicken setzt den Mittelpunkt">◯ Kreis</button>
+          <button data-tool="tpl-square" title="Quadrat (Würfel): klicken setzt den Mittelpunkt">▢ Quadrat</button>
+          <button data-tool="tpl-line" title="Linie: klicken setzt den Anfang, ziehen richtet aus">━ Linie</button>
+        </div>
+        <div class="row">
+          <label><span id="tpl-size-label">Länge</span> <input type="number" id="tpl-size" min="5" step="5" class="narrow" /> ft</label>
+          <label id="tpl-width-wrap">Breite <input type="number" id="tpl-width" min="5" step="5" class="narrow" /> ft</label>
+        </div>
+        <div id="tpl-info" class="muted small"></div>
+        <div id="tpl-editor" hidden>
+          <label class="row"><input type="checkbox" id="tpl-on-player" /> Auf Beamer zeigen</label>
+          <div class="row buttons">
+            <button id="tpl-delete" class="danger" title="Entf">Bereich entfernen</button>
+          </div>
+        </div>
+        <button id="btn-tpl-clear" class="wide">Alle Zauberbereiche entfernen</button>
+        <div class="muted small" style="margin-top:8px">Bereich anklicken zum Auswählen und Verschieben. Viertelkreise und Linien am roten Griff drehen, Drehpunkt ist die Spitze bzw. der Anfang. Shift: in 15°-Schritten drehen, ohne Raster verschieben.</div>
+      </section>
+
+      <section data-panel="areas">
+        <h2>Bereiche <span class="muted small">(Stream Deck: Nummer)</span></h2>
+        <ul id="area-list" class="list"></ul>
+        <div class="muted small" id="area-empty">Mit dem Werkzeug „Bereich" Räume einzeichnen.</div>
+      </section>
+
+      <section data-panel="tokens">
+        <h2>Tokens</h2>
+        <button id="btn-tokens-from-tracker" class="wide">Tokens aus Tracker-Encounter</button>
+        <button id="btn-tokens-clear" class="wide danger">Alle Tokens entfernen</button>
+        <ul id="token-list" class="list"></ul>
+        <div id="token-editor" hidden>
+          <label class="row">Name <input type="text" id="tok-name" /></label>
+          <div class="row">
+            <label>Grösse <select id="tok-size">
+              <option value="0.5">Winzig (½)</option>
+              <option value="1">Mittel (1)</option>
+              <option value="2">Gross (2)</option>
+              <option value="3">Riesig (3)</option>
+              <option value="4">Gigantisch (4)</option>
+            </select></label>
+            <label>Farbe <input type="color" id="tok-color" /></label>
+          </div>
+          <label class="row">Tracker <select id="tok-combatant"></select></label>
+          <label class="row"><input type="checkbox" id="tok-on-player" /> Auf Beamer zeigen (aus = Miniatur)</label>
+          <div class="row buttons">
+            <label class="button file-button">Bild…<input type="file" id="tok-image" accept="image/*" hidden /></label>
+            <button id="tok-image-clear">Bild entfernen</button>
+            <button id="tok-delete" class="danger">Löschen</button>
+          </div>
+        </div>
+      </section>
+
+      <section data-panel="tracker">
+        <h2>Tracker <span id="tracker-round" class="muted small"></span></h2>
+        <div id="tracker-encounter-row" class="row">
+          <select id="tracker-encounter" title="Encounter im Combat Tracker und in seiner Anzeige wechseln" style="flex:1;min-width:0"></select>
+          <button id="btn-encounters-reload" title="Encounter-Liste neu laden">⟳</button>
+        </div>
+        <div id="tracker-info" class="muted small"></div>
+        <div id="tracker-controls">
+          <div class="turn-buttons">
+            <button id="btn-turn-prev" title="Vorheriger Zug (Shift+N)">⟲ Zurück</button>
+            <button id="btn-turn-next" class="primary" title="Nächster Zug (N)">Nächster ⟳</button>
+          </div>
+          <div class="row buttons">
+            <button id="btn-roll-init" title="Initiative aller Monster würfeln">🎲 Monster-Initiative</button>
+            <button id="btn-tracker-reset" title="Runde 1, erster Kämpfer">↺ Runde zurücksetzen</button>
+          </div>
+        </div>
+        <ul id="tracker-list" class="combatants"></ul>
+        <div class="muted small" style="margin-top:8px">Kämpfer anklicken für Trefferpunkte und Zustände. Kämpfer hinzufügen weiterhin im Combat Tracker. Nach einem Encounter-Wechsel die Tokens unter „Tokens" übernehmen.</div>
+      </section>
+    </aside>
+
+    <div id="canvas-wrap">
+      <canvas id="map"></canvas>
+      <div id="empty-hint" class="muted">Unter „Szenen" eine Szene wählen oder ein Kartenbild hochladen.</div>
+      <div id="tool-hint"></div>
+    </div>
+
+    <!-- One-time setup, opened from the gear button; not needed during play. -->
+    <aside id="setup" hidden>
+      <div class="setup-head">
+        <h2>Einrichtung</h2>
+        <button id="btn-setup-close" title="Schliessen (Esc)">✕</button>
+      </div>
+
+      <section class="needs-scene">
+        <h2>Beamer</h2>
+        <button id="btn-show-scene" class="primary wide">Diese Szene auf Beamer zeigen</button>
+        <div id="beamer-scene" class="muted small"></div>
+        <div class="row">
+          <label>Zoom</label>
+          <button id="zoom-out">−</button>
+          <span id="zoom-label">100%</span>
+          <button id="zoom-in">+</button>
+          <button id="zoom-reset" title="1 Feld = 1 Zoll">1:1</button>
+        </div>
+        <button id="btn-center-view" class="wide">Beamer-Rahmen hierher holen</button>
+      </section>
+
+      <section>
+        <h2>Tisch einrichten</h2>
+        <div class="row">
+          <label>Drehung</label>
+          <button id="rot-left">⟲</button>
+          <span id="rot-label">0°</span>
+          <button id="rot-right">⟳</button>
+        </div>
+        <div class="row">
+          <label>Pixel pro Zoll</label>
+          <button id="ppi-down">−</button>
+          <input type="number" id="ppi" step="0.1" min="5" class="narrow" />
+          <button id="ppi-up">+</button>
+        </div>
+        <button id="btn-calibrate" class="toggle wide">Kalibrieren</button>
+        <button id="btn-reset-keystone" class="wide">Trapezkorrektur zurücksetzen</button>
+        <div class="muted small">Beim Kalibrieren zeigt der Beamer ein 10×10 cm-Quadrat. Nachmessen und Pixel pro Zoll anpassen. Die Ecken lassen sich auf dem Beamer-Bild mit der Maus verschieben.</div>
+      </section>
+
+      <section>
+        <h2>Tracker-Anzeige auf dem Beamer</h2>
+        <label class="row"><input type="checkbox" id="strip-enabled" /> Am linken Beamer-Rand einblenden</label>
+        <div class="row">
+          <label>Breite <input type="number" id="strip-px" min="60" max="600" step="10" class="narrow" /> px</label>
+        </div>
+        <div id="strip-info" class="muted small"></div>
+      </section>
+
+      <section>
+        <h2>Handouts aus dem Kampagnenbuch</h2>
+        <label class="row"><input type="checkbox" id="handout-enabled" /> Über die verschwommene Karte legen</label>
+      </section>
+
+      <section>
+        <h2>Bild statt Battlemap</h2>
+        <div class="muted small">Zeigt ein eigenes Bild auf dem Beamer, statt der Battlemap mit Tracker-Streifen.
+          Handouts aus dem Kampagnenbuch legen sich weiterhin verschwommen darüber.</div>
+        <button id="btn-show-battlemap" class="wide" hidden>Battlemap auf Beamer zeigen</button>
+        <ul id="beamer-image-list" class="list"></ul>
+        <label class="button file-button">
+          + Bilder hochladen
+          <input type="file" id="new-beamer-images" accept="image/*" multiple hidden />
+        </label>
+      </section>
+
+      <section class="needs-scene">
+        <h2>Raster</h2>
+        <button data-tool="measure" class="wide" title="Rechteck über Rasterfelder ziehen (M)">📏 Raster auf der Karte messen</button>
+        <div class="row">
+          <label>Feld <input type="number" id="grid-size" step="0.1" min="5" /> px</label>
+        </div>
+        <div class="row">
+          <label>X <input type="number" id="grid-ox" step="0.1" /></label>
+          <label>Y <input type="number" id="grid-oy" step="0.1" /></label>
+        </div>
+        <label class="row">Messrechteck = <input type="number" id="measure-cells" min="1" value="1" class="narrow" /> Felder breit</label>
+        <label class="row"><input type="checkbox" id="show-grid" /> Raster auf Beamer zeigen</label>
+      </section>
+
+      <section>
+        <h2>Stream Deck</h2>
+        <div class="muted small">Klicken kopiert die URL.</div>
+        <ul id="remote-list" class="remote-list"></ul>
+      </section>
+
+      <section>
+        <h2>Datensicherung</h2>
+        <div class="muted small">Encounter, Kämpfer, Karten und alles andere liegen in der Datenbank des Kampagnenbuchs
+          und werden dort gesichert und wiederhergestellt.</div>
+        <a class="button wide" href="/" data-kb-link>⚙ Zur Einrichtung im Kampagnenbuch</a>
+      </section>
+    </aside>
+  </main>
+
+  <!-- Condition list and icons straight from the combat tracker, so both tools agree. -->
+  <script src="ui-lang.js"></script>
+  <script src="kb/shared/nav.js"></script>
+  <script src="tracker/shared/conditions.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

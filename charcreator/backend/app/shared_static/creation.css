@@ -1,0 +1,55 @@
+/* Creation wizard (creation.js), Charaktererstellung only: people and class as picture tiles.
+   Colours as in the wizard's own styles in charsheet.css (.lu). */
+.lu .wz-tiles-head { margin: 10px 0 6px; font-size: 0.8rem; font-weight: 600; color: #7a6a52; }
+.lu .wz-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; margin-bottom: 8px; }
+.lu .wz-tiles-class { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.lu .wz-tile {
+  --wz-c: #5c2e1a;
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 6px 8px; border: 1px solid #d6c8ad; border-radius: 10px; background: #fffdf8;
+  color: #2b2118; font: inherit; text-align: center; cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+.lu .wz-tile:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(60, 40, 20, 0.2); }
+.lu .wz-tile:focus-visible { outline: 2px solid #8c2a24; outline-offset: 2px; }
+.lu .wz-tile[aria-pressed="true"] { border-color: var(--wz-c); box-shadow: 0 0 0 2px var(--wz-c), 0 3px 10px rgba(60, 40, 20, 0.2); }
+.lu .wz-medal {
+  display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%;
+  border: 2px solid #b08a2a; background: radial-gradient(circle at 35% 30%, #3a2c20, #1f1812); color: #f3dca0;
+}
+.lu .wz-tile[aria-pressed="true"] .wz-medal { border-color: #e9cf7a; background: var(--wz-c); color: #fff; }
+.lu .wz-tile-icon { width: 36px; height: 36px; }
+.lu .wz-tile-name { hyphens: auto; font-family: Georgia, "Palatino Linotype", "Book Antiqua", serif; font-size: 0.98rem; line-height: 1.15; }
+.lu .wz-tile-line { font-size: 0.72rem; color: #7a6a52; line-height: 1.2; }
+.lu .wz-tile-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
+.lu .wz-tile-stats span { padding: 0 6px; border-radius: 999px; background: #ece4d4; font-size: 0.68rem; }
+.lu .wz-variants { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 10px; padding: 8px 10px; border: 1px solid #d6c8ad; border-radius: 10px; background: #fffdf8; }
+.lu .wz-variants-head { width: 100%; font-size: 0.8rem; font-weight: 600; color: #7a6a52; }
+.lu .wz-chip { padding: 3px 12px; border: 1px solid #c9b48a; border-radius: 999px; background: #f5f0e6; color: #2b2118; font: inherit; font-size: 0.88rem; cursor: pointer; }
+.lu .wz-chip[aria-pressed="true"] { background: #8c2a24; border-color: #8c2a24; color: #fff; }
+.lu .wz-tile-hint { margin: 4px 0 0; font-size: 0.68rem; color: #7a6a52; }
+.lu .wz-tile-hint a { color: inherit; }
+
+/* Attribute step: one row per ability, columns aligned (name | base value | increase | score | modifier). */
+.lu .wz-abil { margin: 6px 0 12px; }
+.lu .wz-abil-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) 64px 72px 64px 84px; gap: 4px 10px; align-items: center;
+  padding: 4px 0; border-bottom: 1px dotted #d8c8a4;
+}
+.lu .wz-abil-row > .wz-abil-calc { display: contents; }
+.lu .wz-abil-calc > span { text-align: center; }
+.lu .wz-abil-head { border-bottom: 1px solid #c9b48a; font-size: 0.72rem; font-weight: 600; color: #7a6a52; }
+.lu .wz-abil-head > span:nth-child(2) { text-align: center; }
+.lu .wz-abil-row input { width: 100%; box-sizing: border-box; text-align: center; }
+.lu .wz-abil-total { font-weight: 700; }
+.lu .wz-abil-mod { font-weight: 700; color: #8c2a24; }
+.lu .wz-abil-name .wz-cast { margin-left: 4px; }
+
+/* Equipment step: values of weapons and armor beside their name. */
+.lu .wz-stats { display: inline-flex; flex-wrap: wrap; gap: 3px; margin-left: 6px; vertical-align: middle; }
+.lu .wz-stats span { padding: 0 6px; border-radius: 999px; background: #ece4d4; font-size: 0.7rem; font-weight: normal; white-space: nowrap; }
+.lu .wz-equip-any-pick { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+@media (max-width: 520px) {
+  .lu .wz-abil-row { grid-template-columns: minmax(0, 1fr) 50px 50px 44px 56px; gap: 4px 6px; }
+  .lu .wz-abil-head { font-size: 0.64rem; hyphens: auto; }
+}

@@ -1,0 +1,1124 @@
+/* Character sheet, styled after the classic D&D sheet.
+   Shared by the DM view (port 8000) and the player sheets (port 8001, /spieler/); both serve it under /shared/. */
+
+.char-sheet {
+  --cs-ink: #2b2118;
+  --cs-paper: #f3e9d2;
+  --cs-box: #fffaf0;
+  background: var(--cs-paper);
+  color: var(--cs-ink);
+  border: 2px solid var(--cs-ink);
+  border-radius: 8px;
+  padding: 14px 14px 12px;
+  margin: 8px 0;
+  font-family: Georgia, "Times New Roman", serif;
+  /* Fixed maximum width so sheets keep their proportions in wide windows */
+  max-width: 860px;
+  container-type: inline-size;
+}
+
+/* The full player sheet has three columns and gets more room */
+.char-sheet.pc-sheet { max-width: 1180px; }
+
+.cs-abilities {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+  gap: 12px;
+}
+
+.cs-ability {
+  position: relative;
+  background: var(--cs-box);
+  border: 2px solid var(--cs-ink);
+  border-radius: 14px;
+  text-align: center;
+  padding: 6px 4px 20px;
+  margin-bottom: 14px;
+}
+
+.cs-ability-label,
+.cs-passive-label,
+.cs-small-label {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cs-ability-mod {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.cs-ability-score {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cs-box);
+  border: 2px solid var(--cs-ink);
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.cs-extras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.cs-passive {
+  display: flex;
+  align-items: center;
+  min-width: 210px;
+  background: var(--cs-box);
+  border: 2px solid var(--cs-ink);
+  border-radius: 20px 6px 6px 20px;
+  overflow: hidden;
+}
+
+.cs-passive-val {
+  width: 52px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 2px solid var(--cs-ink);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.cs-passive-label { padding: 0 12px; }
+
+/* Header: name banner on the left, race/class on ruled lines, like the top of the sheet */
+.cs-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cs-name {
+  flex: 1 1 220px;
+  background: var(--cs-box);
+  border: 2px solid var(--cs-ink);
+  border-radius: 6px 22px 22px 6px;
+  padding: 6px 14px;
+}
+
+.cs-name-val {
+  font-size: 1.4rem;
+  font-weight: 700;
+  min-height: 1.5em;
+}
+
+.char-sheet input.cs-name-val { text-align: left; }
+
+.cs-header-info {
+  flex: 2 1 280px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.cs-info {
+  flex: 1;
+  text-align: center;
+}
+
+.cs-info-val {
+  font-size: 1.05rem;
+  min-height: 1.5em;
+}
+
+/* Combat row: AC shield, initiative, speed, max HP */
+.cs-combat {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 12px;
+}
+
+.cs-ac {
+  position: relative;
+  width: 74px;
+  height: 84px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cs-ac svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cs-ac path {
+  fill: var(--cs-box);
+  stroke: var(--cs-ink);
+  stroke-width: 1.2;
+}
+
+.cs-ac-val {
+  position: relative;
+  margin-top: -6px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.char-sheet input.cs-ac-val { width: 44px; }
+
+.cs-ac-label {
+  position: relative;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.cs-box {
+  flex: 1 1 110px;
+  background: var(--cs-box);
+  border: 2px solid var(--cs-ink);
+  border-radius: 10px;
+  text-align: center;
+  padding: 8px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cs-box-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  min-height: 1.4em;
+}
+
+/* Hit point box gets the wider, square-cornered look of the sheet's HP block */
+.cs-hp {
+  flex: 1.5 1 150px;
+  border-radius: 6px 6px 18px 18px;
+}
+
+.cs-languages,
+.cs-notes {
+  background: var(--cs-box);
+  border: 2px solid var(--cs-ink);
+  text-align: center;
+  padding: 6px 10px;
+}
+
+.cs-notes {
+  margin-top: 12px;
+  border-radius: 6px;
+}
+
+.cs-notes-val {
+  min-height: 1.5em;
+  font-size: 0.95rem;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.char-sheet input.cs-notes-val { text-align: left; }
+
+.cs-languages {
+  flex: 1;
+  min-width: 200px;
+  border-radius: 6px;
+}
+
+.cs-languages-val {
+  min-height: 1.5em;
+  font-size: 0.95rem;
+}
+
+.cs-small-label {
+  margin-top: 4px;
+  padding-top: 3px;
+  border-top: 1px solid var(--cs-ink);
+}
+
+/* Inputs inside the sheet take on the sheet look instead of the dark app inputs */
+.char-sheet input {
+  background: transparent;
+  color: var(--cs-ink);
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  font-family: inherit;
+  text-align: center;
+  width: 100%;
+}
+
+.char-sheet input::placeholder { color: #b3a68c; }
+
+.char-sheet input:focus {
+  outline: 2px solid #7d5a1c;
+  outline-offset: 1px;
+}
+
+.char-sheet input.cs-ability-score {
+  width: 48px;
+  background: var(--cs-box);
+  border: 2px solid var(--cs-ink);
+  border-radius: 50%;
+}
+
+.char-sheet input.cs-passive-val {
+  width: 52px;
+  border-right: 2px solid var(--cs-ink);
+}
+
+.char-sheet input[type="number"] { -moz-appearance: textfield; }
+
+.char-sheet input::-webkit-inner-spin-button,
+.char-sheet input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ---------- monster additions to the sheet ---------- */
+
+.char-sheet select {
+  background: transparent;
+  color: var(--cs-ink);
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: 1.05rem;
+  text-align: center;
+  text-align-last: center;
+  width: 100%;
+}
+
+.char-sheet select option { color: #111; }
+
+.cs-panel {
+  margin-top: 12px;
+  background: var(--cs-box);
+  border: 2px solid var(--cs-ink);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.cs-panel-title {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--cs-ink);
+}
+
+.cs-feature {
+  font-size: 0.92rem;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.cs-feature:last-child { margin-bottom: 0; }
+
+.cs-def-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 2px 0;
+}
+
+.cs-def-label {
+  flex: 0 0 120px;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cs-def-val {
+  flex: 1;
+  font-size: 0.92rem;
+}
+
+.char-sheet input.cs-def-val {
+  text-align: left;
+  border-bottom: 1px solid #cdbf9f;
+}
+
+/* ---------- full player character sheet ---------- */
+
+.pc-header-grid {
+  flex: 3 1 420px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px 12px;
+  align-items: end;
+}
+
+.pc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.pc-col > * + * { margin-top: 12px; }
+.pc-col > .cs-panel,
+.pc-col > .cs-combat { margin-top: 12px; }
+.pc-col > :first-child { margin-top: 0; }
+
+.pc-abil-wrap {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.pc-abil-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pc-abil-stack .cs-ability { margin-bottom: 14px; }
+
+.pc-abil-side > * + * { margin-top: 10px; }
+.pc-abil-side .cs-panel { margin-top: 10px; }
+
+.pc-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--cs-box);
+  border: 2px solid var(--cs-ink);
+  border-radius: 20px 6px 6px 20px;
+  padding: 4px 12px 4px 6px;
+}
+
+.pc-pill b {
+  min-width: 34px;
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.pc-pill .cs-small-label { margin: 0; padding: 0; border: none; }
+
+.pc-check-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 0;
+  font-size: 0.86rem;
+}
+
+.pc-check-val {
+  min-width: 26px;
+  text-align: right;
+  font-weight: 700;
+  border-bottom: 1px solid var(--cs-ink);
+}
+
+.pc-ab { color: #7a6a52; font-size: 0.75rem; }
+
+.pc-legend {
+  float: right;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #7a6a52;
+}
+
+.pc-hint {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: #6b5c45;
+}
+
+.cs-box .pc-hint { margin-top: 2px; }
+
+.pc-sub { margin-top: 10px; }
+
+/* Proficiency dots: round like on the paper sheet; filled = proficient */
+.cs-dot {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 12px !important;
+  height: 12px;
+  margin: 0;
+  padding: 0 !important;
+  border: 1.5px solid var(--cs-ink) !important;
+  border-radius: 50% !important;
+  background: var(--cs-box) !important;
+  display: inline-block;
+  cursor: pointer;
+}
+
+span.cs-dot { cursor: default; }
+
+.cs-dot:checked,
+.cs-dot.on { background: var(--cs-ink) !important; }
+
+/* Second dot of a skill row = expertise, drawn as a diamond */
+[data-expert].cs-dot,
+.pc-check-row .cs-dot + .cs-dot { border-radius: 2px !important; transform: rotate(45deg) scale(0.85); }
+
+.muted-ink { color: #7a6a52; font-style: italic; }
+
+.cs-area {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  min-height: 1.4em;
+}
+
+.char-sheet textarea.cs-area {
+  width: 100%;
+  resize: vertical;
+  background: transparent;
+  color: var(--cs-ink);
+  border: none;
+  border-bottom: 1px solid #cdbf9f;
+  border-radius: 0;
+  padding: 2px 0;
+  font-family: inherit;
+}
+
+.char-sheet textarea.cs-area::placeholder { color: #b3a68c; }
+
+.char-sheet textarea.cs-area:focus {
+  outline: 2px solid #7d5a1c;
+  outline-offset: 1px;
+}
+
+.pc-attacks {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.pc-attacks th {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: 2px 4px;
+}
+
+.pc-attacks td {
+  padding: 2px 4px;
+  border-bottom: 1px solid #cdbf9f;
+}
+
+.pc-attacks td:nth-child(2) { width: 52px; }
+
+.char-sheet .pc-attacks input { text-align: left; }
+
+.pc-coins {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.pc-coin {
+  text-align: center;
+  border: 1.5px solid var(--cs-ink);
+  border-radius: 8px;
+  padding: 3px 2px 1px;
+  font-weight: 700;
+}
+
+.pc-coin .cs-small-label { margin-top: 2px; }
+
+.pc-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.pc-slot {
+  min-width: 64px;
+  text-align: center;
+  border: 2px solid var(--cs-ink);
+  border-radius: 10px;
+  padding: 4px 8px 2px;
+}
+
+.pc-slot.pact { min-width: 200px; }
+
+.pc-slot-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.pc-spells .cs-combat { margin: 4px 0 0; }
+
+/* Narrow containers (e.g. the encounter column, a party page): abilities, saves and skills keep their
+   column on the left, the other two stack on the right, so the lists stay narrow. */
+@container (max-width: 980px) {
+  .pc-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+  .pc-col-a { grid-row: span 2; }
+}
+
+@container (max-width: 640px) {
+  .pc-grid { grid-template-columns: minmax(0, 1fr); }
+  .pc-header-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---------- armor class controls in the PC sheet ---------- */
+
+.pc-armor {
+  border: 1.5px solid var(--cs-ink);
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+}
+
+.pc-armor-pick {
+  display: block;
+  border-bottom: 1px solid #c9b994;
+  padding-bottom: 4px;
+}
+
+.char-sheet .pc-armor-pick select {
+  font-size: 0.95rem;
+  text-align: left;
+  text-align-last: left;
+}
+
+.pc-armor-shield,
+.pc-armor-adjust {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 12px 0 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.char-sheet .pc-armor-adjust input {
+  width: 40px;
+  border-bottom: 1.5px solid var(--cs-ink);
+  font-weight: 700;
+}
+
+.char-sheet .pc-step {
+  padding: 0 8px;
+  line-height: 1.4;
+  color: var(--cs-ink);
+  border: 1.5px solid var(--cs-ink);
+  border-radius: 6px;
+  background: transparent;
+  font-weight: 700;
+}
+
+.pc-armor-read { font-size: 0.9rem; }
+
+.pc-warn { color: #a1301f; font-style: normal; }
+
+.pc-armor-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b5c45;
+}
+
+/* ---------- item / spell sheets: same sheet, text panels instead of abilities ---------- */
+
+.cs-text {
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.cs-text p { margin: 0 0 8px; }
+.cs-text p:last-child { margin-bottom: 0; }
+
+.cs-table {
+  border-collapse: collapse;
+  margin: 4px 0 8px;
+  font-size: 0.85rem;
+}
+
+.cs-table th,
+.cs-table td {
+  border: 1px solid #cdbf9f;
+  padding: 3px 8px;
+  text-align: left;
+}
+
+.cs-table th {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Long values (e.g. "40 ft, Fliegen 80 ft, Schwimmen 40 ft") shrink instead of blowing up the box */
+.cs-box-val.long {
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+/* ---------- interactive parts: explanations, HP, spells, weapons, ammunition ---------- */
+
+/* Anything with an explanation behind it (data-info): dotted underline, opens a popup on click */
+.cs-info-link {
+  cursor: help;
+  text-decoration: underline dotted rgba(43, 33, 24, 0.45);
+  text-underline-offset: 3px;
+}
+
+.cs-info-link:hover { color: #7d5a1c; }
+
+.char-sheet .pc-btn {
+  padding: 3px 10px;
+  color: var(--cs-ink);
+  border: 1.5px solid var(--cs-ink);
+  border-radius: 6px;
+  background: var(--cs-box);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pc-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.char-sheet .pc-add-row select {
+  flex: 1 1 180px;
+  min-width: 0;
+  text-align: left;
+  text-align-last: left;
+  border-bottom: 1.5px solid var(--cs-ink);
+}
+
+.char-sheet .pc-add-row input { width: 56px; border-bottom: 1.5px solid var(--cs-ink); }
+
+.pc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.pc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1.5px solid var(--cs-ink);
+  border-radius: 999px;
+  background: var(--cs-box);
+  font-size: 0.88rem;
+}
+
+.pc-chip.dim { opacity: 0.6; }
+
+.char-sheet .pc-x {
+  border: 0;
+  background: none;
+  color: #a1301f;
+  padding: 0 2px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.pc-mark {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  padding: 0 2px;
+  color: #6b5c45;
+}
+
+.pc-prep { color: #b8860b; font-weight: 700; display: inline-flex; align-items: center; }
+.pc-prep input { margin: 0 2px 0 0; }
+
+.pc-spell-level { margin-top: 6px; }
+
+.pc-spell-level-label {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b5c45;
+  margin-bottom: 3px;
+}
+
+.cs-box.pc-over .cs-box-val { color: #a1301f; }
+
+/* Spell slots: one pip per slot, filled = used */
+.pc-pips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin: 3px 0 2px;
+}
+
+.pc-pip {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 2px solid var(--cs-ink);
+  border-radius: 50%;
+  background: var(--cs-box);
+}
+
+button.pc-pip { cursor: pointer; }
+.pc-pip.used { background: var(--cs-ink); }
+
+/* Current and temporary HP */
+/* Current HP above temporary HP, both at full width */
+.pc-hp-wrap { flex-direction: column; }
+.pc-hp-row { flex-wrap: nowrap; }
+.pc-rest { flex-wrap: wrap; }
+.pc-hp { flex: 2 1 0; }
+.pc-temp { flex: 1 1 0; }
+
+.pc-hp-now {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.pc-hp-val { font-size: 1.9rem; font-weight: 700; }
+.pc-hp-of { font-size: 1rem; color: #6b5c45; }
+.pc-hp.down .pc-hp-val { color: #a1301f; }
+
+.pc-hp-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.char-sheet .pc-hp-btn {
+  min-width: 34px;
+  padding: 4px 8px;
+  border: 1.5px solid var(--cs-ink);
+  border-radius: 6px;
+  background: var(--cs-box);
+  color: var(--cs-ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.char-sheet .pc-hp-btn.damage,
+.char-sheet .pc-hp-btn.heal { color: #fff; flex: 1; font-size: 0.85rem; }
+.char-sheet .pc-hp-btn.damage { background: #a1301f; border-color: #a1301f; }
+.char-sheet .pc-hp-btn.heal { background: #2e7d4f; border-color: #2e7d4f; }
+
+.char-sheet input.pc-hp-amount,
+.char-sheet input.pc-temp-input {
+  width: 64px;
+  border: 1.5px solid var(--cs-ink);
+  border-radius: 6px;
+  background: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 3px 0;
+}
+
+.pc-rest { margin-top: 8px; align-items: center; }
+
+/* Ammunition */
+.pc-ammo-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.pc-ammo-name { flex: 1; font-weight: 700; }
+.pc-ammo-count { min-width: 28px; text-align: center; font-weight: 700; font-size: 1.05rem; }
+
+/* Explanation popup */
+.cs-popup {
+  padding: 0;
+  border: 2px solid #2b2118;
+  border-radius: 10px;
+  background: #f3e9d2;
+  color: #2b2118;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+}
+
+.cs-popup::backdrop { background: rgba(0, 0, 0, 0.55); }
+
+.cs-popup-body {
+  position: relative;
+  padding: 16px 18px 14px;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.45;
+}
+
+.cs-popup-body h3 { margin: 0 28px 8px 0; font-size: 1.25rem; }
+.cs-popup-body p { margin: 0 0 8px; }
+.cs-popup-body .char-sheet { margin: 8px 0 0; }
+
+.cs-popup-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: 0;
+  background: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #2b2118;
+}
+
+.pc-info-list { margin: 0 0 8px; padding-left: 18px; }
+.pc-info-list li { margin-bottom: 4px; }
+.pc-info-item { margin-bottom: 10px; }
+
+/* Tables and headings from the library texts (Draconic Ancestry, Fighting Style …) */
+.pc-md-table-wrap { overflow-x: auto; margin: 6px 0 10px; }
+.pc-md-table { border-collapse: collapse; font-size: 0.88rem; min-width: 60%; }
+.pc-md-table th, .pc-md-table td { padding: 3px 10px 3px 0; text-align: left; vertical-align: top; border-bottom: 1px solid #d8c8a4; }
+.pc-md-table th { font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: #7a6a52; border-bottom: 1.5px solid #2b2118; }
+.pc-md-table tbody tr:nth-child(even) td { background: rgba(201, 180, 138, 0.12); }
+.pc-md-h { margin: 8px 0 2px; }
+.pc-md-caption { margin: 8px 0 0; font-size: 0.85rem; }
+.pc-info-item p { margin: 2px 0; }
+
+.pc-temp .pc-hp-row { flex-wrap: nowrap; }
+.char-sheet .pc-temp input.pc-temp-input { width: 52px; }
+
+/* Hit dice: remaining count, pips, and a button to spend one */
+.pc-hd-left { font-size: 0.75rem; color: #6b5c45; }
+.char-sheet .pc-hd-roll { font-size: 0.75rem; padding: 2px 6px; margin-top: 2px; }
+
+/* Inventory */
+.char-sheet .pc-inventory .pc-add-row input[data-inv-name] {
+  flex: 1 1 180px;
+  width: auto;
+  min-width: 0;
+  text-align: left;
+}
+
+/* Class resources (Ki) above the feature list */
+.pc-trackers { margin: 0 0 8px; }
+.pc-trackers:empty { display: none; }
+.pc-tracker { max-width: 100%; }
+
+/* Speed: metres large, feet and battlemap squares below */
+.pc-speed-sub {
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: #6b5c45;
+  margin-bottom: 2px;
+}
+
+.pc-speed .pc-armor-adjust { margin: 4px 0 0; font-size: 0.8rem; }
+.pc-speed .pc-hint { margin-top: 2px; }
+
+/* Parts that don't apply (no spellcasting, no armor in the items) also stay hidden on pages without the DM stylesheet */
+.char-sheet .hidden { display: none; }
+
+/* Bonus of people and background under the base value while editing: "+2 → 16". */
+.pc-abil-bonus {
+  min-height: 0.95em;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #7d5a1c;
+}
+
+.pc-asi > div + div { margin-top: 3px; }
+.pc-asi { font-size: 0.82rem; }
+
+.pc-asi-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 8px;
+}
+
+.pc-asi-picks label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.pc-asi-picks select { width: auto; padding: 1px 4px; }
+
+/* Skills and languages chosen vs. what class, people and background give (editing only). */
+.pc-count {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #7a6a52;
+  cursor: help;
+}
+
+.pc-count.warn { color: #a8322d; font-weight: 700; }
+
+/* Portrait in the top left corner (player sheets); the name box gets narrower to make room. */
+.pc-portrait {
+  flex: 0 0 auto;
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border: 2px solid var(--cs-ink);
+  border-radius: 12px;
+  background: var(--cs-box);
+}
+
+.cs-header.with-portrait { align-items: center; }
+.cs-header.with-portrait .cs-name { flex: 0 1 200px; min-width: 140px; }
+
+.pc-portrait-wrap { position: relative; flex: 0 0 auto; }
+.pc-portrait-empty {
+  display: flex; align-items: center; justify-content: center;
+  color: #7a6a52; font-size: 0.7rem; text-align: center; padding: 4px;
+}
+.pc-portrait-add {
+  flex-direction: column; gap: 2px; cursor: pointer;
+  border-style: dashed !important; font-size: 0.72rem; line-height: 1.2;
+}
+.pc-portrait-add .pc-portrait-icon { font-size: 1.4rem; }
+.pc-portrait-add:hover { color: var(--cs-ink); background: #fffaf0; }
+.pc-portrait-upload {
+  position: absolute; right: -6px; bottom: -6px; width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--cs-box); border: 2px solid var(--cs-ink); border-radius: 50%;
+  cursor: pointer; font-size: 14px; line-height: 1;
+}
+.pc-portrait-remove {
+  position: absolute; right: -6px; top: -6px; width: 22px; height: 22px;
+  padding: 0; line-height: 1; border-radius: 50%; font-size: 12px;
+}
+
+@container (max-width: 640px) {
+  .cs-header.with-portrait .cs-name { flex: 1 1 140px; }
+  .pc-portrait, .pc-portrait-empty { width: 72px; height: 72px; }
+}
+
+/* ---------- guided level-up (levelup.js) ---------- */
+
+.lu { width: min(620px, calc(100vw - 24px)); }
+.lu .lu-steps { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 12px; padding: 0; list-style: none; font-size: 0.78rem; color: #7a6a52; }
+.lu .lu-steps li.now { color: #2b2118; font-weight: 700; text-decoration: underline; }
+.lu .lu-steps li.done::before { content: "✓ "; }
+.lu .lu-body { min-height: 140px; max-height: calc(100vh - 260px); overflow-y: auto; }
+.lu .lu-choices { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 10px; }
+.lu .lu-choice { display: flex; align-items: center; gap: 8px; }
+.lu .lu-spells { columns: 2 200px; margin-bottom: 8px; }
+.lu .lu-spells .lu-choice { break-inside: avoid; }
+.lu .lu-asi-row { display: grid; grid-template-columns: 1fr 70px auto auto; gap: 6px; align-items: center; padding: 2px 0; }
+.lu input[type="number"], .lu input:not([type]) { padding: 3px 6px; border: 1.5px solid #2b2118; border-radius: 6px; background: #fffaf0; color: #2b2118; font: inherit; }
+.lu .lu-roll { width: 70px; }
+.lu .lu-feat, .lu .lu-sub-text { width: 100%; }
+.lu .pc-btn { padding: 3px 10px; color: #2b2118; border: 1.5px solid #2b2118; border-radius: 6px; background: #fffaf0; font: inherit; cursor: pointer; }
+.lu .pc-btn:disabled { opacity: 0.4; cursor: default; }
+.lu .lu-next { background: #2b2118; color: #f3e9d2; font-weight: 700; }
+.lu .lu-nav { display: flex; align-items: center; gap: 10px; margin-top: 12px; border-top: 1px solid #c9b48a; padding-top: 10px; }
+.lu .lu-why { flex: 1; text-align: right; margin: 0; }
+
+/* ---------- guided character creation (creation.js) ---------- */
+
+.lu .wz-cast { margin-left: 4px; padding: 0 6px; border: 1px solid #c9a227; border-radius: 999px; font-size: 0.72rem; color: #7d5a1c; background: rgba(201, 162, 39, 0.15); white-space: nowrap; }
+.lu.lu-wide { width: min(1240px, calc(100vw - 24px)); }
+.lu.lu-wide .lu-body { max-height: calc(100vh - 220px); max-width: none; }
+
+/* A box, then its text: one per row, the boxes in one column. */
+.lu .wz-check { display: grid; grid-template-columns: 18px 1fr; gap: 6px; align-items: start; padding: 2px 0; cursor: pointer; }
+.lu .wz-check input { margin: 3px 0 0; }
+.lu .wz-check input:disabled + span { opacity: 0.75; }
+.lu .wz-check input:disabled:not(:checked) + span { opacity: 0.45; }
+.lu .wz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 16px; margin-bottom: 8px; }
+.lu .wz-wide { width: 100%; box-sizing: border-box; }
+.lu .wz-meta { color: #7a6a52; font-size: 0.78rem; }
+
+.lu .wz-spell-head { margin: 10px 0 4px; }
+.lu .wz-spells { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0 16px; margin-bottom: 8px; }
+.lu .wz-spell { display: grid; grid-template-columns: 18px 1fr auto; gap: 6px; align-items: center; padding: 3px 0; border-bottom: 1px dotted #d8c8a4; }
+.lu .wz-spell input { margin: 0; }
+.lu .wz-spell-name { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
+.lu .wz-spell .wz-meta { text-transform: capitalize; }
+
+.lu .wz-equip-group { margin: 0 0 8px; }
+.lu .wz-equip-group.choice { padding: 4px 8px; border-left: 3px solid #c9b48a; }
+.lu .wz-equip-opt { padding: 1px 0; }
+.lu .wz-equip-opt.on > .wz-check { font-weight: 600; }
+.lu .wz-equip-any { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 4px 24px; }
+.lu .wz-equip-any select { font: inherit; padding: 2px 4px; }
+.lu .wz-equip-sum { margin: 10px 0; }
+.lu .wz-details { margin: 0 0 8px; font-size: 0.9rem; }
+.lu .wz-details summary { cursor: pointer; color: #7d5a1c; }
+.lu .wz-pack { display: block; margin: 1px 0 3px; font-size: 0.76rem; font-weight: normal; line-height: 1.3; color: #7a6a52; }
+
+/* ---------- equipping in the inventory, preparing spells in the player view ---------- */
+
+.pc-equip { flex: 0 0 auto; margin-right: 6px; }
+.pc-equip-none { display: inline-block; width: 14px; margin-right: 6px; }
+.pc-2h { margin-left: 6px; font-size: 0.72rem; font-weight: 700; color: #7a6a52; white-space: nowrap; }
+.pc-2h input { margin: 0 2px 0 0; vertical-align: middle; }
+
+.pc-prep-btn {
+  border: 0;
+  background: none;
+  padding: 0 3px 0 0;
+  font: inherit;
+  color: #b8a888;
+  cursor: pointer;
+}
+
+.pc-prep-btn.on { color: #c9a227; }
+
+/* English original under a German translation */
+.pc-orig { margin: 4px 0 8px; font-size: 0.85em; color: #7a6a52; }
+.pc-orig summary { cursor: pointer; font-size: 0.78rem; }
+.pc-orig[open] { padding: 4px 8px; border-left: 2px solid #c9b48a; }
+
+.pc-mark-sub { color: #2f5d8a; }
+.pc-dmg {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.7rem;
+  color: #8a2b1f;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+/* Feats: chosen ones (with ✕ while editing) and the picker below them. */
+.pc-feat-row { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+.pc-feat-row .pc-btn { margin-left: auto; }
+.pc-feat-pick { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
+.pc-feat-pick select { flex: 1 1 12em; min-width: 0; }
+.pc-feat-pick input { flex: 1 1 8em; min-width: 0; }

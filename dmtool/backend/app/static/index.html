@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kampagnenbuch · Wyrmdesk</title>
+  <link rel="stylesheet" href="/shared/charsheet.css" />
+  <link rel="stylesheet" href="library.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Kampagnenbuch</h1>
+    <select id="campaign" title="Kampagne"></select>
+    <button id="today-btn" class="ghost" title="Aktuelles Datum in der Spielwelt"></button>
+    <div class="spacer"></div>
+    <div id="search-wrap">
+      <input type="search" id="search" placeholder="Suchen… (Strg+K)" autocomplete="off" />
+      <ul id="search-results" hidden></ul>
+    </div>
+    <button id="display-badge" class="toggle on" hidden title="Handout auf dem Beamer ausblenden"></button>
+    <a id="player-link" class="button" target="_blank">Beamer-Ansicht ↗</a>
+    <button id="btn-setup" title="Einrichtung: Kampagne, Editor, Beamer, Import">⚙ Einrichtung</button>
+  </header>
+
+  <main>
+    <!-- Topic rail: one click opens the topic's list, another click on it closes the list. -->
+    <nav id="rail">
+      <button data-topic="sessions"><span class="icon">📜</span>Sessions</button>
+      <button data-topic="journal"><span class="icon">📖</span>Journal</button>
+      <button data-topic="timeline"><span class="icon">⏳</span>Timeline</button>
+      <button data-topic="documents"><span class="icon">📂</span>Dokumente</button>
+      <hr />
+      <button data-topic="pc"><span class="icon">🛡</span>Gruppe</button>
+      <button data-topic="npc"><span class="icon">👤</span>NPCs</button>
+      <button data-topic="place"><span class="icon">🏰</span>Orte</button>
+      <button data-topic="location"><span class="icon">📑</span>Kapitel</button>
+      <button data-topic="faction"><span class="icon">⚑</span>Fraktionen</button>
+      <button data-topic="item"><span class="icon">💎</span>Gegenstände</button>
+      <hr />
+      <button data-topic="bestiary"><span class="icon">🐉</span>Bestiarium</button>
+      <button data-topic="items"><span class="icon">⚔</span>Items</button>
+      <button data-topic="spells"><span class="icon">✨</span>Zauber</button>
+      <button data-topic="classes"><span class="icon">🎓</span>Klassen</button>
+      <button data-topic="subclasses"><span class="icon">🔱</span>Unterklassen</button>
+      <button data-topic="races"><span class="icon">🧝</span>Völker</button>
+      <button data-topic="backgrounds"><span class="icon">📯</span>Hintergründe</button>
+      <button data-topic="feats"><span class="icon">🏅</span>Talente</button>
+      <hr />
+      <button data-topic="quest"><span class="icon">❗</span>Quests</button>
+      <button data-topic="decision"><span class="icon">⚖</span>Entscheide</button>
+      <hr />
+      <button data-topic="handout"><span class="icon">📽</span>Handouts</button>
+    </nav>
+
+    <aside id="panel" hidden></aside>
+
+    <div id="content">
+      <div id="page"></div>
+      <!-- Bestiary, items and spells (library.js), shown instead of #page for those topics. -->
+      <div id="library" hidden>
+      <section id="lib-bestiary" class="lib-tab" hidden>
+        <details class="panel collapsible" open>
+          <summary><h3>Open5e Monster-Suche</h3></summary>
+          <div class="form-row">
+            <input id="open5e-search-input" placeholder="z.B. goblin" />
+            <button id="open5e-search-btn">Suchen</button>
+          </div>
+          <div class="form-row bulk-import" data-kind="monsters" data-label="Monster">
+            <select class="bulk-scope">
+              <option value="srd">Nur 5e-SRD (offizielle Grundregeln)</option>
+              <option value="all">Alle Open5e-Quellen (inkl. Drittanbieter)</option>
+            </select>
+            <button class="ghost bulk-btn">⇩ Alle Monster importieren</button>
+            <span class="muted bulk-status"></span>
+          </div>
+          <div id="open5e-results" class="list"></div>
+        </details>
+  
+        <details class="panel collapsible">
+          <summary><h3>Custom Monster anlegen</h3></summary>
+          <div id="cm-sheet"></div>
+          <div class="form-row">
+            <button id="cm-add-btn">Hinzufügen</button>
+          </div>
+        </details>
+  
+        <details class="panel collapsible">
+          <summary><h3>Monster aus Datei importieren (.odt / .docx)</h3></summary>
+          <p class="muted">
+            Liest Statblocks aus einem Bestiarium-Kapitel (.odt oder .docx). Die Erkennung ist nicht
+            perfekt – jedes gefundene Monster muss vor der Übernahme kontrolliert und bestätigt werden.
+          </p>
+          <div class="form-row">
+            <input type="file" id="odt-import-input" accept=".odt,.docx" />
+            <button id="odt-import-btn">Datei einlesen</button>
+          </div>
+          <div id="odt-import-results"></div>
+        </details>
+  
+        <div class="encounter-layout">
+          <div class="panel encounter-sidebar">
+            <h3>Filter</h3>
+            <input id="bestiary-search" placeholder="Name suchen..." />
+  
+            <div class="bestiary-filter-group">
+              <button class="ghost bestiary-filter-toggle" data-filter="type">Typ ▾</button>
+              <div class="bestiary-filter-menu hidden" id="bestiary-filter-type"></div>
+            </div>
+            <div class="bestiary-filter-group">
+              <button class="ghost bestiary-filter-toggle" data-filter="cr">CR ▾</button>
+              <div class="bestiary-filter-menu hidden" id="bestiary-filter-cr"></div>
+            </div>
+            <div class="bestiary-filter-group">
+              <button class="ghost bestiary-filter-toggle" data-filter="source">Quelle ▾</button>
+              <div class="bestiary-filter-menu hidden" id="bestiary-filter-source"></div>
+            </div>
+  
+            <button id="bestiary-filter-unverified" class="ghost">⚠ Nur zu kontrollierende</button>
+            <button id="bestiary-filter-reset" class="ghost">Filter zurücksetzen</button>
+          </div>
+  
+          <div class="encounter-main">
+            <div id="custom-monster-list" class="panel list"></div>
+          </div>
+        </div>
+      </section>
+  
+      <section id="lib-items" class="lib-tab" hidden>
+        <details class="panel collapsible" open>
+          <summary><h3>Open5e Item-Suche</h3></summary>
+          <div class="form-row">
+            <input id="open5e-item-search-input" placeholder="z.B. ring of protection" />
+            <button id="open5e-item-search-btn">Suchen</button>
+          </div>
+          <div class="form-row srd-row">
+            <button id="srd-equipment-btn" class="ghost">+ SRD-Rüstungen &amp; Waffen importieren</button>
+            <span class="muted">Alle Standard-Rüstungen, Schilde und Waffen aus dem 5e-SRD; bereits vorhandene werden übersprungen.</span>
+          </div>
+          <div class="form-row bulk-import" data-kind="items" data-label="Items">
+            <select class="bulk-scope">
+              <option value="srd">Nur 5e-SRD (offizielle Grundregeln)</option>
+              <option value="all">Alle Open5e-Quellen (inkl. Drittanbieter)</option>
+            </select>
+            <button class="ghost bulk-btn">⇩ Alle Items importieren</button>
+            <span class="muted bulk-status"></span>
+          </div>
+          <div id="open5e-item-results" class="list"></div>
+        </details>
+  
+        <details class="panel collapsible">
+          <summary><h3>Custom Item anlegen</h3></summary>
+          <div class="form-row">
+            <input id="item-name" placeholder="Name" />
+            <input id="item-type" placeholder="Typ (z.B. Wondrous Item, Ring, Waffe)" />
+            <select id="item-rarity">
+              <option value="">-- Seltenheit --</option>
+              <option value="common">Common</option>
+              <option value="uncommon">Uncommon</option>
+              <option value="rare">Rare</option>
+              <option value="very rare">Very Rare</option>
+              <option value="legendary">Legendary</option>
+              <option value="artifact">Artifact</option>
+            </select>
+            <label class="inline-checkbox"><input type="checkbox" id="item-attunement" /> Attunement nötig</label>
+          </div>
+          <div class="form-row" id="item-armor-row"></div>
+          <div class="form-row">
+            <textarea id="item-desc" placeholder="Beschreibung" rows="3"></textarea>
+          </div>
+          <button id="item-add-btn">Hinzufügen</button>
+        </details>
+  
+        <div class="encounter-layout">
+          <div class="panel encounter-sidebar">
+            <h3>Filter</h3>
+            <input id="item-search" placeholder="Name suchen..." />
+  
+            <div class="bestiary-filter-group">
+              <button class="ghost bestiary-filter-toggle" data-scope="item" data-filter="item_type">Typ ▾</button>
+              <div class="bestiary-filter-menu hidden" id="item-filter-item_type"></div>
+            </div>
+            <div class="bestiary-filter-group">
+              <button class="ghost bestiary-filter-toggle" data-scope="item" data-filter="rarity">Seltenheit ▾</button>
+              <div class="bestiary-filter-menu hidden" id="item-filter-rarity"></div>
+            </div>
+            <div class="bestiary-filter-group">
+              <button class="ghost bestiary-filter-toggle" data-scope="item" data-filter="source">Quelle ▾</button>
+              <div class="bestiary-filter-menu hidden" id="item-filter-source"></div>
+            </div>
+  
+            <button id="item-filter-reset" class="ghost">Filter zurücksetzen</button>
+          </div>
+  
+          <div class="encounter-main">
+            <div id="custom-item-list" class="panel list"></div>
+          </div>
+        </div>
+      </section>
+  
+      <section id="lib-spells" class="lib-tab" hidden>
+        <details class="panel collapsible" open>
+          <summary><h3>Open5e Zauber-Suche</h3></summary>
+          <div class="form-row">
+            <input id="open5e-spell-search-input" placeholder="z.B. fireball" />
+            <button id="open5e-spell-search-btn">Suchen</button>
+          </div>
+          <div class="form-row bulk-import" data-kind="spells" data-label="Zauber">
+            <select class="bulk-scope">
+              <option value="srd">Nur 5e-SRD (offizielle Grundregeln)</option>
+              <option value="all">Alle Open5e-Quellen (inkl. Drittanbieter)</option>
+            </select>
+            <button class="ghost bulk-btn">⇩ Alle Zauber importieren</button>
+            <span class="muted bulk-status"></span>
+          </div>
+          <div id="open5e-spell-results" class="list"></div>
+        </details>
+  
+        <details class="panel collapsible">
+          <summary><h3>Custom Zauber anlegen</h3></summary>
+          <div class="form-row">
+            <input id="spell-name" placeholder="Name" />
+            <select id="spell-school">
+              <option value="">-- Schule --</option>
+              <option>Abjuration</option>
+              <option>Conjuration</option>
+              <option>Divination</option>
+              <option>Enchantment</option>
+              <option>Evocation</option>
+              <option>Illusion</option>
+              <option>Necromancy</option>
+              <option>Transmutation</option>
+            </select>
+            <select id="spell-level">
+              <option value="">-- Grad --</option>
+              <option value="0">Zaubertrick</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+            </select>
+            <input id="spell-class" placeholder="Klassen (z.B. Wizard, Sorcerer)" />
+          </div>
+          <div class="form-row">
+            <input id="spell-casting-time" placeholder="Zauberdauer (z.B. 1 action)" />
+            <input id="spell-range" placeholder="Reichweite" />
+            <input id="spell-components" placeholder="Komponenten (V, S, M)" />
+            <input id="spell-duration" placeholder="Wirkungsdauer" />
+            <label class="inline-checkbox"><input type="checkbox" id="spell-concentration" /> Konzentration</label>
+            <label class="inline-checkbox"><input type="checkbox" id="spell-ritual" /> Ritual</label>
+          </div>
+          <div class="form-row">
+            <input id="spell-material" placeholder="Materialkomponente (optional)" />
+          </div>
+          <div class="form-row">
+            <textarea id="spell-desc" placeholder="Beschreibung" rows="3"></textarea>
+          </div>
+          <div class="form-row">
+            <textarea id="spell-higher-level" placeholder="Bei höherem Grad (optional)" rows="2"></textarea>
+          </div>
+          <button id="spell-add-btn">Hinzufügen</button>
+        </details>
+  
+        <div class="encounter-layout">
+          <div class="panel encounter-sidebar">
+            <h3>Filter</h3>
+            <input id="spell-search" placeholder="Name suchen..." />
+  
+            <div class="bestiary-filter-group">
+              <button class="ghost bestiary-filter-toggle" data-scope="spell" data-filter="school">Schule ▾</button>
+              <div class="bestiary-filter-menu hidden" id="spell-filter-school"></div>
+            </div>
+            <div class="bestiary-filter-group">
+              <button class="ghost bestiary-filter-toggle" data-scope="spell" data-filter="level_int">Grad ▾</button>
+              <div class="bestiary-filter-menu hidden" id="spell-filter-level_int"></div>
+            </div>
+            <div class="bestiary-filter-group">
+              <button class="ghost bestiary-filter-toggle" data-scope="spell" data-filter="dnd_class">Klasse ▾</button>
+              <div class="bestiary-filter-menu hidden" id="spell-filter-dnd_class"></div>
+            </div>
+            <div class="bestiary-filter-group">
+              <button class="ghost bestiary-filter-toggle" data-scope="spell" data-filter="source">Quelle ▾</button>
+              <div class="bestiary-filter-menu hidden" id="spell-filter-source"></div>
+            </div>
+  
+            <button id="spell-filter-reset" class="ghost">Filter zurücksetzen</button>
+          </div>
+  
+          <div class="encounter-main">
+            <div id="custom-spell-list" class="panel list"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+
+    </div>
+
+    <!-- Rarely needed settings, opened from the gear button. -->
+    <aside id="setup" hidden>
+      <div class="setup-head">
+        <h2>Einrichtung</h2>
+        <button id="btn-setup-close" title="Schliessen (Esc)">✕</button>
+      </div>
+
+      <section>
+        <h2>Kampagne</h2>
+        <div id="setup-campaign" class="muted small"></div>
+        <button id="btn-world" class="wide">Welt und Kalender ändern…</button>
+        <button id="btn-rename-campaign" class="wide">Kampagne umbenennen…</button>
+        <button id="btn-new-campaign" class="wide">+ Neue Kampagne…</button>
+        <button id="btn-delete-campaign" class="wide danger">Kampagne löschen…</button>
+        <div class="muted small" style="margin-top:6px">Kampagnen, Charaktere, Bestiarium, Items und Zauber liegen hier. Combat Tracker und Battlemap holen sie vom Kampagnenbuch.</div>
+      </section>
+
+      <section>
+        <h2>Vorlagen</h2>
+        <div class="muted small">Ein Schnappschuss der Kampagne mit allem darin (Einträge, Sessions, Zeitleiste, Charaktere,
+          Encounter, Karten), um sie für eine andere Gruppe beliebig oft neu zu beginnen.</div>
+        <button id="btn-save-template" class="wide">Kampagne als Vorlage sichern…</button>
+        <ul id="template-list" class="template-list"></ul>
+      </section>
+
+      <section>
+        <h2>Texteditor</h2>
+        <label class="choice"><input type="radio" name="editor" value="rich" /> <span><b>Formatiert</b><br /><span class="muted small">Mit Symbolleiste, Text sieht direkt fertig aus.</span></span></label>
+        <label class="choice"><input type="radio" name="editor" value="markdown" /> <span><b>Markdown</b><br /><span class="muted small">Reiner Text mit Zeichen wie **fett** und ## Titel.</span></span></label>
+        <div class="muted small">Beide speichern dasselbe Format. Du kannst jederzeit wechseln.</div>
+      </section>
+
+      <section>
+        <h2>Beamer (Handouts)</h2>
+        <div class="row">
+          <label>Drehung</label>
+          <button id="rot-left">⟲</button>
+          <span id="rot-label">0°</span>
+          <button id="rot-right">⟳</button>
+        </div>
+        <div class="muted small" style="margin-top:6px">Die Beamer-Ansicht läuft auf eigenem Port: <span id="player-url"></span></div>
+      </section>
+
+      <section>
+        <h2>Stream Deck</h2>
+        <div class="muted small">Eine Adresse, die ein Handout oder Bild auf den Beamer bringt. Im Stream Deck mit einem
+          Web-Request-Plugin (z.B. „API Ninja“ oder „Web Requests“) als GET oder POST aufrufen.</div>
+        <div class="row" style="margin-top:8px">
+          <label for="sd-entry">Eintrag</label>
+          <select id="sd-entry"></select>
+        </div>
+        <div class="row">
+          <label for="sd-text">Text</label>
+          <select id="sd-text">
+            <option value="">wie beim Eintrag eingestellt</option>
+            <option value="1">mitzeigen</option>
+            <option value="0">nur Bild</option>
+          </select>
+        </div>
+        <label class="choice"><input type="checkbox" id="sd-toggle" checked /> <span>Zweiter Druck blendet wieder aus</span></label>
+        <div class="sd-url"><input id="sd-url" readonly /><button id="sd-copy" class="small-btn">Kopieren</button></div>
+        <div class="muted small" style="margin-top:8px">Beamer leeren:</div>
+        <div class="sd-url"><input id="sd-clear-url" readonly /><button id="sd-clear-copy" class="small-btn">Kopieren</button></div>
+      </section>
+
+      <section>
+        <h2>Combat Tracker</h2>
+        <div id="tracker-status" class="muted small"></div>
+      </section>
+
+      <section>
+        <h2>Charaktererstellung</h2>
+        <a class="button wide" href="/api/library/export">⬇ Charakterinhalte exportieren</a>
+        <div class="muted small" style="margin-top:6px">Klassen, Unterklassen, Völker, Hintergründe, Gegenstände und Zauber als JSON-Datei, zum Hochladen in der Charaktererstellung (⚙ Verwaltung → Inhalte).</div>
+        <div class="row" style="margin-top:12px">
+          <label for="char-import-campaign">In Kampagne</label>
+          <select id="char-import-campaign"></select>
+        </div>
+        <label class="button wide">⬆ Charaktere importieren
+          <input type="file" id="char-import" accept=".json,application/json" hidden />
+        </label>
+        <div id="char-import-status" class="muted small" style="margin-top:6px">Export aus der Charaktererstellung (⚙ Verwaltung → Fertige Charaktere exportieren). Bei Namen, die es schon gibt, fragt der Import nach: überspringen, Charakterblatt ersetzen oder als Kopie anlegen.</div>
+      </section>
+
+      <section>
+        <h2>Abenteuer von D&amp;D Beyond</h2>
+        <button id="btn-book-import" class="wide">📖 Kapitel in diese Kampagne importieren</button>
+        <div class="muted small" style="margin-top:6px">Ein gekauftes Abenteuer kapitelweise: Abschnitte kommen unter Kapitel (nummerierte Bereiche darunter), „Roleplaying …“ NPCs, Karten Handouts. Vor dem Import lässt sich jede Zeile ändern.</div>
+      </section>
+
+      <section data-only-de>
+        <h2>Deutsche Übersetzung (DeepL)</h2>
+        <div id="tr-status" class="muted small" style="white-space: pre-line"></div>
+        <button id="btn-tr-standard" class="wide">Grundregeln, Zauber und Gegenstände übersetzen</button>
+        <button id="btn-tr-all" class="wide">Alles übersetzen (auch Zusatzbücher)</button>
+        <button id="btn-tr-stop" class="wide" hidden>Anhalten</button>
+        <button id="btn-tr-campaign" class="wide">Diese Kampagne übersetzen (NPCs, Orte, Quests, Sessions …)</button>
+        <button id="btn-tr-monsters" class="wide">Bestiarium übersetzen</button>
+        <div id="tr-content-progress" class="muted small" style="white-space: pre-line">Kampagnentexte und Monster werden ersetzt; das englische Original bleibt bei jedem Eintrag aufklappbar. Schon Übersetztes und deine Geheimnisse/Notizen bleiben unberührt.</div>
+        <div id="tr-progress" class="muted small" style="white-space: pre-line"></div>
+        <div class="muted small" style="margin-top:6px">Übersetzt nur, was noch fehlt; die englischen Texte bleiben erhalten. Einzelne Übersetzungen lassen sich in der Bibliothek mit ✎ korrigieren und werden danach nie mehr überschrieben. Danach die Charakterinhalte neu exportieren.</div>
+      </section>
+
+      <section>
+        <h2>Datensicherung</h2>
+        <a class="button wide" href="/api/backup">⬇ Sicherung herunterladen</a>
+        <div class="muted small" style="margin-top:6px">Datenbank und alle Bilder als ZIP-Datei.</div>
+        <label class="button wide">⬆ Sicherung wiederherstellen
+          <input type="file" id="backup-restore" accept=".zip,application/zip" hidden />
+        </label>
+        <div id="backup-status" class="muted small" style="margin-top:6px">Ersetzt alle Kampagnen-Einträge, Sessions und Einstellungen durch den Stand der Sicherung.</div>
+      </section>
+    </aside>
+  </main>
+
+  <div id="modal-backdrop" hidden><div id="modal"></div></div>
+  <div id="toast" hidden></div>
+
+  <script src="/ui-lang.js"></script>
+  <script src="/shared/vendor/marked.min.js"></script>
+  <script src="/shared/vendor/turndown.js"></script>
+  <script src="/shared/nav.js"></script>
+  <script src="/shared/charsheet-rules.js"></script>
+  <script src="/shared/charsheet.js"></script>
+  <script src="/shared/levelup.js"></script>
+  <script src="/shared/monstersheet.js"></script>
+  <script src="library.js"></script>
+  <script src="options.js"></script>
+  <script src="translate.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -3,12 +3,14 @@
 <head>
   <meta charset="utf-8">
   <title>Charaktererstellung – Verwaltung · Wyrmdesk</title>
+  <link rel="icon" type="image/svg+xml" href="/shared/brand/favicon.svg" />
+  <link rel="apple-touch-icon" href="/shared/brand/apple-touch-icon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="/common/calendar.css">
 </head>
 <body>
-  <header><h1>Charaktererstellung – Verwaltung</h1></header>
+  <header><img class="brand-logo" src="/shared/brand/wyrmdesk-logo-dunkel.svg" alt="" width="28" height="28" /><h1>Charaktererstellung – Verwaltung</h1></header>
 
   <main id="login-gate">
     <section class="panel">
@@ -46,6 +48,8 @@
         <button type="submit">Hochladen</button>
       </form>
       <p class="hint">Export aus dem Kampagnenbuch unter „⚙ Einrichtung → Charakterinhalte exportieren“.</p>
+      <p><button type="button" id="load-wyrmdesk">Wyrmdesk-Inhalte laden</button></p>
+      <p class="hint">Oder nur die freien Grundregeln (SRD 5.1 und 5.2) mit deutschen Texten von der Wyrmdesk-Website, ohne etwas aus der eigenen Bibliothek. Für eine öffentlich zugängliche Charaktererstellung (offener Modus) gedacht, die sie auch selbst lädt und täglich aktualisiert.</p>
     </section>
 
     <section class="panel">
@@ -78,6 +82,8 @@
       <button id="export-characters">Fertige Charaktere exportieren</button>
     </section>
   </main>
+
+  <p id="app-version" style="text-align:center; font-size:13px; opacity:0.6"></p>
 
   <script src="/ui-lang.js"></script>
   <script src="/common/calendar.js"></script>

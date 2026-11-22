@@ -13,6 +13,7 @@
 #
 # Set in a .env next to this file or in the stack's environment (not checked in, see .env.example):
 #   DEEPL_API_KEY     German translation of the library; empty: no translating
+#   WYRMDESK_CONTENT_URL  where the Wyrmdesk content (SRD with German texts) comes from; empty: wyrmdesk.ch
 #   UI_LANG           language of the UI: de (default) or en
 #   BACKUP_HOST_DIR   where the automatic backups go on the host (default: the volume dnd-tools_backups)
 
@@ -34,6 +35,7 @@ services:
       - "8431:8005"   # old address: battlemap beamer (redirects to 8441/beamer/)
     environment:
       - DEEPL_API_KEY=${DEEPL_API_KEY:-}
+      - WYRMDESK_CONTENT_URL=${WYRMDESK_CONTENT_URL:-}
       # Sprache der Oberfläche: de (Standard) oder en.
       - UI_LANG=${UI_LANG:-de}
       # The old databases, read once by merge.py (volumes below).

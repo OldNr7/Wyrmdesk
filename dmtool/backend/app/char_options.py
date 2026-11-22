@@ -638,12 +638,12 @@ def get_option(conn, option_id: int) -> dict:
     return option_row(row)
 
 
-def insert_open5e(conn, entry: dict) -> int:
+def insert_open5e(conn, entry: dict, note: str | None = None) -> int:
     return conn.execute(
         "INSERT INTO char_options (kind, name, name_en, parent, is_2024, data, desc, source, notes) "
         "VALUES (?, ?, ?, ?, ?, ?, ?, 'import', ?)",
         (entry["kind"], entry["name"], entry["name_en"], entry["parent"], int(entry["is_2024"]),
-         json.dumps(entry["data"]), entry["desc"], open5e.import_note(entry)),
+         json.dumps(entry["data"]), entry["desc"], note or open5e.import_note(entry)),
     ).lastrowid
 
 

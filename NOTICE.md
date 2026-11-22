@@ -37,6 +37,7 @@ by Lorc, Delapouite and other contributors, licensed under
 |---|---|---|
 | [marked](https://github.com/markedjs/marked) 12.0.2, © 2011–2024 Christopher Jeffrey | `dmtool/backend/app/shared_static/vendor/marked.min.js` | MIT |
 | [Turndown](https://github.com/mixmark-io/turndown), © Dom Christie | `dmtool/backend/app/shared_static/vendor/turndown.js` | MIT |
+| [pywebview](https://github.com/r0x0r/pywebview), © Roman Sirokov and contributors | bundled into the native app, `dmtool/desktop` | BSD-3-Clause |
 
 Python dependencies (FastAPI, uvicorn, …) are installed from PyPI at build time, see the
 `requirements.txt` of each service.

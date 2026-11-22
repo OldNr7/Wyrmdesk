@@ -1969,7 +1969,17 @@ async function restoreBackup(e) {
   const status = $("#backup-status");
   const before = status.textContent;
   status.textContent = t("Sicherung wird hochgeladen und wiederhergestellt …");
-  const resp = await fetch("/api/backup/restore", { method: "POST", body: file });
+  let resp = await fetch("/api/backup/restore", { method: "POST", body: file });
+  // 409: the backup comes from a newer Wyrmdesk; only on a second yes.
+  if (resp.status === 409) {
+    let detail = "";
+    try { detail = (await resp.json()).detail || ""; } catch { /* not json */ }
+    if (!confirm(`${detail}\n\n${t("Trotzdem wiederherstellen?")}`)) {
+      status.textContent = before;
+      return;
+    }
+    resp = await fetch("/api/backup/restore?force=1", { method: "POST", body: file });
+  }
   if (!resp.ok) {
     let detail = resp.statusText;
     try { detail = (await resp.json()).detail || detail; } catch { /* not json */ }
@@ -1984,6 +1994,7 @@ async function restoreBackup(e) {
 function renderSetup() {
   document.querySelectorAll('input[name="editor"]').forEach((r) => { r.checked = r.value === S.settings.editor; });
   $("#rot-label").textContent = `${S.settings.rotation}°`;
+  $("#app-version").textContent = S.settings.version ? t("Wyrmdesk Version {v}", { v: S.settings.version }) : "";
   const sel = $("#char-import-campaign");
   sel.innerHTML = "";
   for (const c of S.campaigns) sel.append(h("option", { value: c.id }, c.name || `Kampagne ${c.id}`));
@@ -2073,8 +2084,7 @@ async function importCharacters(e) {
   const file = e.target.files[0];
   e.target.value = "";
   if (!file) return;
-  const campaignId = $("#char-import-campaign").value;
-  if (!campaignId) return toast(t("Zuerst eine Kampagne wählen."), true);
+  if (!$("#char-import-campaign").value) return toast(t("Zuerst eine Kampagne wählen."), true);
   let chars;
   try {
     chars = JSON.parse(await file.text());
@@ -2082,6 +2092,37 @@ async function importCharacters(e) {
     toast(t("Das ist keine gültige JSON-Datei."), true);
     return;
   }
+  importCharacterList(chars);
+}
+
+// A player's share link from the Charaktererstellung (…/teilen/<token>): its data comes from …/api/teilen/<token>,
+// fetched by this page itself (that route allows it, CORS), so the Kampagnenbuch's server needs no way out.
+async function importCharacterLink(e) {
+  e.preventDefault();
+  if (!$("#char-import-campaign").value) return toast(t("Zuerst eine Kampagne wählen."), true);
+  let url;
+  try {
+    url = new URL(e.target.url.value.trim());
+  } catch {
+    return toast(t("Das ist kein gültiger Link."), true);
+  }
+  const m = url.pathname.match(/^(.*?)\/(?:api\/)?teilen\/([^/]+)\/?$/);
+  if (!m || !/^https?:$/.test(url.protocol)) return toast(t("Das ist kein Teilen-Link aus der Charaktererstellung (…/teilen/…)."), true);
+  let chars;
+  try {
+    const resp = await fetch(`${url.origin}${m[1]}/api/teilen/${m[2]}`, { cache: "no-store" });
+    if (resp.status === 404) return toast(t("Dieser Link ist ungültig oder abgelaufen."), true);
+    if (!resp.ok) throw new Error();
+    chars = await resp.json();
+  } catch {
+    return toast(t("Der Charakter konnte nicht abgerufen werden. Link und Internetverbindung prüfen."), true);
+  }
+  e.target.reset();
+  importCharacterList(chars);
+}
+
+async function importCharacterList(chars) {
+  const campaignId = $("#char-import-campaign").value;
   if (!Array.isArray(chars)) {
     toast(t("Erwartet wird die Liste der Charaktere aus der Charaktererstellung."), true);
     return;
@@ -2186,6 +2227,7 @@ function wireStatic() {
   $("#btn-setup-close").addEventListener("click", () => toggleSetup(false));
   $("#backup-restore").addEventListener("change", restoreBackup);
   $("#char-import").addEventListener("change", importCharacters);
+  $("#char-import-link").addEventListener("submit", importCharacterLink);
   const trContent = async (body, what) => {
     const out = $("#tr-content-progress");
     const est = await api("POST", "/api/translate/content", { ...body, dry_run: true });

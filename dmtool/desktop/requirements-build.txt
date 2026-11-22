@@ -1,0 +1,3 @@
+# Build-time only - never ships inside the frozen app. Kept separate from requirements.txt so it
+# can never accidentally end up bundled by PyInstaller itself.
+pyinstaller==6.22.3

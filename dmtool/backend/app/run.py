@@ -7,6 +7,9 @@
              (8420), its display (8421), the battlemap (8430) at their root as before; the old beamer
              port (8431) sends the browser to /beamer/ on 8001
 
+The native app (dmtool/desktop) sets GM_HOST, GM_PORT, PUBLIC_LISTEN_PORT and OLD_PORTS: it listens on
+the published ports (8440, 8441) directly, the Spielleiter part only on this computer, no old addresses.
+
 Since phase 2 all parts use this database (merge.py moved the old ones in once); they still talk to
 each other through their APIs, in-process (internal.py), and a change in a fight wakes the battlemap.
 """
@@ -33,6 +36,12 @@ from .public import app as public_app
 # Where the beamer finds the tracker strip and the handouts: the same origin as the beamer page now.
 TRACKER_DISPLAY_PATH = "/anzeige/tracker"
 OLD_BEAMER_TARGET_PORT = int(os.environ.get("PUBLIC_PORT", "8441"))
+
+# Where the servers listen. The defaults are the container's, compose.yaml publishes them.
+GM_HOST = os.environ.get("GM_HOST", "0.0.0.0")
+GM_PORT = int(os.environ.get("GM_PORT", "8000"))
+PUBLIC_LISTEN_PORT = int(os.environ.get("PUBLIC_LISTEN_PORT", "8001"))
+OLD_PORTS = os.environ.get("OLD_PORTS", "1") != "0"
 
 
 def _slash(prefix: str) -> Route:
@@ -133,10 +142,12 @@ async def main() -> None:
     _connect_parts()
     repair = asyncio.create_task(repair_library())  # noqa: F841 - keeps the task referenced
     prune = asyncio.create_task(prune_tracker())  # noqa: F841
-    apps = [(main_app, 8000), (public_app, 8001),
-            (combat_app, 8002), (combat_public_app, 8003), (map_app, 8004), (_old_beamer(), 8005)]
+    apps = [(main_app, GM_HOST, GM_PORT), (public_app, "0.0.0.0", PUBLIC_LISTEN_PORT)]
+    if OLD_PORTS:
+        apps += [(combat_app, "0.0.0.0", 8002), (combat_public_app, "0.0.0.0", 8003),
+                 (map_app, "0.0.0.0", 8004), (_old_beamer(), "0.0.0.0", 8005)]
     # One process for all apps, so the WebSocket registries (live.py of each part) are shared.
-    servers = [uvicorn.Server(uvicorn.Config(a, host="0.0.0.0", port=p, log_level="info")) for a, p in apps]
+    servers = [uvicorn.Server(uvicorn.Config(a, host=h, port=p, log_level="info")) for a, h, p in apps]
     await asyncio.gather(
         *(s.serve() for s in servers),
         map_tracker.poll_forever(map_live.notify_tracker),

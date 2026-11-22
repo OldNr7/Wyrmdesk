@@ -100,7 +100,6 @@ class TokenIn(BaseModel):
     image: Optional[str] = None
     combatant_id: Optional[int] = None
     on_player: bool = True
-    vision: bool = False
 
 
 class TokenPatch(BaseModel):
@@ -112,6 +111,7 @@ class TokenPatch(BaseModel):
     image: Optional[str] = None
     combatant_id: Optional[int] = None
     on_player: Optional[bool] = None
+    vision: Optional[bool] = None  # player tokens only (linked to a combatant of kind pc)
 
 
 class SettingsPatch(BaseModel):
@@ -203,9 +203,9 @@ async def update_vision(scene_id: int, force: bool = False) -> None:
                      (json.dumps(polys), json.dumps(ops), scene_id))
 
 
-def _token_is_viewer(conn, token_id: int) -> bool:
-    row = conn.execute("SELECT vision FROM tokens WHERE id = ?", (token_id,)).fetchone()
-    return bool(row and row["vision"])
+def _is_player(combatant_id: int | None) -> bool:
+    """Whether the combatant is a player character in the encounter the tracker shows."""
+    return any(c["id"] == combatant_id and c["kind"] == "pc" for c in tracker.state["combatants"])
 
 
 # ---------- scenes ----------
@@ -565,14 +565,12 @@ async def create_token(scene_id: int, body: TokenIn):
     with get_conn() as conn:
         _scene_or_404(conn, scene_id)
         token_id = conn.execute(
-            "INSERT INTO tokens (scene_id, name, x, y, size, color, image, combatant_id, on_player, vision) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO tokens (scene_id, name, x, y, size, color, image, combatant_id, on_player) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (scene_id, body.name, body.x, body.y, body.size, body.color, body.image,
-             body.combatant_id, 0 if body.vision else int(body.on_player), int(body.vision)),
+             body.combatant_id, int(body.on_player)),
         ).lastrowid
         token = row_to_dict(conn.execute("SELECT * FROM tokens WHERE id = ?", (token_id,)).fetchone())
-    if body.vision:
-        await update_vision(scene_id)
     await live.notify(scene_id=scene_id)
     return token
 
@@ -604,10 +602,11 @@ async def tokens_from_tracker(scene_id: int):
 
 @app.delete("/api/scenes/{scene_id}/tokens")
 async def clear_tokens(scene_id: int):
-    """Remove every token of the scene; sight points (vision tokens) stay."""
+    """Remove every token of the scene, seeing player tokens included."""
     with get_conn() as conn:
         _scene_or_404(conn, scene_id)
-        removed = conn.execute("DELETE FROM tokens WHERE scene_id = ? AND vision = 0", (scene_id,)).rowcount
+        removed = conn.execute("DELETE FROM tokens WHERE scene_id = ?", (scene_id,)).rowcount
+    await update_vision(scene_id)
     await live.notify(scene_id=scene_id)
     return {"removed": removed}
 
@@ -616,15 +615,21 @@ async def clear_tokens(scene_id: int):
 async def patch_token(token_id: int, body: TokenPatch):
     fields = body.model_dump(exclude_unset=True)
     with get_conn() as conn:
-        row = conn.execute("SELECT scene_id FROM tokens WHERE id = ?", (token_id,)).fetchone()
+        row = conn.execute("SELECT scene_id, combatant_id, vision FROM tokens WHERE id = ?", (token_id,)).fetchone()
         if row is None:
             raise HTTPException(404, "token not found")
+        combatant_id = fields.get("combatant_id", row["combatant_id"])
+        if fields.get("vision") and not _is_player(combatant_id):
+            raise HTTPException(400, _t("Sicht gibt es nur für Tokens, die mit einem Spielercharakter verknüpft sind."))
+        # Linked to someone else: the token keeps its sight only if that is a player character too.
+        if "combatant_id" in fields and row["vision"] and "vision" not in fields and not _is_player(combatant_id):
+            fields["vision"] = False
         for key, value in fields.items():
-            if key == "on_player":
+            if key in ("on_player", "vision"):
                 value = int(value)
             conn.execute(f"UPDATE tokens SET {key} = ? WHERE id = ?", (value, token_id))
-        viewer = _token_is_viewer(conn, token_id)
-    if viewer and ("x" in fields or "y" in fields):
+        viewer = bool(fields.get("vision", row["vision"]))
+    if "vision" in fields or (viewer and ("x" in fields or "y" in fields)):
         await update_vision(row["scene_id"])
     await live.notify(scene_id=row["scene_id"])
     return {"ok": True}

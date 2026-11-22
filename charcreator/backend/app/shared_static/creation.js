@@ -241,12 +241,12 @@ function raceTileGroups() {
     list.sort((a, b) => (a.name === name) !== (b.name === name) ? (a.name === name ? -1 : 1)
       : a.name === b.name ? b.is_2024 - a.is_2024 : a.name.localeCompare(b.name, UI_LOCALE));
     const head = main[0] || list[0];
-    return { name, list, standard: isStandardRace(head), icon: WIZ_RACE_ICONS[String(head.name_en || "").toLowerCase()] || "hood" };
-  }).sort((a, b) => a.name.localeCompare(b.name, UI_LOCALE));
+    return { name, label: optName(head), list, standard: isStandardRace(head), icon: WIZ_RACE_ICONS[String(head.name_en || "").toLowerCase()] || "hood" };
+  }).sort((a, b) => a.label.localeCompare(b.label, UI_LOCALE));
 }
 
 // Backgrounds grouped by their English name, so "Soldat" (2024) and "Soldier" (2014) share a tile.
-// The tile carries the German name where one of the entries has it.
+// The tile carries the German name where one of the entries has it (English UI: the English one).
 function backgroundTileGroups() {
   const groups = new Map();
   for (const o of charOptions("backgrounds")) {
@@ -257,8 +257,9 @@ function backgroundTileGroups() {
   return [...groups].map(([key, list]) => {
     list.sort((a, b) => b.is_2024 - a.is_2024 || a.name.localeCompare(b.name, UI_LOCALE));
     const de = list.find((o) => o.name_en && o.name !== o.name_en);
-    return { name: (de || list[0]).name, list, icon: WIZ_BACKGROUND_ICONS[key] || "scroll-unfurled" };
-  }).sort((a, b) => a.name.localeCompare(b.name, UI_LOCALE));
+    const name = (de || list[0]).name;
+    return { name, label: UI_DE ? name : optName(list.find((o) => o.name_en) || list[0]), list, icon: WIZ_BACKGROUND_ICONS[key] || "scroll-unfurled" };
+  }).sort((a, b) => a.label.localeCompare(b.label, UI_LOCALE));
 }
 
 
@@ -352,11 +353,11 @@ function openCreationWizard(character, actions) {
     const open = groups.find((g) => g.name === openTile[kind]) || (ref && groups.find((g) => g.list.some((o) => o.id === ref.id)));
     const tile = (g) => `<button type="button" class="wz-tile" data-wiz-tile="${kind}" data-name="${esc(g.name)}" aria-pressed="${g === open}">
         <span class="wz-medal">${wizIcon(g.icon)}</span>
-        <span class="wz-tile-name">${esc(g.name)}</span>
+        <span class="wz-tile-name">${esc(g.label)}</span>
         ${g.list.length > 1 ? `<span class="wz-tile-line">${t("{n} Varianten", { n: g.list.length })}</span>` : ""}
       </button>`;
     const variants = open && open.list.length > 1
-      ? `<div class="wz-variants"><span class="wz-variants-head">${t("Variante von {name}:", { name: esc(open.name) })}</span>${open.list
+      ? `<div class="wz-variants"><span class="wz-variants-head">${t("Variante von {name}:", { name: esc(open.label) })}</span>${open.list
           .map((o) => `<button type="button" class="wz-chip" data-wiz-pick="${kind}" data-id="${o.id}" aria-pressed="${!!ref && ref.id === o.id}">${esc(optionLabel(o))}</button>`)
           .join("")}</div>`
       : "";
@@ -839,7 +840,7 @@ function openCreationWizard(character, actions) {
         const list = speciesFeatList();
         const pick = c.feat_pick && optionById(Number(c.feat_pick));
         const info = (o) => (o ? `<div class="lu-option-info">${optionInfoHtml(o)}</div>` : "");
-        return `${bg ? `<p>${t("Dein Hintergrund gibt dir das Herkunftstalent <b>{feat}</b>.", { feat: esc(featLabel({ name: bg.option.name, detail: bg.detail })) })}</p>${info(bg.option)}` : ""}
+        return `${bg ? `<p>${t("Dein Hintergrund gibt dir das Herkunftstalent <b>{feat}</b>.", { feat: esc(featLabel({ id: bg.option.id, name: bg.option.name, detail: bg.detail })) })}</p>${info(bg.option)}` : ""}
           ${g ? `<p>${g.origin ? t("{trait} (Volk): wähle ein Herkunftstalent.", { trait: esc(g.trait) }) : t("{trait} (Volk): wähle ein Talent.", { trait: esc(g.trait) })}</p>
             ${list.length
               ? `<select class="cs-info-val lu-select" data-wiz="feat"><option value="">${t("-- Talent wählen --")}</option>${list

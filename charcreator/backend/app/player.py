@@ -9,13 +9,16 @@ public.py in the dmtool backend, which this mirrors (minus the tracker sync, whi
 apply here).
 """
 import json
+import secrets
 from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from . import export, open_mode
 from .db import IMAGE_EXTS, UPLOAD_DIR, get_conn, row_to_dict
 from .grants import parse_grants
 from .security import verify_password
@@ -35,7 +38,14 @@ def _campaign(conn, token: str, password: Optional[str] = None) -> dict:
     c = row_to_dict(row)
     if c["password_hash"] and not (password and verify_password(password, c["password_hash"])):
         raise HTTPException(401, t("Falsches Passwort."))
+    open_mode.touch(conn, c)
     return c
+
+
+def _group_only(c: dict) -> None:
+    """Session dates belong to a group with a DM: not in an open collection (open_mode.py)."""
+    if c.get("is_open"):
+        raise HTTPException(404, "not found")
 
 
 @router.get("")
@@ -47,7 +57,9 @@ def get_campaign(token: str):
         if row is None:
             raise HTTPException(404, t("Unbekannter oder abgelaufener Link."))
         c = row_to_dict(row)
-        return {"id": c["id"], "name": c["name"], "password_required": bool(c["password_hash"])}
+        return {"id": c["id"], "name": c["name"], "password_required": bool(c["password_hash"]),
+                "open": bool(c["is_open"]),
+                **({"days": open_mode.OPEN_DAYS, "max_characters": open_mode.OPEN_MAX_CHARACTERS} if c["is_open"] else {})}
 
 
 @router.get("/characters")
@@ -81,6 +93,9 @@ class CharacterIn(BaseModel):
 def create_character(token: str, body: CharacterIn, password: Optional[str] = CampaignPassword):
     with get_conn() as conn:
         c = _campaign(conn, token, password)
+        if c["is_open"] and conn.execute("SELECT COUNT(*) AS n FROM characters WHERE campaign_id = ?",
+                                         (c["id"],)).fetchone()["n"] >= open_mode.OPEN_MAX_CHARACTERS:
+            raise HTTPException(400, t("Hier haben höchstens {n} Charaktere Platz.", n=open_mode.OPEN_MAX_CHARACTERS))
         cur = conn.execute(
             "INSERT INTO characters (campaign_id, player_name, name, max_hp, ac, initiative_bonus, notes, "
             "stat_block, current_hp, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -122,6 +137,38 @@ def save_character(token: str, character_id: int, body: CharacterIn, password: O
 
 class StatusIn(BaseModel):
     status: str  # draft | fertig
+
+
+@router.get("/characters/{character_id}/export")
+def export_character(token: str, character_id: int, password: Optional[str] = CampaignPassword):
+    """The character as a file for the DM: the same shape as the DM's export of the finished ones (a list),
+    so the Kampagnenbuch imports it the same way."""
+    with get_conn() as conn:
+        c = _campaign(conn, token, password)
+        ch = _character(conn, c["id"], character_id)
+    return JSONResponse([export.export_character(ch)],
+                        headers={"Content-Disposition": f'attachment; filename="{export.export_filename(ch["name"])}"'})
+
+
+@router.post("/characters/{character_id}/share")
+def share_character(token: str, character_id: int, password: Optional[str] = CampaignPassword):
+    """The character's share link (share.py), made on first use; the same one after that."""
+    with get_conn() as conn:
+        c = _campaign(conn, token, password)
+        ch = _character(conn, c["id"], character_id)
+        if not ch["share_token"]:
+            conn.execute("UPDATE characters SET share_token = ? WHERE id = ?", (secrets.token_urlsafe(16), character_id))
+        return _character(conn, c["id"], character_id)
+
+
+@router.delete("/characters/{character_id}/share")
+def unshare_character(token: str, character_id: int, password: Optional[str] = CampaignPassword):
+    """Withdraws the share link: whoever has it can't download the character any more."""
+    with get_conn() as conn:
+        c = _campaign(conn, token, password)
+        _character(conn, c["id"], character_id)
+        conn.execute("UPDATE characters SET share_token = NULL WHERE id = ?", (character_id,))
+        return _character(conn, c["id"], character_id)
 
 
 @router.put("/characters/{character_id}/status")
@@ -170,6 +217,8 @@ async def upload_character_avatar(token: str, character_id: int, filename: str, 
     data = await request.body()
     with get_conn() as conn:
         c = _campaign(conn, token, password)
+        if c["is_open"]:  # a public server is no image host; the class pictures stay
+            raise HTTPException(403, t("Eigene Bilder gehen hier nicht."))
         ch = _character(conn, c["id"], character_id)
         new_path = _save_image(data, filename)
         conn.execute("UPDATE characters SET avatar_path = ?, updated_at = ? WHERE id = ?",
@@ -349,6 +398,7 @@ def _dates_out(conn, campaign_id: int) -> list[dict]:
 def list_dates(token: str, password: Optional[str] = CampaignPassword):
     with get_conn() as conn:
         c = _campaign(conn, token, password)
+        _group_only(c)
         return _dates_out(conn, c["id"])
 
 
@@ -366,6 +416,7 @@ def vote_date(token: str, date_id: int, body: VoteIn, password: Optional[str] = 
         raise HTTPException(400, t("Name fehlt."))
     with get_conn() as conn:
         c = _campaign(conn, token, password)
+        _group_only(c)
         if conn.execute(
             "SELECT 1 FROM session_dates WHERE id = ? AND campaign_id = ?", (date_id, c["id"])
         ).fetchone() is None:
@@ -382,6 +433,7 @@ def vote_date(token: str, date_id: int, body: VoteIn, password: Optional[str] = 
 def clear_vote(token: str, date_id: int, player_name: str, password: Optional[str] = CampaignPassword):
     with get_conn() as conn:
         c = _campaign(conn, token, password)
+        _group_only(c)
         conn.execute(
             "DELETE FROM session_votes WHERE date_id = ? AND player_name = ? "
             "AND date_id IN (SELECT id FROM session_dates WHERE campaign_id = ?)",

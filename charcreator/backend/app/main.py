@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -5,7 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import admin, i18n, player
+from . import admin, i18n, open_mode, player, share
 from .db import UPLOAD_DIR, init_db
 
 APP_DIR = Path(__file__).parent
@@ -14,21 +15,46 @@ APP_DIR = Path(__file__).parent
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    cleanup = asyncio.create_task(open_mode.cleanup_loop()) if open_mode.OPEN_MODE else None
     yield
+    if cleanup:
+        cleanup.cancel()
 
 
-app = FastAPI(title="Wyrmdesk – Charaktererstellung", lifespan=lifespan)
+# Publicly reachable: no API documentation (/docs, /redoc, /openapi.json), it would map every route
+# for an attacker. Nothing in Wyrmdesk uses it.
+app = FastAPI(title="Wyrmdesk – Charaktererstellung", lifespan=lifespan,
+              docs_url=None, redoc_url=None, openapi_url=None)
+
+
+# Publicly reachable, so the usual browser protections. Everything comes from this server (no inline
+# scripts, no other hosts); styles set inline by the pages need 'unsafe-inline'. No referrer: the
+# address holds the campaign's or collection's link, which a click on a link elsewhere (imprint,
+# privacy policy, game-icons.net) would otherwise hand to that site. HTTPS and HSTS: the reverse proxy.
+SECURITY_HEADERS = {
+    "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+                               "img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; "
+                               "frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+    "Referrer-Policy": "no-referrer",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+}
 
 
 @app.middleware("http")
 async def no_cache(request: Request, call_next):
     response = await call_next(request)
     response.headers["Cache-Control"] = "no-cache"
+    for key, value in SECURITY_HEADERS.items():
+        response.headers.setdefault(key, value)
     return response
 
 
 app.include_router(admin.router)
 app.include_router(player.router)
+app.include_router(open_mode.router)
+app.include_router(share.router)
 
 
 # ---------- pages ----------
@@ -47,6 +73,12 @@ def player_page(token: str):
 
 @app.get("/k/{token}/", include_in_schema=False)
 def player_page_slash(token: str):
+    return FileResponse(APP_DIR / "player_static" / "index.html")
+
+
+# A share link (share.py): the same page shell, which shows the download for the DM.
+@app.get("/teilen/{share_token}", include_in_schema=False)
+def share_page(share_token: str):
     return FileResponse(APP_DIR / "player_static" / "index.html")
 
 

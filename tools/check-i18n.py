@@ -19,7 +19,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SERVICES = {"charcreator": ROOT / "charcreator/backend/app", "dmtool": ROOT / "dmtool/backend/app"}
 SHARED_FILES = {"charsheet.js", "charsheet-rules.js", "levelup.js", "i18n.js"}
-SKIP_DIRS = {"vendor", "__pycache__", "lang"}
+# handbuch_static: the handbook has its own page per language (de/, en/), not t() texts.
+SKIP_DIRS = {"vendor", "__pycache__", "lang", "handbuch_static"}
 
 CALL = re.compile(r'(?<![\w.$])(?:window\.)?(?:t|tk|_t|calT)\(\s*"((?:[^"\\]|\\.)*)"')
 # tn(n, "{n} Fertigkeit", "{n} Fertigkeiten"): both forms.
@@ -73,6 +74,11 @@ def scan(app: Path) -> tuple[dict[str, set], dict[str, set]]:
         target = shared if path.name in SHARED_FILES else own
         for k in keys_of(path):
             target.setdefault(k, set()).add(str(path.relative_to(app)))
+    # The native app's launcher uses the Kampagnenbuch's texts (lang/en.json there).
+    if app == SERVICES["dmtool"]:
+        for path in sorted((ROOT / "dmtool/desktop").glob("*.py")):
+            for k in keys_of(path):
+                own.setdefault(k, set()).add(str(path.relative_to(ROOT)))
     return shared, own
 
 

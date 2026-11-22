@@ -4,6 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Charaktererstellung · Wyrmdesk</title>
+  <link rel="icon" type="image/svg+xml" href="/shared/brand/favicon.svg" />
+  <link rel="apple-touch-icon" href="/shared/brand/apple-touch-icon.png" />
   <link rel="stylesheet" href="/shared/charsheet.css" />
   <link rel="stylesheet" href="/shared/creation.css" />
   <link rel="stylesheet" href="/common/calendar.css" />
@@ -12,11 +14,16 @@
 <body>
   <div class="top">
     <header>
+      <img class="brand-logo" src="/shared/brand/wyrmdesk-logo-dunkel.svg" alt="" width="28" height="28" />
       <span id="campaign-name">Charaktererstellung</span>
       <span class="spacer"></span>
       <button id="back-btn" class="ghost" hidden>← Charaktere</button>
       <button id="status-btn" hidden></button>
+      <button id="share-btn" class="ghost" hidden title="Link für deine Spielleitung">🔗 Teilen</button>
+      <button id="print-btn" class="ghost" hidden>🖨 Drucken / PDF</button>
+      <button id="download-btn" class="ghost" hidden title="Datei für den Import ins Kampagnenbuch deiner Spielleitung">⇩ Datei</button>
       <button id="levelup-btn" class="ghost" hidden>⬆ Stufenaufstieg</button>
+      <button id="delete-btn" class="ghost" hidden>🗑 Löschen</button>
       <button id="edit-btn" hidden>Bearbeiten</button>
       <button id="save-btn" hidden>Speichern</button>
       <button id="cancel-btn" class="ghost" hidden>Abbrechen</button>
@@ -26,6 +33,8 @@
   <main id="app">
     <p class="empty">lädt…</p>
   </main>
+  <footer id="site-foot" hidden></footer>
+  <dialog id="share-dialog"></dialog>
   <script src="/ui-lang.js"></script>
   <script src="/shared/charsheet-rules.js"></script>
   <script src="/shared/charsheet.js"></script>

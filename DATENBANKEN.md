@@ -59,8 +59,9 @@ sie werden seither nicht mehr geöffnet, aber auch nicht gelöscht. Vor dem Kopi
 | `scenes`, `tokens` | Battlemap: Karte, Raster, Nebel, Wände, Sicht, Zauberflächen; `scenes.campaign_id` ordnet eine Szene einer Kampagne zu (NULL: noch keiner, erscheint in jeder). Tokens mit optionalem `combatant_id`. |
 | `app_settings` | Einstellungen; Tracker unter `tracker.<key>` (angezeigter Encounter, Stream-Deck-Zähler), Battlemap unter `map.<key>` (PPI, Rotation, Keystone, Blackout, …), Kampagnenbuch ohne Präfix, `merge.done` als Marker der Zusammenführung. |
 
-Dateien liegen daneben: `uploads/` (Kampagnenbuch), `avatars/` (ältere Tracker-Porträts), `maps/` und
-`tokens/` (Battlemap). Das Backup (`/api/backup`) enthält die Datenbank und alle vier Ordner.
+Dateien liegen daneben: `uploads/` (Kampagnenbuch), `avatars/` (ältere Tracker-Porträts), `maps/`,
+`tokens/` und `beamer_images/` (Battlemap, „Bild statt Battlemap“). Das Backup (`/api/backup`) enthält die
+Datenbank und alle fünf Ordner.
 
 ## Charaktererstellung (charcreator)
 

@@ -48,6 +48,10 @@ spells, items, classes, species, backgrounds and feats are imported from the [Op
 API in the campaign book (the 5e SRD or all Open5e sources), or entered by hand. The character
 creation gets them from the campaign book as a JSON export.
 
+The SRD (5.1 and 5.2) is also published as the **Wyrmdesk content** on wyrmdesk.ch, with German
+texts (choose "Wyrmdesk content" in the bulk import; `WYRMDESK_CONTENT_URL` points elsewhere).
+`tools/srd_export.py` builds it.
+
 Optionally, the English texts of the library can be machine-translated to German with a free
 [DeepL API](https://www.deepl.com/pro-api) key (`DEEPL_API_KEY`).
 

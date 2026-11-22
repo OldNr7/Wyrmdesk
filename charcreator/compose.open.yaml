@@ -1,0 +1,42 @@
+# Charaktererstellung im offenen Modus: für alle, ohne Spielleitung und ohne Anmeldung (z. B.
+# charakter.wyrmdesk.ch). Eigener Stack neben der normalen Charaktererstellung (compose.yaml), mit eigener
+# Datenbank: die Charaktere einer Gruppe und die offenen bleiben getrennt.
+#
+#   docker compose -f compose.open.yaml up -d --build
+#
+# Inhalte: nur die Wyrmdesk-Inhalte (SRD mit deutschen Texten), beim ersten Start und danach täglich von
+# der Website geladen. Charaktere, die 30 Tage niemand geöffnet hat, werden gelöscht.
+# Davor gehört ein Reverse Proxy mit HTTPS (er gibt die Adresse des Besuchers in X-Forwarded-For weiter,
+# die Begrenzung neuer Sammlungen pro Adresse braucht das). Einstellungen in open.env (Vorlage
+# open.env.example) oder in Komodo als Umgebung des Stacks.
+
+name: charcreator-open
+
+services:
+  charcreator-open:
+    build: ./backend
+    container_name: charcreator-open
+    restart: unless-stopped
+    ports:
+      - "${OPEN_PORT:-8455}:8000"
+    environment:
+      - OPEN_MODE=1
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      - UI_LANG=${UI_LANG:-de}
+      - OPEN_DAYS=${OPEN_DAYS:-30}
+      - OPEN_MAX_NEW_PER_HOUR=${OPEN_MAX_NEW_PER_HOUR:-10}
+      - OPEN_MAX_COLLECTIONS=${OPEN_MAX_COLLECTIONS:-5000}
+      - OPEN_MAX_CHARACTERS=${OPEN_MAX_CHARACTERS:-5}
+      - IMPRINT_URL=${IMPRINT_URL:-https://www.wyrmdesk.ch/de/impressum/}
+      - PRIVACY_URL=${PRIVACY_URL:-https://www.wyrmdesk.ch/de/datenschutz/}
+      - WYRMDESK_CONTENT_URL=${WYRMDESK_CONTENT_URL:-}
+    volumes:
+      - charcreator_open_data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+volumes:
+  charcreator_open_data:

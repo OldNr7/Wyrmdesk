@@ -1,0 +1,12 @@
+Package: wyrmdesk
+Version: @VERSION@
+Section: games
+Priority: optional
+Architecture: amd64
+Maintainer: Wyrmdesk
+Installed-Size: @SIZE@
+Depends: gir1.2-gtk-3.0, gir1.2-webkit2-4.1, libcairo2, libcairo-gobject2
+Homepage: https://wyrmdesk.ch
+Description: Werkzeuge für Spielleiter von 5e-Runden
+ Kampagnenbuch, Combat Tracker und Battlemap mit Beamer-Ansicht, als eigenes
+ Programm ohne Docker. Spieler und Beamer erreichen es im lokalen Netz.

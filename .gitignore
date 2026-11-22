@@ -14,6 +14,11 @@ backups/
 # Python
 __pycache__/
 *.pyc
+.venv/
+
+# PyInstaller build output of the native app (dmtool/desktop) - built locally per OS, not checked in.
+dmtool/desktop/build/
+dmtool/desktop/dist/
 
 # Secrets (ADMIN_PASSWORD, DEEPL_API_KEY …) — live next to each tool's compose.yaml; templates: .env.example
 .env

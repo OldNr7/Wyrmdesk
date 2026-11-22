@@ -35,6 +35,7 @@ services:
       # German translation of the library (Einrichtung → Deutsche Übersetzung): the DeepL key,
       # from a .env file next to this one (not checked in). Empty: no translating.
       - DEEPL_API_KEY=${DEEPL_API_KEY:-}
+      - WYRMDESK_CONTENT_URL=${WYRMDESK_CONTENT_URL:-}
       # Sprache der Oberfläche: de (Standard) oder en.
       - UI_LANG=${UI_LANG:-de}
       - COMBAT_DB_PATH=/data/combat/combattracker.db

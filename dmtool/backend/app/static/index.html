@@ -4,6 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kampagnenbuch · Wyrmdesk</title>
+  <link rel="icon" type="image/svg+xml" href="/shared/brand/favicon.svg" />
+  <link rel="apple-touch-icon" href="/shared/brand/apple-touch-icon.png" />
   <link rel="stylesheet" href="/shared/charsheet.css" />
   <link rel="stylesheet" href="library.css" />
   <link rel="stylesheet" href="style.css" />
@@ -68,6 +70,7 @@
           </div>
           <div class="form-row bulk-import" data-kind="monsters" data-label="Monster">
             <select class="bulk-scope">
+              <option value="wyrmdesk">Wyrmdesk-Inhalte: SRD mit deutschen Texten</option>
               <option value="srd">Nur 5e-SRD (offizielle Grundregeln)</option>
               <option value="all">Alle Open5e-Quellen (inkl. Drittanbieter)</option>
             </select>
@@ -139,6 +142,7 @@
           </div>
           <div class="form-row bulk-import" data-kind="items" data-label="Items">
             <select class="bulk-scope">
+              <option value="wyrmdesk">Wyrmdesk-Inhalte: SRD mit deutschen Texten</option>
               <option value="srd">Nur 5e-SRD (offizielle Grundregeln)</option>
               <option value="all">Alle Open5e-Quellen (inkl. Drittanbieter)</option>
             </select>
@@ -207,6 +211,7 @@
           </div>
           <div class="form-row bulk-import" data-kind="spells" data-label="Zauber">
             <select class="bulk-scope">
+              <option value="wyrmdesk">Wyrmdesk-Inhalte: SRD mit deutschen Texten</option>
               <option value="srd">Nur 5e-SRD (offizielle Grundregeln)</option>
               <option value="all">Alle Open5e-Quellen (inkl. Drittanbieter)</option>
             </select>
@@ -381,7 +386,11 @@
         <label class="button wide">⬆ Charaktere importieren
           <input type="file" id="char-import" accept=".json,application/json" hidden />
         </label>
-        <div id="char-import-status" class="muted small" style="margin-top:6px">Export aus der Charaktererstellung (⚙ Verwaltung → Fertige Charaktere exportieren). Bei Namen, die es schon gibt, fragt der Import nach: überspringen, Charakterblatt ersetzen oder als Kopie anlegen.</div>
+        <form id="char-import-link" class="row" style="margin-top:6px">
+          <input type="url" name="url" placeholder="Link aus der Charaktererstellung (…/teilen/…)" style="flex:1;min-width:0" required />
+          <button type="submit">Importieren</button>
+        </form>
+        <div id="char-import-status" class="muted small" style="margin-top:6px">Eine Datei aus der Charaktererstellung (⚙ Verwaltung → Fertige Charaktere exportieren, oder ⇩ Datei eines Spielers) oder der Teilen-Link eines Spielers. Bei Namen, die es schon gibt, fragt der Import nach: überspringen, Charakterblatt ersetzen oder als Kopie anlegen.</div>
       </section>
 
       <section>
@@ -412,6 +421,8 @@
         </label>
         <div id="backup-status" class="muted small" style="margin-top:6px">Ersetzt alle Kampagnen-Einträge, Sessions und Einstellungen durch den Stand der Sicherung.</div>
       </section>
+
+      <div id="app-version" class="muted small" style="text-align:center; margin: 12px 0 4px"></div>
     </aside>
   </main>
 

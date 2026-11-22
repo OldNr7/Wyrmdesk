@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS tokens (
     combatant_id INTEGER,
     -- Off for creatures standing on the table as a miniature.
     on_player INTEGER NOT NULL DEFAULT 1,
-    -- DM-only viewpoint: never drawn on the beamer, sight is computed from here.
+    -- Player token that sees: line of sight is computed from here (switched on per token, off by default).
     vision INTEGER NOT NULL DEFAULT 0
 );
 

@@ -11,7 +11,7 @@ from uuid import uuid4
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
-from . import char_options, monster_import, open5e, tracker, translate
+from . import char_options, content_translate, i18n, monster_import, open5e, tracker, translate, wyrmdesk_content
 from .characters import CharacterFields, character_row, get_character, new_version, save_character, set_character_hp
 from .db import IMAGE_EXTS, UPLOAD_DIR, get_conn, row_to_dict
 
@@ -315,7 +315,7 @@ async def import_open5e_monster(slug: str):
         )
 
 
-def _insert_open5e_monster(conn, monster: dict) -> int:
+def _insert_open5e_monster(conn, monster: dict, note: str | None = None) -> int:
     return conn.execute(
         "INSERT INTO custom_monsters (name, max_hp, ac, initiative_bonus, challenge_rating, notes, "
         "stat_block, creature_type, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'import')",
@@ -325,7 +325,7 @@ def _insert_open5e_monster(conn, monster: dict) -> int:
             monster["ac"],
             monster["initiative_bonus"],
             monster["challenge_rating"],
-            open5e.import_note(monster),
+            note or open5e.import_note(monster),
             json.dumps(monster["stat_block"]),
             monster["type"],
         ),
@@ -488,7 +488,7 @@ async def import_open5e_item(slug: str):
         return _get_item(conn, _insert_open5e_item(conn, item))
 
 
-def _insert_open5e_item(conn, item: dict) -> int:
+def _insert_open5e_item(conn, item: dict, note: str | None = None) -> int:
     return conn.execute(
         "INSERT INTO custom_items (name, item_type, rarity, requires_attunement, desc, source, notes) "
         "VALUES (?, ?, ?, ?, ?, 'import', ?)",
@@ -498,8 +498,17 @@ def _insert_open5e_item(conn, item: dict) -> int:
             item["rarity"],
             int(item["requires_attunement"]),
             item["desc"],
-            open5e.import_note(item),
+            note or open5e.import_note(item),
         ),
+    ).lastrowid
+
+
+def _insert_equipment(conn, item: dict, note: str | None = None) -> int:
+    """A mundane armor or weapon of the SRD (open5e.get_srd_equipment)."""
+    return conn.execute(
+        "INSERT INTO custom_items (name, item_type, rarity, requires_attunement, desc, stat_block, "
+        "source, notes) VALUES (?, ?, NULL, 0, ?, ?, 'import', ?)",
+        (item["name"], item["item_type"], item["desc"], json.dumps(item["stat_block"]), note or item["notes"]),
     ).lastrowid
 
 
@@ -514,11 +523,7 @@ async def import_srd_equipment():
         for item in items:
             if item["name"].lower() in existing:
                 continue
-            conn.execute(
-                "INSERT INTO custom_items (name, item_type, rarity, requires_attunement, desc, stat_block, "
-                "source, notes) VALUES (?, ?, NULL, 0, ?, ?, 'import', ?)",
-                (item["name"], item["item_type"], item["desc"], json.dumps(item["stat_block"]), item["notes"]),
-            )
+            _insert_equipment(conn, item)
             existing.add(item["name"].lower())
             added.append(item["name"])
     return {"added": added, "skipped": len(items) - len(added)}
@@ -625,7 +630,7 @@ async def import_open5e_spell(slug: str):
         return row_to_dict(conn.execute("SELECT * FROM custom_spells WHERE id = ?", (spell_id,)).fetchone())
 
 
-def _insert_open5e_spell(conn, spell: dict) -> int:
+def _insert_open5e_spell(conn, spell: dict, note: str | None = None) -> int:
     return conn.execute(
         "INSERT INTO custom_spells (name, school, level_int, dnd_class, casting_time, range, "
         "components, material, duration, concentration, ritual, higher_level, desc, source, notes) "
@@ -644,7 +649,7 @@ def _insert_open5e_spell(conn, spell: dict) -> int:
             int(spell["ritual"]),
             spell["higher_level"],
             spell["desc"],
-            open5e.import_note(spell),
+            note or open5e.import_note(spell),
         ),
     ).lastrowid
 
@@ -690,17 +695,24 @@ def _bulk_kind(kind: str) -> str:
 
 
 @router.get("/api/{kind}/open5e-all/count")
-async def count_open5e_all(kind: str, srd: bool = True):
+async def count_open5e_all(kind: str, srd: bool = True, source: str = "open5e"):
+    if source == "wyrmdesk":
+        if kind not in char_options.KINDS:
+            _bulk_kind(kind)
+        return {"count": len(await wyrmdesk_content.fetch_kind(kind))}
     if kind in char_options.KINDS:
         return {"count": len(await char_options.fetch_kind(kind, srd))}
     return {"count": await open5e.count_all(_bulk_kind(kind), srd)}
 
 
 @router.post("/api/{kind}/custom/import-open5e-all")
-async def import_open5e_all(kind: str, srd: bool = True):
+async def import_open5e_all(kind: str, srd: bool = True, source: str = "open5e"):
     """Imports a whole category. Names already in the library are skipped, so it can be
     run again (or after single imports) without creating duplicates; across Open5e
-    sources the first entry of a name wins."""
+    sources the first entry of a name wins. source "wyrmdesk": from the Wyrmdesk-Inhalte
+    (wyrmdesk_content.py), the SRD with German texts."""
+    if source == "wyrmdesk":
+        return await _import_wyrmdesk(kind)
     if kind in char_options.KINDS:
         return await _import_all_options(kind, srd)
     table, insert = BULK_TARGETS[_bulk_kind(kind)]
@@ -732,6 +744,55 @@ async def _import_all_options(kind: str, srd: bool) -> dict:
             existing |= keys
             added += 1
     return {"added": added, "skipped": len(entries) - added}
+
+
+async def _import_wyrmdesk(kind: str) -> dict:
+    """Like the Open5e import (same entries, same duplicate rules), plus the German lines of the
+    export into the translation memory: spells, items and character options then show German
+    texts right away; imported monsters get their German stat block (the English one kept, as
+    content_translate.py does) with a German UI."""
+    if kind not in char_options.KINDS:
+        _bulk_kind(kind)
+    entries = await wyrmdesk_content.fetch_kind(kind)
+    pairs, fixed = await wyrmdesk_content.translations()
+    with get_conn() as conn:
+        added, german = insert_wyrmdesk(conn, kind, entries, pairs, fixed)
+    return {"added": added, "skipped": len(entries) - added, "german": german}
+
+
+def insert_wyrmdesk(conn, kind: str, entries: list[dict], pairs, fixed) -> tuple[int, int]:
+    """The Wyrmdesk import's work on the database (also used by tools/srd_export.py for the
+    Charaktererstellung's content pack): the German lines into the translation memory, then the entries
+    not there yet. Returns (added, monsters given their German stat block)."""
+    added, monsters = 0, []
+    translate.store_lines(conn, pairs, fixed)
+    if kind in char_options.KINDS:
+        existing = char_options.existing_keys(conn, kind)
+    else:
+        table = BULK_TARGETS[kind][0]
+        existing = {r["name"].lower() for r in conn.execute(f"SELECT name FROM {table}")}
+    for entry in sorted(entries, key=lambda e: (e["name"] or "").lower()):
+        note = wyrmdesk_content.import_note(entry)
+        if kind in char_options.KINDS:
+            keys = char_options.entry_keys(entry)
+            if not keys or keys & existing:
+                continue
+            char_options.insert_open5e(conn, entry, note)
+            existing |= keys
+        else:
+            name = (entry["name"] or "").strip()
+            if not name or name.lower() in existing:
+                continue
+            if entry.get("equipment"):
+                _insert_equipment(conn, entry, wyrmdesk_content.import_note({"source_name": "SRD-Ausrüstung"}))
+            else:
+                new_id = BULK_TARGETS[kind][1](conn, entry, note)
+                if kind == "monsters":
+                    monsters.append(new_id)
+            existing.add(name.lower())
+        added += 1
+    german = content_translate.germanize_monsters(conn, monsters) if monsters and i18n.lang() == "de" else 0
+    return added, german
 
 
 @router.get("/api/spells/open5e/search")

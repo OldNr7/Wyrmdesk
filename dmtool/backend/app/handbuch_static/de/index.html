@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wyrmdesk Handbuch</title>
+  <meta name="description" content="Anleitung für Wyrmdesk: Kampagnenbuch, Combat Tracker, Battlemap und Charaktererstellung für Pen-&amp;-Paper-Runden (5e)." />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="top">
+    <span class="brand">Wyrmdesk</span>
+    <span class="sub">Handbuch</span>
+    <span class="spacer"></span>
+    <a id="back-to-app" href="../../" hidden>← Zurück zu Wyrmdesk</a>
+    <a href="../en/" hreflang="en" lang="en">English</a>
+  </div>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Inhalt">
+      <h2>Inhalt</h2>
+      <ol>
+        <li><a href="#ueberblick">1. Überblick</a></li>
+        <li><a href="#installation">2. Installation</a></li>
+        <li><a href="#erste-schritte">3. Erste Schritte</a></li>
+        <li><a href="#kampagnenbuch">4. Kampagnenbuch</a>
+          <ol>
+            <li><a href="#kb-sessions">Sessions</a></li>
+            <li><a href="#kb-eintraege">NPCs, Orte, Quests …</a></li>
+            <li><a href="#kb-handouts">Handouts und Beamer</a></li>
+            <li><a href="#kb-gruppe">Gruppe und Charakterblätter</a></li>
+            <li><a href="#kb-bibliothek">Bibliothek</a></li>
+            <li><a href="#kb-spieler">Ansicht für Spieler</a></li>
+          </ol>
+        </li>
+        <li><a href="#tracker">5. Combat Tracker</a></li>
+        <li><a href="#karte">6. Battlemap</a>
+          <ol>
+            <li><a href="#karte-szenen">Szenen</a></li>
+            <li><a href="#karte-nebel">Nebel des Krieges</a></li>
+            <li><a href="#karte-sicht">Wände, Türen, Sicht</a></li>
+            <li><a href="#karte-tokens">Tokens</a></li>
+            <li><a href="#karte-tracker">Kampf auf der Karte</a></li>
+            <li><a href="#karte-beamer">Beamer</a></li>
+          </ol>
+        </li>
+        <li><a href="#charaktererstellung">7. Charaktererstellung</a></li>
+        <li><a href="#daten">8. Daten und Sicherung</a></li>
+        <li><a href="#tipps">9. Tipps</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <header>
+        <h1>Wyrmdesk Handbuch</h1>
+        <p>Werkzeuge für die Spielleitung am Spieltisch: Kampagne vorbereiten, Kämpfe führen, Karten auf den Beamer bringen, und Spieler erstellen ihre Charaktere selbst.</p>
+      </header>
+
+      <!-- ===================================================================== -->
+      <section class="chapter" id="ueberblick">
+        <h2>1. Überblick</h2>
+        <p>Wyrmdesk besteht aus vier Teilen, die zusammenarbeiten. Die ersten drei nutzt die Spielleitung, den vierten die Spieler.</p>
+        <div class="cards">
+          <div class="card"><b>📖 Kampagnenbuch</b><span>Sessions, NPCs, Orte, Quests, Handouts, Charakterblätter und die Regel-Bibliothek. Hier liegen alle Daten.</span></div>
+          <div class="card"><b>⚔ Combat Tracker</b><span>Encounter, Initiative, Trefferpunkte und Zustände, mit einer Anzeige für die Spieler.</span></div>
+          <div class="card"><b>🗺 Battlemap</b><span>Karten mit Nebel des Krieges, Wänden, Türen und Sichtlinien, für Bildschirm oder Beamer.</span></div>
+          <div class="card"><b>🧙 Charaktererstellung</b><span>Spieler bauen ihre Charaktere Schritt für Schritt über einen persönlichen Link.</span></div>
+        </div>
+        <p>Kampagnenbuch, Combat Tracker und Battlemap teilen sich eine Datenbank. Ein Charakter, der im Tracker Schaden nimmt, hat diesen Schaden auch auf seinem Charakterblatt und auf der Karte. Oben in jeder Kopfzeile wechselst du mit <b>📖 Kampagnenbuch · ⚔ Kampf · 🗺 Karte</b> zwischen den drei Teilen. Die gewählte Kampagne ist in allen dreien dieselbe.</p>
+        <p>Es gibt zwei Arten von Seiten:</p>
+        <ul>
+          <li><b>Seiten für die Spielleitung</b>: alles, was du vorbereitest und steuerst. Hier stehen auch Geheimnisse und Notizen.</li>
+          <li><b>Anzeigen für die Spieler</b>: Beamer-Bild, Kampfreihenfolge, Handouts und Charakterblätter auf Handy oder Tablet. Sie zeigen nur, was die Spieler sehen sollen.</li>
+        </ul>
+        <p>Die Oberfläche gibt es auf Deutsch und Englisch. Die Sprache wählst du oben rechts in jeder Kopfzeile. Die Wahl gilt für den ganzen Browser.</p>
+      </section>
+
+      <!-- ===================================================================== -->
+      <section class="chapter" id="installation">
+        <h2>2. Installation</h2>
+        <div class="placeholder">Dieser Abschnitt folgt. Hier wird beschrieben, wie du Wyrmdesk einrichtest und startest.</div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <section class="chapter" id="erste-schritte">
+        <h2>3. Erste Schritte</h2>
+        <h3>Eine Kampagne anlegen</h3>
+        <p>Beim ersten Öffnen zeigt das Kampagnenbuch <b>+ Neue Kampagne</b>. Gib einen Namen ein und wähle, in welcher Welt die Kampagne spielt:</p>
+        <ul>
+          <li><b>Forgotten Realms</b>: mit dem Kalender von Harptos.</li>
+          <li><b>Eigene Welt</b>: eigene Monate und Zeitrechnung.</li>
+          <li><b>Ohne Kalender</b>: freie Datumsangaben.</li>
+        </ul>
+        <p>Weitere Kampagnen legst du später unter <b>⚙ Einrichtung → Kampagne → + Neue Kampagne…</b> an. Oben in der Kopfzeile wechselst du zwischen ihnen.</p>
+
+        <h3>Die Bibliothek füllen</h3>
+        <p>Klassen, Völker, Hintergründe, Zauber, Monster und Gegenstände kommen aus der <b>Bibliothek</b> (Menüpunkte unten links im Kampagnenbuch). Sie gilt für alle Kampagnen. Auf jeder dieser Seiten lassen sich die frei verfügbaren Regelinhalte (SRD) mit einem Klick von Open5e importieren. Danach kannst du Einträge ergänzen oder eigene anlegen. Mehr dazu unter <a href="#kb-bibliothek">Bibliothek</a>.</p>
+
+        <h3>Der typische Ablauf</h3>
+        <ol>
+          <li>Kampagne anlegen und die Bibliothek füllen.</li>
+          <li>Spieler erstellen ihre Charaktere in der <a href="#charaktererstellung">Charaktererstellung</a>, du übernimmst sie ins Kampagnenbuch.</li>
+          <li>Sessions vorbereiten: NPCs, Orte, Quests und Encounter anlegen.</li>
+          <li>Am Spielabend: Handouts und Karte auf den Beamer, Kämpfe im Tracker oder auf der Karte führen.</li>
+          <li>Nach dem Spiel: Rückblick schreiben, Einträge den Spielern freigeben.</li>
+        </ol>
+      </section>
+
+      <!-- ===================================================================== -->
+      <section class="chapter" id="kampagnenbuch">
+        <h2>4. Kampagnenbuch</h2>
+        <p>Das Kampagnenbuch ist der Kern von Wyrmdesk. Links steht die Leiste mit den Bereichen (Sessions, Journal, Zeitleiste, Gruppe, NPCs, Orte …), daneben die Liste des gewählten Bereichs und rechts die Seite des gewählten Eintrags. Die Startseite zeigt die nächste und die letzte Session, offene Quests und zuletzt geänderte Einträge.</p>
+        <figure>
+          <a href="img/kb-home.webp"><img src="img/kb-home.webp" alt="Startseite des Kampagnenbuchs mit nächster Session, letzter Session, offenen Quests und zuletzt geänderten Einträgen" loading="lazy" /></a>
+          <figcaption>Die Startseite einer Kampagne.</figcaption>
+        </figure>
+
+        <h3 id="kb-sessions">Sessions</h3>
+        <p>Eine Session hat drei Teile, oben als Reiter:</p>
+        <ul>
+          <li><b>Vorbereitung</b>: deine Notizen für den Abend. Hier verknüpfst du auch die <b>Encounter</b> aus dem Combat Tracker. Ein Klick auf <b>▶ Anzeigen</b> schickt einen Encounter auf die Kampfanzeige.</li>
+          <li><b>Am Spieltisch</b>: kurze Notizen während des Spiels. Aus einer Notiz wird mit einem Klick ein neuer NPC oder Eintrag.</li>
+          <li><b>Rückblick</b>: was passiert ist, für dich und die Spieler.</li>
+        </ul>
+        <p>Der Status wechselt von <i>geplant</i> zu <i>gespielt</i>. Gespielte Sessions erscheinen im <b>Journal</b>, Ereignisse in der <b>Zeitleiste</b>. Unter <b>Beteiligt</b> sammelt die Seite alle Einträge, auf die die Session verweist.</p>
+        <figure>
+          <a href="img/kb-session.webp"><img src="img/kb-session.webp" alt="Geplante Session mit Vorbereitung, verknüpften Encountern und beteiligten Einträgen" loading="lazy" /></a>
+          <figcaption>Eine geplante Session mit Vorbereitung und zwei Encountern.</figcaption>
+        </figure>
+
+        <h3 id="kb-eintraege">NPCs, Orte, Quests, Fraktionen, Gegenstände</h3>
+        <p>Jeder Eintrag hat ein Bild, eine Kurzbeschreibung, einen Text und <b>Geheimnisse (nur DM)</b>. Je nach Art kommen passende Felder dazu: ein NPC hat Rolle, Haltung, Status und Aufenthaltsort, ein Ort eine Art (Dorf, Taverne, Ruine …) und liegt in einem anderen Ort, eine Quest hat einen Auftraggeber und einen Status.</p>
+        <figure>
+          <a href="img/kb-npc.webp"><img src="img/kb-npc.webp" alt="NPC-Seite mit Rolle, Haltung, Aufenthaltsort und Verweisen" loading="lazy" /></a>
+          <figcaption>Ein NPC mit Rolle, Haltung und Aufenthaltsort.</figcaption>
+        </figure>
+        <p><b>Verweise:</b> Schreibst du im Text <code>[[</code>, schlägt das Kampagnenbuch Einträge vor. So wird aus <code>[[Mara Kesselbrand]]</code> ein Link. Jede Seite zeigt unten unter <b>Erwähnt in</b>, wo sie verlinkt ist.</p>
+        <p><b>Den Spielern bekannt:</b> Neue Einträge sind zunächst geheim. Mit dem Schalter <b>Den Spielern bekannt</b> gibst du sie frei, sobald die Gruppe davon erfahren hat.</p>
+        <figure>
+          <a href="img/kb-places.webp"><img src="img/kb-places.webp" alt="Ortsliste als Baum mit Dorf, Taverne und Ruine" loading="lazy" /></a>
+          <figcaption>Orte bilden einen Baum: die Taverne liegt im Dorf.</figcaption>
+        </figure>
+        <figure>
+          <a href="img/kb-quest.webp"><img src="img/kb-quest.webp" alt="Quest mit Auftraggeber, Status und Hintergrund nur für die Spielleitung" loading="lazy" /></a>
+          <figcaption>Eine offene Quest. Der Hintergrund ist nur für dich sichtbar.</figcaption>
+        </figure>
+
+        <h3 id="kb-handouts">Handouts und Beamer</h3>
+        <p>Ein Handout ist ein Bild oder Text für die Spieler, etwa ein Brief oder eine Karte. Mit <b>📽 Auf Beamer zeigen</b> erscheint es auf der Beamer-Ansicht, mit <b>Text mitzeigen</b> auch sein Text. Jedes Bild eines Eintrags lässt sich so zeigen. Gezeigte Einträge gelten danach als den Spielern bekannt.</p>
+        <figure>
+          <a href="img/kb-handout.webp"><img src="img/kb-handout.webp" alt="Handout mit Text für die Spieler und dem Knopf Auf Beamer zeigen" loading="lazy" /></a>
+          <figcaption>Ein Handout, bereit für den Beamer.</figcaption>
+        </figure>
+
+        <h3 id="kb-gruppe">Gruppe und Charakterblätter</h3>
+        <p>Unter <b>Gruppe</b> stehen die Spielercharaktere mit vollem Charakterblatt. Das Blatt rechnet Rüstungsklasse, Angriffe, Rettungswürfe, Fertigkeiten und Bewegung nach den Regeln aus. Ausrüstung legst du im Inventar mit dem Punkt links an, Zauber kommen aus der Bibliothek. <b>⬆ Stufenaufstieg</b> führt Schritt für Schritt durch die nächste Stufe.</p>
+        <p>Trefferpunkte gehören zum Charakter. Ob sie im Tracker, auf der Karte oder auf dem Blatt geändert werden: überall steht derselbe Wert.</p>
+        <figure>
+          <a href="img/kb-pc.webp"><img src="img/kb-pc.webp" alt="Charakterblatt einer Magierin mit Attributen, Fertigkeiten, Trefferpunkten und Zaubern" loading="lazy" /></a>
+          <figcaption>Das Charakterblatt im Kampagnenbuch.</figcaption>
+        </figure>
+
+        <h3 id="kb-bibliothek">Bibliothek</h3>
+        <p>Die Bibliothek umfasst <b>Bestiarium, Items, Zauber, Klassen, Unterklassen, Völker, Hintergründe</b> und <b>Talente</b>. Sie gilt für alle Kampagnen. Jede Seite kann:</p>
+        <ul>
+          <li>die frei verfügbaren SRD-Inhalte von Open5e importieren (einzeln über die Suche oder alle auf einmal),</li>
+          <li>eigene Einträge anlegen und bestehende bearbeiten,</li>
+          <li>filtern und suchen.</li>
+        </ul>
+        <p>Monster aus dem Bestiarium nimmst du direkt in Encounter auf, Zauber und Gegenstände erscheinen auf den Charakterblättern.</p>
+        <figure>
+          <a href="img/kb-bestiary.webp"><img src="img/kb-bestiary.webp" alt="Bestiarium mit Open5e-Suche, Filtern und einer Liste von Goblins" loading="lazy" /></a>
+          <figcaption>Das Bestiarium, gefiltert nach „Goblin“.</figcaption>
+        </figure>
+
+        <h3 id="kb-spieler">Ansicht für Spieler</h3>
+        <p>Spieler öffnen die Spielerseite auf Handy, Tablet oder Laptop, wählen oben ihren Charakter und sehen das volle Charakterblatt. Trefferpunkte, verbrauchte Zauberplätze, Munition und Rasten ändern sie direkt. <b>⚔ Kampfreihenfolge</b> blendet die Initiative-Leiste ein. Die Adresse der Spielerseite steht im Combat Tracker unter <b>Anzeige</b>.</p>
+        <figure>
+          <a href="img/pub-player.webp"><img src="img/pub-player.webp" alt="Spielerseite mit Charakterauswahl und Charakterblatt" loading="lazy" /></a>
+          <figcaption>Die Spielerseite mit dem Blatt von Liora.</figcaption>
+        </figure>
+      </section>
+
+      <!-- ===================================================================== -->
+      <section class="chapter" id="tracker">
+        <h2>5. Combat Tracker</h2>
+        <p>Der Combat Tracker führt durch Kämpfe. Links stehen die Encounter der Kampagne, rechts der gewählte Encounter mit allen Kämpfern in Initiative-Reihenfolge.</p>
+        <figure>
+          <a href="img/tracker.webp"><img src="img/tracker.webp" alt="Combat Tracker mit Encounter-Liste, Rundenanzeige und Kämpfern nach Initiative" loading="lazy" /></a>
+          <figcaption>Ein laufender Kampf in Runde 1.</figcaption>
+        </figure>
+        <h3>Encounter vorbereiten</h3>
+        <ol>
+          <li><b>+ Neuer Encounter</b> legt einen Encounter an. Die Gruppe ist automatisch dabei.</li>
+          <li>Unter <b>Kombattant hinzufügen</b> nimmst du Monster aus dem Bestiarium auf.</li>
+          <li>Die Schwierigkeit (leicht bis tödlich) rechnet der Tracker aus Erfahrungspunkten und Gruppengröße live aus.</li>
+        </ol>
+        <h3>Den Kampf führen</h3>
+        <ul>
+          <li>Initiative eintragen oder mit <b>🎲 Init aller Monster</b> für alle Monster würfeln.</li>
+          <li><b>Nächster Zug ⟳</b> und <b>⟲ Zurück</b> wechseln den aktiven Kämpfer, die Runde zählt mit.</li>
+          <li>Mit <b>−5 −1 +1 +5</b> änderst du Trefferpunkte und temporäre TP. Bei 0 TP gilt ein Kämpfer als besiegt.</li>
+          <li><b>Status ▾</b> setzt Zustände wie Vergiftet, Liegend oder Konzentration.</li>
+          <li><b>📖 Stats</b> klappt den Wertekasten des Monsters auf.</li>
+          <li><b>Für Spieler verborgen</b> hält ein Monster von Anzeige und Beamer fern, bis du es aufdeckst.</li>
+        </ul>
+        <h3>Anzeige für die Spieler</h3>
+        <p>Im Reiter <b>Anzeige</b> wählst du, welcher Encounter auf der Spieleranzeige läuft, und findest ihre Adresse. Die Anzeige zeigt die Reihenfolge mit Porträts und markiert, wer am Zug ist.</p>
+        <figure>
+          <a href="img/tracker-display.webp"><img src="img/tracker-display.webp" alt="Kampfreihenfolge für die Spieler mit Porträts" loading="lazy" /></a>
+          <figcaption>Die Kampfreihenfolge, wie die Spieler sie sehen.</figcaption>
+        </figure>
+        <div class="note">Für ein Stream Deck oder andere Fernbedienungen nennt der Reiter <b>Anzeige</b> Adressen für „Nächster Zug“, „Zurück“ und „Initiative würfeln“.</div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <section class="chapter" id="karte">
+        <h2>6. Battlemap</h2>
+        <p>Die Battlemap zeigt Karten auf deinem Bildschirm und auf dem Beamer. Links stehen die Bereiche Szenen, Werkzeuge, Sicht, Bereiche, Tokens und Tracker. Ein Klick öffnet den Bereich, ein zweiter schließt ihn. Der gelbe Rahmen zeigt, welcher Ausschnitt gerade auf dem Beamer ist.</p>
+
+        <h3 id="karte-szenen">Szenen</h3>
+        <p>Eine Szene ist eine Karte. Du legst sie an mit</p>
+        <ul>
+          <li><b>+ Neue Szene aus Bild</b>: ein beliebiges Kartenbild. Das Raster stellst du unter <b>⚙ Einrichtung → Raster</b> ein oder misst es mit 📏 auf der Karte.</li>
+          <li><b>+ Szene aus Dungeondraft (.dd2vtt)</b>: Karte, Raster, Wände und Türen kommen fertig mit (Dungeondraft: Datei → Exportieren → Universal VTT).</li>
+        </ul>
+        <p>Szenen gehören zur gewählten Kampagne. <b>Diese Szene auf Beamer zeigen</b> (in der Einrichtung) schickt sie auf den Beamer.</p>
+
+        <h3 id="karte-nebel">Nebel des Krieges</h3>
+        <p>Unter <b>Werkzeuge</b> deckst du Teile der Karte mit Rechteck, Pinsel oder Polygon auf und wieder zu. Du siehst die Karte immer ganz, der Nebel ist für dich nur halb durchsichtig. Mit dem Werkzeug <b>Bereich</b> umrandest du Räume, die du später unter <b>Bereiche</b> mit einem Klick aufdeckst.</p>
+        <figure>
+          <a href="img/map-tools.webp"><img src="img/map-tools.webp" alt="Werkzeuge der Battlemap zum Aufdecken und Verdecken" loading="lazy" /></a>
+          <figcaption>Werkzeuge zum Aufdecken und Verdecken.</figcaption>
+        </figure>
+
+        <h3 id="karte-sicht">Wände, Türen und Sicht</h3>
+        <p>Unter <b>Sicht</b> zeichnest du Wände und Türen ein (oder sie kommen aus Dungeondraft). Türen öffnest und schließt du mit dem Auswahl-Werkzeug per Klick. Geschlossene Türen und Wände halten die Sicht auf.</p>
+        <figure>
+          <a href="img/map-sight.webp"><img src="img/map-sight.webp" alt="Karte mit eingeblendeten Wänden in Orange und Türen" loading="lazy" /></a>
+          <figcaption>Wände (orange) und Türen. Zwei Türen stehen offen.</figcaption>
+        </figure>
+
+        <h3 id="karte-tokens">Tokens</h3>
+        <p><b>Tokens aus Tracker-Encounter</b> setzt für jeden Kämpfer des laufenden Encounters einen Token auf die Karte, mit Porträt. Ein ausgewählter Token hat Name, Größe, Farbe, Bild und eine Verknüpfung zum Tracker. <b>Auf Beamer zeigen</b> ausgeschaltet bedeutet: Auf dem Tisch steht eine echte Miniatur, der Beamer zeigt den Token nicht.</p>
+        <p><b>Sichtlinien:</b> Ist <b>Sichtlinien aktiv</b> eingeschaltet, deckt die Karte auf, was die Spieler-Tokens sehen. Welche Tokens sehen, wählst du pro Token mit <b>👁 Sicht</b>. Das gibt es nur für Tokens von Spielercharakteren und ist anfangs aus. Was einmal gesehen wurde, bleibt als erkundet sichtbar, nur gedimmt.</p>
+        <figure>
+          <a href="img/map-tokens.webp"><img src="img/map-tokens.webp" alt="Tokens-Bereich mit Sichtlinien, Tokenliste und Editor mit dem Häkchen Sicht" loading="lazy" /></a>
+          <figcaption>Mira sieht (👁): von ihrem Token aus wird die Sicht berechnet.</figcaption>
+        </figure>
+
+        <h3 id="karte-tracker">Kampf auf der Karte</h3>
+        <p>Der Bereich <b>Tracker</b> bringt den Combat Tracker in die Karte: Initiative, nächster Zug, Trefferpunkte und Zustände. Ein Klick auf einen Kämpfer klappt TP und Zustände auf und springt zu seinem Token. Spielercharaktere tragen ein kleines Figur-Symbol hinter dem Namen. Auf der Karte zeigt jeder Token seine Position in der Reihenfolge.</p>
+        <p>Darunter liegen die <b>Zauberbereiche</b>: Kegel, Kreis, Würfel und Linie, auf Wunsch direkt aus einem Zauber (z. B. Fireball).</p>
+        <figure>
+          <a href="img/map-tracker.webp"><img src="img/map-tracker.webp" alt="Tracker in der Battlemap mit aufgeklapptem Kämpfer, Trefferpunkten und Zuständen" loading="lazy" /></a>
+          <figcaption>Kämpfer mit TP und Zuständen direkt in der Karte.</figcaption>
+        </figure>
+
+        <h3 id="karte-beamer">Beamer</h3>
+        <p>Die Beamer-Ansicht öffnest du im Browser des Beamer-Rechners (Knopf <b>Beamer-Ansicht ↗</b> oben). Ein Klick ins Bild schaltet auf Vollbild. Sie zeigt nur, was aufgedeckt ist, und Tokens nur, wo die Spieler sie sehen können. Links läuft auf Wunsch die Kampfreihenfolge mit.</p>
+        <figure>
+          <a href="img/beamer.webp"><img src="img/beamer.webp" alt="Beamer-Ansicht mit aufgedeckten Räumen, Tokens und Kampfreihenfolge am linken Rand" loading="lazy" /></a>
+          <figcaption>Was der Beamer zeigt: nur aufgedeckte Bereiche.</figcaption>
+        </figure>
+        <p>Unter <b>⚙ Einrichtung</b> der Karte stellst du den Beamer auf den Tisch ein:</p>
+        <ul>
+          <li><b>Drehung</b>, wenn der Beamer von der Seite projiziert.</li>
+          <li><b>Kalibrieren</b>: Der Beamer zeigt ein 10 × 10 cm großes Quadrat. Nachmessen und <b>Pixel pro Zoll</b> anpassen, bis ein Feld genau 1 Zoll (2,54 cm) groß ist, passend für Miniaturen.</li>
+          <li><b>Trapezkorrektur</b>: Die Ecken des Beamer-Bilds lassen sich mit der Maus verschieben.</li>
+          <li><b>Blackout</b> (Taste <kbd>B</kbd>) schaltet den Beamer schwarz.</li>
+          <li><b>Bild statt Battlemap</b>: ein eigenes Bild, z. B. für Pausen.</li>
+        </ul>
+      </section>
+
+      <!-- ===================================================================== -->
+      <section class="chapter" id="charaktererstellung">
+        <h2>7. Charaktererstellung</h2>
+        <p>In der Charaktererstellung bauen Spieler ihre Charaktere selbst, ohne Zugang zum Kampagnenbuch. Sie läuft getrennt und tauscht Daten nur über Dateien aus.</p>
+
+        <h3>Für die Spielleitung: einrichten</h3>
+        <p>Die Verwaltung (<code>/admin/</code>) ist mit einem Passwort geschützt.</p>
+        <ol>
+          <li><b>Inhalte hochladen:</b> Im Kampagnenbuch unter <b>⚙ Einrichtung → Charaktererstellung → ⬇ Charakterinhalte exportieren</b> die Datei speichern und in der Verwaltung unter <b>Inhalte</b> hochladen. Damit kennt die Charaktererstellung deine Klassen, Völker, Hintergründe, Gegenstände und Zauber.</li>
+          <li><b>Kampagne anlegen:</b> Jede Kampagne bekommt einen eigenen <b>Link für Spieler</b>, auf Wunsch mit Passwort. Diesen Link schickst du der Gruppe.</li>
+          <li><b>Termine:</b> Optional schlägst du Spieltermine vor, die Spieler stimmen ab.</li>
+        </ol>
+        <figure>
+          <a href="img/cc-admin.webp"><img src="img/cc-admin.webp" alt="Verwaltung der Charaktererstellung mit Kampagnen, Spieler-Links, Inhalten und Terminen" loading="lazy" /></a>
+          <figcaption>Die Verwaltung: Kampagnen mit Spieler-Links, Inhalte und Termine.</figcaption>
+        </figure>
+
+        <h3>Für Spieler: einen Charakter erstellen</h3>
+        <p>Über den Link sehen Spieler die Charaktere ihrer Kampagne. Name des Charakters und eigener Name eintragen, dann <b>+ Neuen Charakter anlegen</b>.</p>
+        <figure>
+          <a href="img/cc-list.webp"><img src="img/cc-list.webp" alt="Charakterliste einer Kampagne für Spieler" loading="lazy" /></a>
+          <figcaption>Die Charaktere einer Kampagne.</figcaption>
+        </figure>
+        <p>Ein Assistent führt durch alle Schritte: <b>Volk, Klasse, Hintergrund, Talente, Attribute, Fertigkeiten, Sprachen, Zauber, Ausrüstung</b>. Was Volk, Klasse und Hintergrund vorgeben, ist schon eingetragen. Unten steht jeweils, was noch fehlt. <b>Weiter</b> geht erst, wenn der Schritt vollständig ist.</p>
+        <figure>
+          <a href="img/cc-wizard-species.webp"><img src="img/cc-wizard-species.webp" alt="Assistent, Schritt Volk, mit Auswahl der Varianten des Elfen" loading="lazy" /></a>
+          <figcaption>Schritt 1: das Volk und seine Variante.</figcaption>
+        </figure>
+        <figure>
+          <a href="img/cc-wizard-class.webp"><img src="img/cc-wizard-class.webp" alt="Assistent, Schritt Klasse, mit Trefferwürfel und Rettungswürfen jeder Klasse" loading="lazy" /></a>
+          <figcaption>Schritt 2: die Klasse, mit ihren Merkmalen.</figcaption>
+        </figure>
+        <p>Am Ende steht das fertige Charakterblatt. Spieler können es jederzeit wieder öffnen, bearbeiten, ein Porträt hochladen und später mit <b>⬆ Stufenaufstieg</b> aufsteigen. Mit <b>✓ Als fertig melden</b> ist der Charakter bereit für die Übernahme.</p>
+        <figure>
+          <a href="img/cc-sheet.webp"><img src="img/cc-sheet.webp" alt="Fertiges Charakterblatt in der Charaktererstellung" loading="lazy" /></a>
+          <figcaption>Das fertige Charakterblatt.</figcaption>
+        </figure>
+
+        <h3>Charaktere ins Kampagnenbuch übernehmen</h3>
+        <ol>
+          <li>In der Verwaltung <b>Fertige Charaktere exportieren</b>.</li>
+          <li>Im Kampagnenbuch unter <b>⚙ Einrichtung → Charaktererstellung → ⬆ Charaktere importieren</b> die Datei wählen.</li>
+        </ol>
+        <p>Die Charaktere erscheinen unter <b>Gruppe</b>, mit Startausrüstung und Porträt. Gibt es einen Namen schon, fragt der Import nach: überspringen, Charakterblatt ersetzen oder als Kopie anlegen.</p>
+      </section>
+
+      <!-- ===================================================================== -->
+      <section class="chapter" id="daten">
+        <h2>8. Daten und Sicherung</h2>
+        <p>Unter <b>⚙ Einrichtung → Datensicherung</b> im Kampagnenbuch:</p>
+        <ul>
+          <li><b>⬇ Sicherung herunterladen</b>: Datenbank und alle Bilder (Uploads, Karten, Tokens, Beamer-Bilder) als eine ZIP-Datei.</li>
+          <li><b>⬆ Sicherung wiederherstellen</b>: ersetzt alle Daten durch den Stand der Sicherung.</li>
+        </ul>
+        <p>Zusätzlich legt Wyrmdesk regelmäßig automatische Sicherungen an. Combat Tracker und Battlemap gehören zur selben Datenbank und sind darin enthalten.</p>
+        <figure>
+          <a href="img/kb-setup.webp"><img src="img/kb-setup.webp" alt="Einrichtung des Kampagnenbuchs mit den Abschnitten Kampagne, Vorlagen, Charaktererstellung und Datensicherung" loading="lazy" /></a>
+          <figcaption>Die Einrichtung des Kampagnenbuchs.</figcaption>
+        </figure>
+        <h3>Vorlagen</h3>
+        <p><b>⚙ Einrichtung → Vorlagen → Kampagne als Vorlage sichern…</b> legt einen Schnappschuss der Kampagne an, mit Einträgen, Sessions, Encountern und Karten. Daraus startest du dieselbe Kampagne beliebig oft mit einer neuen Gruppe, auf Wunsch mit zurückgesetztem Spielstand.</p>
+        <div class="note warn">Kampagnenbuch, Combat Tracker und Battlemap haben keine Anmeldung. Wer die Adresse kennt, kann alles sehen und ändern. Sie gehören deshalb nur ins eigene Netz oder hinter einen geschützten Zugang.</div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <section class="chapter" id="tipps">
+        <h2>9. Tipps</h2>
+        <table>
+          <tr><th>Wo</th><th>Taste</th><th>Wirkung</th></tr>
+          <tr><td>Battlemap</td><td><kbd>B</kbd></td><td>Beamer schwarz schalten</td></tr>
+          <tr><td>Battlemap</td><td><kbd>N</kbd> / <kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nächster / vorheriger Zug</td></tr>
+          <tr><td>Battlemap</td><td><kbd>V</kbd> <kbd>T</kbd> <kbd>R</kbd> <kbd>P</kbd> <kbd>W</kbd> <kbd>D</kbd></td><td>Auswahl, Token, Rechteck, Pinsel, Wand, Tür</td></tr>
+          <tr><td>Battlemap</td><td><kbd>Strg</kbd>+<kbd>Z</kbd></td><td>Nebel: letzten Schritt zurück</td></tr>
+          <tr><td>Beamer</td><td><kbd>F11</kbd> / Klick</td><td>Vollbild</td></tr>
+          <tr><td>Kampagnenbuch</td><td><code>[[</code></td><td>Verweis auf einen Eintrag einfügen</td></tr>
+        </table>
+        <ul>
+          <li>Unterstrichene Begriffe auf dem Charakterblatt zeigen beim Antippen eine Erklärung.</li>
+          <li>Die Suche oben im Kampagnenbuch findet Einträge, Sessions und Texte der ganzen Kampagne.</li>
+          <li>Die Sprache gilt pro Browser. Beamer und Spieleranzeigen folgen dem Browser, in dem sie laufen.</li>
+        </ul>
+      </section>
+
+      <footer>Wyrmdesk · Die Bilder zeigen eine erfundene Beispielkampagne. Regelinhalte aus dem System Reference Document (SRD), Icons von game-icons.net (CC BY 3.0).</footer>
+    </main>
+  </div>
+  <script>
+    // Opened from the app ("?" in its header, ?zurueck=<part>): the way back to that part, and the
+    // language switch keeps it. On the website there is no such parameter and the link stays hidden.
+    (() => {
+      const part = new URLSearchParams(location.search).get("zurueck");
+      const parts = { start: "", "tracker/": "tracker/", "map/": "map/" };
+      if (!Object.prototype.hasOwnProperty.call(parts, part)) return;
+      const back = document.getElementById("back-to-app");
+      back.href = "../../" + parts[part];
+      back.hidden = false;
+      const other = document.querySelector('.top a[hreflang]');
+      if (other) other.href += "?zurueck=" + encodeURIComponent(part);
+    })();
+  </script>
+</body>
+</html>

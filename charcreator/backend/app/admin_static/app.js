@@ -39,6 +39,9 @@ function showApp() {
   loadCampaigns();
   loadContentStatus();
   loadCharacters();
+  api("/api/admin/version").then((r) => {
+    document.querySelector("#app-version").textContent = t("Wyrmdesk Version {v}", { v: r.version });
+  }).catch(() => {});
 }
 
 document.querySelector("#login").addEventListener("submit", async (e) => {
@@ -123,11 +126,26 @@ document.querySelector("#new-campaign").addEventListener("submit", async (e) => 
 async function loadContentStatus() {
   const s = await api("/api/admin/content");
   const el = document.querySelector("#content-status");
-  el.textContent = s.uploaded_at
-    ? t("{options} Klassen/Völker/Hintergründe, {items} Gegenstände, {spells} Zauber – hochgeladen am {date}",
-        { options: s.char_options, items: s.items, spells: s.spells, date: s.uploaded_at })
-    : t("Noch keine Inhalte hochgeladen.");
+  el.textContent = !s.uploaded_at ? t("Noch keine Inhalte hochgeladen.")
+    : (s.source || "").startsWith("wyrmdesk:")
+      ? t("{options} Klassen/Völker/Hintergründe, {items} Gegenstände, {spells} Zauber – Wyrmdesk-Inhalte vom {generated}, geladen am {date}",
+          { options: s.char_options, items: s.items, spells: s.spells, generated: s.source.slice(9), date: s.uploaded_at })
+      : t("{options} Klassen/Völker/Hintergründe, {items} Gegenstände, {spells} Zauber – hochgeladen am {date}",
+          { options: s.char_options, items: s.items, spells: s.spells, date: s.uploaded_at });
 }
+
+document.querySelector("#load-wyrmdesk").addEventListener("click", async (e) => {
+  if (!confirm(t("Die Inhalte durch die Wyrmdesk-Inhalte (SRD) ersetzen?\n\nSchon erstellte Charaktere behalten, was sie gewählt haben."))) return;
+  e.target.disabled = true;
+  try {
+    await api("/api/admin/content/wyrmdesk", { method: "POST" });
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    e.target.disabled = false;
+    loadContentStatus();
+  }
+});
 
 document.querySelector("#upload-content").addEventListener("submit", async (e) => {
   e.preventDefault();

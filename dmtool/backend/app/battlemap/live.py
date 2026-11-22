@@ -64,11 +64,11 @@ def player_payload(conn) -> dict:
     if image_url is None and settings["active_scene_id"] is not None:
         scene = scene_detail(conn, settings["active_scene_id"])
     if scene is not None:
-        # Line of sight is active once the DM has placed at least one vision token.
+        # Line of sight is active once at least one player token has sight switched on.
         sight = [p["points"] for p in scene["vision_polys"]] if scene["vision_enabled"] else []
         tokens = []
         for t in scene["tokens"]:
-            if not t["on_player"] or t["vision"]:
+            if not t["on_player"]:
                 continue
             status = tracker.combatant_status(t["combatant_id"])
             # Lurking monsters stay off the table until the DM reveals them in the tracker.

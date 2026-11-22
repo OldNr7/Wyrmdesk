@@ -237,7 +237,6 @@ function render() {
   drawGrid(ctx, scene, px, scene.show_grid ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)");
 
   for (const t of scene.tokens) {
-    if (t.vision) continue;
     const st = trackerStatus(t);
     drawToken(ctx, t, scene.grid_size, {
       current: st.current, dead: st.dead, selected: t.id === selectedTokenId,
@@ -248,7 +247,6 @@ function render() {
   if (sightActive()) sightDim.draw(ctx, scene, 0.25);
   if (scene.fog_enabled) fog.draw(ctx, scene, 0.5);
   if (wallsVisible()) drawWalls(px);
-  for (const t of scene.tokens) if (t.vision) drawViewer(t, px);
   // Spell areas above the fog, so the DM can always grab them; faint when kept off the beamer.
   for (const t of scene.templates) {
     ctx.save();
@@ -261,6 +259,7 @@ function render() {
     if (t.label && t.id !== selectedTemplateId) label(t.label, ...templateLabelPoint(t), px, "#ff6b6b");
   }
   drawTurnNumbers();
+  drawSightBadges();
 
   // Areas with their Stream Deck numbers.
   scene.areas.forEach((a, i) => {
@@ -306,7 +305,7 @@ function render() {
 
 // ---------- walls and sight ----------
 
-const WALL_TOOLS = ["wall", "door", "wall-erase", "viewer"];
+const WALL_TOOLS = ["wall", "door", "wall-erase"];
 
 function sightActive() {
   return !!(scene && scene.vision_enabled && scene.vision_polys.length);
@@ -349,21 +348,29 @@ function drawWalls(px) {
   ctx.restore();
 }
 
-function drawViewer(t, px) {
-  const r = Math.max(scene.grid_size * 0.4, 14 * px);
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(142,68,173,0.85)";
-  ctx.fill();
-  ctx.lineWidth = (t.id === selectedTokenId ? 3 : 1.5) * px;
-  ctx.strokeStyle = "#fff";
-  ctx.stroke();
-  ctx.font = `${r * 1.1}px "Segoe UI Emoji", system-ui, sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("👁", t.x, t.y + r * 0.05);
-  ctx.restore();
+// DM view only: a small eye at the lower left of each player token that has sight switched on,
+// across from the turn number, so it is clear where the line of sight comes from.
+function drawSightBadges() {
+  const br = (TURN_BADGE_CELLS * scene.grid_size) / 2;
+  for (const t of scene.tokens) {
+    if (!t.vision) continue;
+    const r = (t.size * scene.grid_size) / 2;
+    const x = t.x - r * 0.71;
+    const y = t.y + r * 0.71;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, br, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(142,68,173,0.95)";
+    ctx.fill();
+    ctx.lineWidth = br * 0.15;
+    ctx.strokeStyle = "#fff";
+    ctx.stroke();
+    ctx.font = `${br * 1.2}px "Segoe UI Emoji", system-ui, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("👁", x, y + br * 0.05);
+    ctx.restore();
+  }
 }
 
 const doorCenter = (w) => [(w.a[0] + w.b[0]) / 2, (w.a[1] + w.b[1]) / 2];
@@ -403,11 +410,6 @@ function snapWallPoint(p) {
   return best;
 }
 
-function viewerAt(p) {
-  const r = Math.max(scene.grid_size * 0.4, 14 / cam.scale);
-  return scene.tokens.find((t) => t.vision && Math.hypot(p[0] - t.x, p[1] - t.y) <= r);
-}
-
 function label(text, x, y, px, color) {
   ctx.save();
   ctx.font = `bold ${13 * px}px "Segoe UI", system-ui, sans-serif`;
@@ -429,7 +431,7 @@ function drawTurnNumbers() {
   const order = new Map(trackerState.combatants.map((c, i) => [c.id, i + 1]));
   const br = (TURN_BADGE_CELLS * scene.grid_size) / 2;
   for (const t of scene.tokens) {
-    const n = t.vision ? undefined : order.get(t.combatant_id);
+    const n = order.get(t.combatant_id);
     if (n === undefined) continue;
     const r = (t.size * scene.grid_size) / 2;
     const x = t.x + r * 0.71;
@@ -546,7 +548,6 @@ const TOOL_HINTS = {
   "reveal-poly": t("Punkte klicken, Doppelklick oder Enter schliesst, Esc bricht ab"),
   area: t("Raum umranden: Punkte klicken, Doppelklick oder Enter schliesst"),
   measure: t("Rechteck über die eingestellte Anzahl Felder ziehen, möglichst genau an den Linien"),
-  viewer: t("Klicken: Sichtpunkt setzen · bestehenden Sichtpunkt ziehen zum Verschieben"),
   wall: t("Wand: Punkte klicken, Doppelklick oder Enter beendet, Esc bricht ab · rastet an Wandenden ein"),
   door: t("Tür: Anfang und Ende der Türöffnung klicken"),
   "wall-erase": t("Wand oder Tür anklicken zum Löschen"),
@@ -624,15 +625,6 @@ canvas.addEventListener("pointerdown", (ev) => {
     }
   } else if (tool === "token") {
     createToken(p);
-  } else if (tool === "viewer") {
-    const v = viewerAt(p);
-    if (v) {
-      selectToken(v.id);
-      gesture = { kind: "token", token: v, offset: [v.x - p[0], v.y - p[1]] };
-    } else {
-      const [x, y] = snapToGrid(p[0], p[1], 1);
-      api("POST", `api/scenes/${scene.id}/tokens`, { name: t("Sichtpunkt"), x, y, color: "#8e44ad", vision: true });
-    }
   } else if (tool === "wall" || tool === "door") {
     if (!poly) poly = { mode: tool, points: [] };
     poly.points.push(snapWallPoint(p));
@@ -808,7 +800,7 @@ document.addEventListener("keydown", (ev) => {
   else if (ev.key.toLowerCase() === "n" && trackerState.encounter) $(ev.shiftKey ? "btn-turn-prev" : "btn-turn-next").click();
   else {
     const map = { v: "select", t: "token", r: "reveal-rect", p: "reveal-brush", o: "reveal-poly", a: "area", m: "measure",
-      s: "viewer", w: "wall", d: "door", x: "wall-erase" };
+      w: "wall", d: "door", x: "wall-erase" };
     const name = map[ev.key.toLowerCase()];
     if (name && scene) setTool(ev.shiftKey && (name === "reveal-rect" || name === "reveal-brush") ? name.replace("reveal", "hide") : name);
   }
@@ -934,7 +926,7 @@ $("new-scene-uvtt").addEventListener("change", async (ev) => {
   try {
     const res = await api("POST", `api/scenes/import-uvtt?filename=${encodeURIComponent(file.name)}`, file, true);
     await openScene(res.id);
-    alert(t("Importiert: {walls} Wandstücke, {doors} Türen.\nUnter „Sicht\" einen Sichtpunkt setzen.", { walls: res.walls, doors: res.doors }));
+    alert(t("Importiert: {walls} Wandstücke, {doors} Türen.\nUnter „Tokens\" bei Spieler-Tokens die Sicht einschalten.", { walls: res.walls, doors: res.doors }));
   } finally {
     setTool(tool);
   }
@@ -952,9 +944,11 @@ function renderSceneFields() {
   $("vision-enabled").checked = !!scene.vision_enabled;
   $("show-walls").checked = showWalls;
   const doors = scene.walls.filter((w) => w.kind === "door").length;
+  $("wall-info").textContent = `${tn(scene.walls.length - doors, "{n} Wandstück", "{n} Wandstücke")} · ${tn(doors, "{n} Tür", "{n} Türen")}`;
   const viewers = scene.tokens.filter((t) => t.vision).length;
-  $("wall-info").textContent = `${tn(scene.walls.length - doors, "{n} Wandstück", "{n} Wandstücke")} · ${tn(doors, "{n} Tür", "{n} Türen")} · ${tn(viewers, "{n} Sichtpunkt", "{n} Sichtpunkte")}`
-    + (scene.vision_enabled && !viewers ? t(" · Sichtpunkt setzen, damit die Sicht wirkt") : "");
+  $("vision-info").textContent = !scene.vision_enabled ? ""
+    : viewers ? tn(viewers, "{n} Token sieht", "{n} Tokens sehen")
+    : t("Bei einem Spieler-Token „Sicht\" einschalten, damit die Sicht wirkt.");
   $("zoom-label").textContent = `${Math.round(scene.view_zoom * 100)}%`;
 }
 
@@ -1102,6 +1096,8 @@ function renderTemplateEditor() {
     + `${feetToMeters(values.size)} m = ${String(cells).replace(".", ",")} ${cells === 1 ? t("Feld") : t("Felder")}`;
   $("tpl-editor").hidden = !tpl;
   if (tpl) $("tpl-on-player").checked = tpl.on_player !== false;
+  // A selected area on the map: its editor must be visible, also if the section was folded.
+  if (tpl) $("spell-details").open = true;
 }
 
 function changeTemplateSize(key) {
@@ -1221,7 +1217,9 @@ function renderTokens() {
     li.innerHTML = `<span class="dot"></span><span class="name"></span><span class="muted small"></span>`;
     li.querySelector(".dot").style.background = tok.color;
     li.querySelector(".name").textContent = tok.name;
-    li.querySelector(".small").textContent = tok.vision ? t("nur DM") : !tok.on_player ? t("Miniatur") : st.hidden ? t("versteckt") : "";
+    li.querySelector(".small").textContent = [tok.vision ? "👁" : "", !tok.on_player ? t("Miniatur") : st.hidden ? t("versteckt") : ""]
+      .filter(Boolean).join(" ");
+    if (tok.vision) li.querySelector(".small").title = t("Sicht an");
     li.addEventListener("click", () => {
       selectToken(tok.id);
       cam.x = tok.x;
@@ -1244,6 +1242,11 @@ function renderTokenEditor() {
   $("tok-size").value = String(tok.size);
   $("tok-color").value = tok.color;
   $("tok-on-player").checked = !!tok.on_player;
+  // Sight only for player characters; a token that still has it (e.g. after an encounter change) can switch it off.
+  const player = trackerState.combatants.some((c) => c.id === tok.combatant_id && c.kind === "pc");
+  // .row sets display:flex, which would override the hidden attribute.
+  $("tok-vision-row").style.display = player || tok.vision ? "" : "none";
+  $("tok-vision").checked = !!tok.vision;
   const sel = $("tok-combatant");
   sel.innerHTML = `<option value="">${t("– nicht verknüpft –")}</option>`;
   const options = [...trackerState.combatants];
@@ -1262,7 +1265,7 @@ function renderTokenEditor() {
 
 function patchToken(fields) {
   const t = selectedToken();
-  if (t) api("PATCH", `api/tokens/${t.id}`, fields);
+  return t ? api("PATCH", `api/tokens/${t.id}`, fields) : Promise.resolve();
 }
 
 $("tok-name").addEventListener("change", () => patchToken({ name: $("tok-name").value }));
@@ -1274,6 +1277,13 @@ $("tok-size").addEventListener("change", () => {
 });
 $("tok-color").addEventListener("change", () => patchToken({ color: $("tok-color").value }));
 $("tok-on-player").addEventListener("change", () => patchToken({ on_player: $("tok-on-player").checked }));
+$("tok-vision").addEventListener("change", async () => {
+  try {
+    await patchToken({ vision: $("tok-vision").checked });
+  } catch {
+    renderTokenEditor();
+  }
+});
 $("tok-combatant").addEventListener("change", () => {
   const id = $("tok-combatant").value;
   const c = trackerState.combatants.find((c) => String(c.id) === id);
@@ -1303,7 +1313,7 @@ $("btn-tokens-from-tracker").addEventListener("click", async () => {
   if (res.added === 0) alert(t("Alle Kämpfer des Tracker-Encounters haben schon einen Token."));
 });
 $("btn-tokens-clear").addEventListener("click", async () => {
-  if (!scene || !confirm(t("Alle Tokens dieser Szene entfernen? Sichtpunkte bleiben."))) return;
+  if (!scene || !confirm(t("Alle Tokens dieser Szene entfernen?"))) return;
   selectedTokenId = null;
   await api("DELETE", `api/scenes/${scene.id}/tokens`);
 });
@@ -1414,7 +1424,9 @@ function renderTracker() {
   $("tracker-info").textContent = !tr.configured
     ? t("TRACKER_URL ist nicht gesetzt.")
     : !tr.ok ? t("Der Combat Tracker antwortet nicht.") : tr.encounter ? tr.encounter : t("Im Tracker einen Encounter in die Anzeige übernehmen.");
-  $("tracker-round").textContent = tr.encounter ? `Runde ${tr.round}` : "";
+  // Running encounter: its name is in the select above already, the line is only for problems.
+  $("tracker-info").hidden = !!(tr.configured && tr.ok && tr.encounter);
+  $("tracker-round").textContent = tr.encounter ? t("Runde {n}", { n: tr.round }) : "";
   $("tracker-controls").hidden = !tr.encounter;
   // .row sets display:flex, which would override the hidden attribute.
   $("tracker-encounter-row").style.display = tr.configured && tr.ok ? "" : "none";
@@ -1534,8 +1546,18 @@ function renderCombatants() {
     });
     init.addEventListener("blur", () => combatantRenderPending && setTimeout(renderCombatants));
     const noToken = scene && !token;
-    li.querySelector(".c-name").textContent = `${c.is_boss ? "👑 " : ""}${c.is_hidden ? "👁‍🗨 " : ""}${c.name}${noToken ? " ·" : ""}`;
-    li.querySelector(".c-name").title = noToken ? t("Kein Token auf dieser Karte") : "";
+    const nameEl = li.querySelector(".c-name");
+    nameEl.textContent = `${c.is_boss ? "👑 " : ""}${c.is_hidden ? "👁‍🗨 " : ""}${c.name}`;
+    // Player characters at a glance: a small figure right after the name.
+    if (c.kind === "pc") {
+      const pc = document.createElement("span");
+      pc.className = "c-pc";
+      pc.title = t("Spieler");
+      pc.innerHTML = `<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="4.6" r="3"/><path d="M2.2 15c0-3.4 2.6-5.6 5.8-5.6s5.8 2.2 5.8 5.6z"/></svg>`;
+      nameEl.appendChild(pc);
+    }
+    if (noToken) nameEl.append(" ·");
+    nameEl.title = noToken ? t("Kein Token auf dieser Karte") : "";
     li.querySelector(".c-hp").textContent = `${c.current_hp}/${c.max_hp}${c.temp_hp > 0 ? ` +${c.temp_hp}` : ""}${c.ac != null ? ` · RK ${c.ac}` : ""}`;
 
     // Active conditions as icons; click removes, like in the tracker.
@@ -1695,6 +1717,13 @@ function openPanel(name) {
 
 document.querySelectorAll("#rail [data-panel]").forEach((b) => {
   b.addEventListener("click", () => openPanel(b.classList.contains("open") ? null : b.dataset.panel));
+});
+
+// The spell areas under the tracker stay open or folded as last left.
+const SPELLS_KEY = "battlemap.spells-open";
+try { $("spell-details").open = localStorage.getItem(SPELLS_KEY) === "1"; } catch {}
+$("spell-details").addEventListener("toggle", () => {
+  try { localStorage.setItem(SPELLS_KEY, $("spell-details").open ? "1" : ""); } catch {}
 });
 
 function toggleSetup(open) {

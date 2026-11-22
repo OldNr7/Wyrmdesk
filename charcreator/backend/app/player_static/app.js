@@ -13,6 +13,7 @@ const API = TOKEN ? `/api/k/${TOKEN}` : null;
 const pwKey = () => `ccpw:${TOKEN}`;
 
 let campaign = null;
+let site = { open: false }; // GET /api/open: open mode (open_mode.py), imprint/privacy links
 let characters = [];
 let current = null; // the open character, or null while on the list
 let editing = false;
@@ -61,16 +62,21 @@ async function loadList() {
   characters = await api(`${API}/characters`);
 }
 
+// An open collection (open mode) has no name of its own: it is the player's own page.
+const campaignTitle = () => (campaign.open ? t("Deine Charaktere") : campaign.name);
+
 function renderList() {
-  document.getElementById("campaign-name").textContent = campaign.name;
+  document.getElementById("campaign-name").textContent = campaignTitle();
   backBtn.hidden = true;
   statusBtn.hidden = true;
-  for (const id of ["edit-btn", "levelup-btn", "save-btn", "cancel-btn"]) document.getElementById(id).hidden = true;
-  document.title = campaign.name;
+  for (const id of ["edit-btn", "levelup-btn", "print-btn", "download-btn", "share-btn", "delete-btn", "save-btn", "cancel-btn"]) document.getElementById(id).hidden = true;
+  document.title = campaignTitle();
 
+  // The sheet keeps the library name as it was picked ("Hochelf"); shown in the UI language.
+  const libName = (kind, name) => optName(findOptionByName(kind, name)) || name;
   const items = characters.map((c) => {
-    const cls = [c.char_class, c.subclass].filter(Boolean).join(" – ");
-    const facts = [c.race, cls ? `${cls}${c.level ? ` ${t("Stufe {n}", { n: c.level })}` : ""}` : ""].filter(Boolean).join(" · ");
+    const cls = [libName("classes", c.char_class), libName("subclasses", c.subclass)].filter(Boolean).join(" – ");
+    const facts = [libName("races", c.race), cls ? `${cls}${c.level ? ` ${t("Stufe {n}", { n: c.level })}` : ""}` : ""].filter(Boolean).join(" · ");
     return `
     <li data-open="${c.id}">
       ${c.avatar_path || listPortrait(c)
@@ -85,19 +91,26 @@ function renderList() {
     </li>`;
   }).join("");
 
+  const full = campaign.open && characters.length >= campaign.max_characters;
   appEl.innerHTML = `
+    ${campaign.open ? openNoteHtml() : ""}
     ${characters.length ? `<ul class="char-list">${items}</ul>` : `<p class="empty">${t("Noch keine Charaktere. Leg unten den ersten an.")}</p>`}
-    <form class="new-char-form" id="new-char">
+    ${full
+      ? `<p class="empty">${t("Hier haben höchstens {n} Charaktere Platz.", { n: campaign.max_characters })}</p>`
+      : `<form class="new-char-form" id="new-char">
       <input type="text" name="name" placeholder="${t("Name des Charakters")}" required>
       <input type="text" name="player_name" placeholder="${t("Dein Name")}">
       <button type="submit">${t("+ Neuen Charakter anlegen")}</button>
-    </form>
-    <button type="button" id="dates-btn" class="dates-link">${t("📅 Termine")}</button>`;
+    </form>`}
+    ${campaign.open ? "" : `<button type="button" id="dates-btn" class="dates-link">${t("📅 Termine")}</button>`}`;
 
   appEl.querySelectorAll("[data-open]").forEach((li) => {
     li.addEventListener("click", () => openCharacter(Number(li.dataset.open)));
   });
-  document.getElementById("dates-btn").addEventListener("click", showDates);
+  document.getElementById("dates-btn")?.addEventListener("click", showDates);
+  bindCopy(appEl);
+  if (full) return;
+  if (campaign.open && !characters.length) appEl.querySelector('#new-char [name="name"]').focus();
   document.getElementById("new-char").addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = e.target.name.value.trim();
@@ -114,7 +127,8 @@ function renderList() {
           await api(`${API}/characters/${c.id}/hp`, "POST", { heal: body.max_hp });
         },
         discard: () => api(`${API}/characters/${c.id}`, "DELETE"),
-        portrait: (file) => setPortrait(c.id, file).then((fresh) => {
+        // Open mode: no pictures of one's own (open_mode.py), the class's stays.
+        portrait: campaign.open ? null : (file) => setPortrait(c.id, file).then((fresh) => {
           c.updated_at = fresh.updated_at; // the save above checks against this
           return fresh;
         }),
@@ -171,16 +185,22 @@ function renderSheet() {
   backBtn.hidden = false;
   document.getElementById("edit-btn").hidden = editing;
   document.getElementById("levelup-btn").hidden = editing || !canLevelUp(current);
+  document.getElementById("print-btn").hidden = editing;
+  document.getElementById("download-btn").hidden = editing;
   document.getElementById("save-btn").hidden = !editing;
   document.getElementById("cancel-btn").hidden = !editing;
+  document.getElementById("share-btn").hidden = editing;
+  // In a group the DM decides what goes; an open collection is the player's own.
+  document.getElementById("delete-btn").hidden = editing || !campaign.open;
   const sBtn = document.getElementById("status-btn");
-  sBtn.hidden = editing;
+  // "Fertig" tells the DM the character can be taken over; an open collection has no DM.
+  sBtn.hidden = editing || campaign.open;
   sBtn.textContent = current.status === "fertig" ? t("Als Entwurf markieren") : t("✓ Als fertig melden");
   document.title = `${current.name || t("Charakter")} – ${t("Charaktererstellung")}`;
-  document.getElementById("campaign-name").textContent = campaign.name;
+  document.getElementById("campaign-name").textContent = campaignTitle();
 
   const root = document.createElement("div");
-  root.innerHTML = pcSheetHtml(current, editing, { live: true, portrait: current.avatar_path, portraitEdit: editing, portraitFallback: sheetPortrait() });
+  root.innerHTML = pcSheetHtml(current, editing, { live: true, portrait: current.avatar_path, portraitEdit: editing && !campaign.open, portraitFallback: sheetPortrait() });
   appEl.replaceChildren(root);
   if (editing) bindSheet(root);
   else bindPcLive(root, current, liveActions);
@@ -297,6 +317,95 @@ document.getElementById("levelup-btn").addEventListener("click", async () => {
     setTimeout(() => showStatus(""), 3000);
   });
 });
+
+document.getElementById("print-btn").addEventListener("click", () => {
+  printPcSheet(current, { portrait: current.avatar_path, portraitFallback: sheetPortrait() }, state.spells);
+});
+
+// The character as a file for the DM's Kampagnenbuch (Einrichtung → Charaktere importieren). Fetched
+// rather than linked: a campaign password goes along as a header.
+document.getElementById("download-btn").addEventListener("click", async () => {
+  try {
+    const resp = await fetch(`${API}/characters/${current.id}/export`, { headers: authHeaders(), cache: "no-store" });
+    if (!resp.ok) throw new Error();
+    const name = (resp.headers.get("Content-Disposition") || "").match(/filename="([^"]+)"/);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(await resp.blob());
+    a.download = name ? name[1] : "charakter.wyrmdesk.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  } catch {
+    showStatus(t("Datei nicht erstellt. Verbindung prüfen."), "error");
+  }
+});
+
+document.getElementById("delete-btn").addEventListener("click", async () => {
+  if (!confirm(t("„{name}“ endgültig löschen?", { name: current.name || t("(unbenannt)") }))) return;
+  try {
+    await api(`${API}/characters/${current.id}`, "DELETE");
+  } catch {
+    return showStatus(t("Nicht gelöscht. Verbindung prüfen."), "error");
+  }
+  showList();
+});
+
+// ---------- share link (share.py) ----------
+// A link of its own per character, for the DM: it downloads this one character, nothing else.
+
+const shareDialog = document.getElementById("share-dialog");
+const shareUrl = (c) => `${location.origin}/teilen/${c.share_token}`;
+
+document.getElementById("share-btn").addEventListener("click", async () => {
+  try {
+    if (!current.share_token) current = await api(`${API}/characters/${current.id}/share`, "POST");
+  } catch {
+    return showStatus(t("Kein Link erstellt. Verbindung prüfen."), "error");
+  }
+  renderShareDialog();
+  shareDialog.showModal();
+});
+
+function renderShareDialog() {
+  shareDialog.innerHTML = `
+    <h2>${t("Charakter teilen")}</h2>
+    <p>${t("Schick diesen Link deiner Spielleitung. Damit kann sie {name} in Wyrmdesk übernehmen oder als Datei herunterladen. Ändern kann damit niemand etwas.", { name: `<b>${escapeHtml(current.name)}</b>` })}</p>
+    <div class="copy-row"><input type="text" readonly value="${escapeHtml(shareUrl(current))}"><button type="button" data-copy>${t("Kopieren")}</button></div>
+    <p class="hint">${t("Spätere Änderungen am Charakter sind über denselben Link abrufbar.")}${campaign.open ? ` ${t("Der Link gilt, solange es den Charakter hier gibt.")}` : ""}</p>
+    <div class="dialog-actions">
+      <button type="button" class="ghost" data-unshare>${t("Link zurückziehen")}</button>
+      <button type="button" data-close>${t("Schliessen")}</button>
+    </div>`;
+  bindCopy(shareDialog);
+  shareDialog.querySelector("[data-close]").addEventListener("click", () => shareDialog.close());
+  shareDialog.querySelector("[data-unshare]").addEventListener("click", async () => {
+    if (!confirm(t("Link zurückziehen? Wer ihn hat, kann den Charakter dann nicht mehr abrufen."))) return;
+    try {
+      current = await api(`${API}/characters/${current.id}/share`, "DELETE");
+      shareDialog.close();
+      showStatus(t("Link zurückgezogen."), "ok");
+      setTimeout(() => showStatus(""), 3000);
+    } catch {
+      showStatus(t("Nicht gespeichert! Verbindung prüfen."), "error");
+    }
+  });
+}
+
+// [data-copy] buttons copy the text field next to them.
+function bindCopy(root) {
+  root.querySelectorAll("[data-copy]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const input = btn.parentElement.querySelector("input");
+      input.select();
+      try {
+        await navigator.clipboard.writeText(input.value);
+      } catch {
+        document.execCommand("copy");
+      }
+      btn.textContent = t("Kopiert ✓");
+      setTimeout(() => { btn.textContent = t("Kopieren"); }, 2000);
+    });
+  });
+}
 
 document.getElementById("cancel-btn").addEventListener("click", async () => {
   editing = false;
@@ -520,8 +629,8 @@ function renderDates() {
   closeVotePopover();
   backBtn.hidden = false;
   statusBtn.hidden = true;
-  for (const id of ["edit-btn", "levelup-btn", "save-btn", "cancel-btn"]) document.getElementById(id).hidden = true;
-  document.getElementById("campaign-name").textContent = campaign.name;
+  for (const id of ["edit-btn", "levelup-btn", "print-btn", "download-btn", "share-btn", "delete-btn", "save-btn", "cancel-btn"]) document.getElementById(id).hidden = true;
+  document.getElementById("campaign-name").textContent = campaignTitle();
   document.title = `${t("Termine")} – ${campaign.name}`;
 
   const myName = localStorage.getItem(nameKey()) || "";
@@ -675,16 +784,101 @@ async function startApp() {
   await showList();
 }
 
+// ---------- open mode: start page, the player's own link (open_mode.py) ----------
+
+const OPEN_KEY = "ccOpenToken"; // the last open collection of this browser, for "zurück" on the start page
+
+function storage(fn) {
+  try { return fn(localStorage); } catch { return null; } // private windows may refuse
+}
+
+function openNoteHtml() {
+  return `
+    <div class="open-note">
+      <p>${t("<b>Das ist dein persönlicher Link.</b> Speichere ihn als Lesezeichen: Nur mit ihm kommst du wieder zu deinen Charakteren, auch auf einem anderen Gerät. Wird er {days} Tage lang nicht geöffnet, werden die Charaktere gelöscht.", { days: campaign.days })}</p>
+      <div class="copy-row"><input type="text" readonly value="${escapeHtml(location.origin + location.pathname)}"><button type="button" data-copy>${t("Kopieren")}</button></div>
+    </div>`;
+}
+
+function renderLanding() {
+  const back = storage((s) => s.getItem(OPEN_KEY));
+  document.getElementById("campaign-name").textContent = t("Charaktererstellung");
+  appEl.innerHTML = `
+    <div class="landing">
+      <h1>${t("Charaktererstellung")}</h1>
+      <p>${t("Erstelle Schritt für Schritt einen Charakter für die 5. Edition, mit den freien Grundregeln (SRD). Ohne Anmeldung.")}</p>
+      <p>${t("Am Ende druckst du das Charakterblatt oder speicherst es als PDF, lädst den Charakter als Datei herunter oder schickst deiner Spielleitung einen Link, mit dem sie ihn in Wyrmdesk übernimmt.")}</p>
+      <button type="button" id="open-new">${t("Neuen Charakter erstellen")}</button>
+      ${back ? `<p><a href="/k/${encodeURIComponent(back)}">${t("Zurück zu deinen Charakteren auf diesem Gerät")}</a></p>` : ""}
+      <p class="hint">${t("Deine Charaktere werden auf diesem Server gespeichert und {days} Tage nach der letzten Nutzung gelöscht.", { days: site.days })}</p>
+    </div>`;
+  document.getElementById("open-new").addEventListener("click", async (e) => {
+    e.target.disabled = true;
+    try {
+      const { token: tok } = await api("/api/open/new", "POST");
+      location.href = `/k/${tok}`;
+    } catch (err) {
+      e.target.disabled = false;
+      showStatus(err.message || t("Nicht angelegt. Verbindung prüfen."), "error");
+    }
+  });
+}
+
+// ---------- share page: /teilen/<token>, what the DM opens ----------
+
+async function renderSharePage(shareToken) {
+  document.getElementById("campaign-name").textContent = t("Charaktererstellung");
+  let c;
+  try {
+    [c] = await api(`/api/teilen/${encodeURIComponent(shareToken)}`);
+  } catch {
+    appEl.innerHTML = `<p class="empty">${t("Dieser Link ist ungültig oder abgelaufen.")}</p>`;
+    return;
+  }
+  const sb = c.stat_block || {};
+  const facts = [sb.race, [sb.char_class, sb.subclass].filter(Boolean).join(" – "), sb.level ? t("Stufe {n}", { n: sb.level }) : ""]
+    .filter(Boolean).join(" · ");
+  document.title = `${c.name} – ${t("Charaktererstellung")}`;
+  appEl.innerHTML = `
+    <div class="landing">
+      <h1>${escapeHtml(c.name) || t("(unbenannt)")}</h1>
+      <p>${escapeHtml(facts)}${c.player_name ? ` · ${t("gespielt von {name}", { name: escapeHtml(c.player_name) })}` : ""}</p>
+      <h2>${t("Für die Spielleitung")}</h2>
+      <p>${t("Im Kampagnenbuch von Wyrmdesk unter Einrichtung → Charaktere importieren diesen Link einfügen. Oder die Datei herunterladen und dort hochladen.")}</p>
+      <div class="copy-row"><input type="text" readonly value="${escapeHtml(location.href)}"><button type="button" data-copy>${t("Kopieren")}</button></div>
+      <p><a class="button" href="/api/teilen/${encodeURIComponent(shareToken)}?download=1">${t("⇩ Datei herunterladen")}</a></p>
+    </div>`;
+  bindCopy(appEl);
+}
+
+function renderFoot() {
+  const links = [[site.imprint_url, t("Impressum")], [site.privacy_url, t("Datenschutz")]].filter(([u]) => u);
+  if (!links.length) return;
+  const foot = document.getElementById("site-foot");
+  foot.innerHTML = links.map(([u, l]) => `<a href="${escapeHtml(u)}">${l}</a>`).join(" · ");
+  foot.hidden = false;
+}
+
 (async () => {
+  try {
+    site = await api("/api/open");
+  } catch { /* older server or offline: as before */ }
+  renderFoot();
+  const share = location.pathname.match(/^\/teilen\/([^/]+)/);
+  if (share) return renderSharePage(share[1]);
   if (!TOKEN) {
+    if (site.open) return renderLanding();
     appEl.innerHTML = `<p class="empty">${t("Diese Seite braucht den Link, den dir deine Spielleitung geschickt hat.")}</p>`;
     return;
   }
   try {
     campaign = await api(API);
   } catch {
-    appEl.innerHTML = `<p class="empty">${t("Dieser Link ist ungültig oder nicht mehr aktiv. Frag deine Spielleitung nach einem neuen.")}</p>`;
+    appEl.innerHTML = campaign === null && site.open
+      ? `<p class="empty">${t("Dieser Link ist ungültig, oder die Charaktere wurden nach langer Zeit ohne Nutzung gelöscht.")} <a href="/">${t("Neu beginnen")}</a></p>`
+      : `<p class="empty">${t("Dieser Link ist ungültig oder nicht mehr aktiv. Frag deine Spielleitung nach einem neuen.")}</p>`;
     return;
   }
+  if (campaign.open) storage((s) => s.setItem(OPEN_KEY, TOKEN));
   if (await ensurePassword()) await startApp();
 })();

@@ -68,6 +68,13 @@ def init_db() -> None:
             for name, decl in columns:
                 if name not in existing:
                     conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
+        # Sight used to come from separate DM-only viewpoint tokens (vision = 1, no tracker link); now
+        # player tokens see themselves, so those leftovers go, and their sight with them.
+        scenes = [r["scene_id"] for r in conn.execute(
+            "SELECT DISTINCT scene_id FROM tokens WHERE vision = 1 AND combatant_id IS NULL")]
+        if scenes:
+            conn.execute("DELETE FROM tokens WHERE vision = 1 AND combatant_id IS NULL")
+            conn.executemany("UPDATE scenes SET vision_polys = '[]' WHERE id = ?", [(s,) for s in scenes])
 
 
 @contextmanager

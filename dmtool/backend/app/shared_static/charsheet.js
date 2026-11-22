@@ -800,7 +800,8 @@ const featSourceLabel = (s) => {
   const m = /^Stufe (\d+)$/.exec(String(s || ""));
   return m ? t("Stufe {n}", { n: m[1] }) : t(s);
 };
-const featLabel = (f) => `${f.name}${f.detail ? ` (${f.detail})` : ""}`;
+// The stored name is the library one as picked ("Magie-Eingeweihter"); shown in the UI language.
+const featLabel = (f) => `${(f.id && optName(optionById(f.id))) || f.name}${f.detail ? ` (${f.detail})` : ""}`;
 
 // The chosen feats: chips to read, rows with ✕ while editing.
 function featListHtml(d, editable) {
@@ -2819,5 +2820,50 @@ function spellSheetHtml(sp) {
       ${sheetPanel(t("Beschreibung"), sp.desc ? deTextHtml(sp.desc, sp.desc_de) : "")}
       ${sheetPanel(t("Bei höherem Grad"), sp.higher_level ? deTextHtml(sp.higher_level, sp.higher_level_de) : "")}
       ${sheetPanel(t("Hinweis"), sp.notes ? escapeHtml(sp.notes) : "")}
+    </div>`;
+}
+
+// ---------- print / PDF ----------
+// The sheet as on paper: read-only (no buttons for HP, rests and the like), then one page per spell with
+// its description. Built in a block of its own that only the print media shows (charsheet.css), so the
+// page behind it stays as it is; the browser's print dialog also saves it as PDF.
+// spells: library entries (id, name, desc …) to look the character's spells up in.
+function printPcSheet(entity, opts = {}, spells = []) {
+  document.querySelector(".pc-print")?.remove();
+  const d = pcData(entity);
+  const byId = new Map(spells.map((s) => [String(s.id), s]));
+  const pages = d.spell_list
+    .map((s) => byId.get(String(s.id)))
+    .filter(Boolean)
+    .sort((a, b) => (a.level_int ?? 99) - (b.level_int ?? 99) || a.name.localeCompare(b.name, UI_LOCALE));
+  const box = document.createElement("div");
+  box.className = "pc-print";
+  box.innerHTML = pcSheetHtml(entity, false, opts)
+    + (pages.length ? `<div class="pc-print-spells"><h2>${t("Zauber")}</h2><div class="pc-print-cols">${pages.map(spellPrintHtml).join("")}</div></div>` : "");
+  document.body.append(box);
+  const done = () => box.remove();
+  window.addEventListener("afterprint", done, { once: true });
+  // Pictures (portrait, school icons) have to be there before the dialog takes its snapshot.
+  const imgs = [...box.querySelectorAll("img")].filter((i) => !i.complete);
+  Promise.all(imgs.map((i) => new Promise((r) => { i.onload = i.onerror = r; }))).then(() => window.print());
+}
+
+// One spell, compact for the print: the facts in a line, then the texts (German where there is one).
+function spellPrintHtml(sp) {
+  const level = sp.level_int === 0 ? t("Zaubertrick") : sp.level_int != null ? t("Grad {n}", { n: sp.level_int }) : "";
+  const facts = [
+    [t("Zauberdauer"), sp.casting_time], [t("Reichweite"), sp.range], [t("Komponenten"), sp.components],
+    [t("Wirkungsdauer"), sp.duration],
+  ].filter(([, v]) => v).map(([l, v]) => `<span><b>${l}:</b> ${escapeHtml(v)}</span>`);
+  if (sp.concentration) facts.push(`<span>${t("Konzentration")}</span>`);
+  if (sp.ritual) facts.push(`<span>${t("Ritual")}</span>`);
+  const text = (en, de) => (en || de ? (de ? mdLiteHtml(de) : mdLiteHtml(en)) : "");
+  return `
+    <div class="pc-print-spell">
+      <div class="pc-print-spell-head"><b>${escapeHtml(sp.name)}</b><span>${escapeHtml([level, sp.school].filter(Boolean).join(" · "))}</span></div>
+      <div class="pc-print-spell-facts">${facts.join("")}</div>
+      ${sp.material ? `<div class="pc-print-spell-facts"><span><b>${t("Material")}:</b> ${escapeHtml(sp.material_de || sp.material)}</span></div>` : ""}
+      <div class="pc-print-spell-text">${text(sp.desc, sp.desc_de)}</div>
+      ${sp.higher_level ? `<div class="pc-print-spell-text"><b>${t("Bei höherem Grad")}:</b> ${text(sp.higher_level, sp.higher_level_de)}</div>` : ""}
     </div>`;
 }

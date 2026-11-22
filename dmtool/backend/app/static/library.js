@@ -1020,18 +1020,22 @@ function bindBulkImport(row, reload) {
   const btn = row.querySelector(".bulk-btn");
   const status = row.querySelector(".bulk-status");
   btn.addEventListener("click", async () => {
-    const srd = row.querySelector(".bulk-scope").value === "srd";
+    // "wyrmdesk": the SRD from wyrmdesk.ch with German texts; "srd"/"all": straight from Open5e.
+    const scope = row.querySelector(".bulk-scope").value;
+    const srd = scope !== "all";
+    const query = `srd=${srd}&source=${scope === "wyrmdesk" ? "wyrmdesk" : "open5e"}`;
     btn.disabled = true;
     status.textContent = t("Zähle Einträge …");
     try {
-      const { count } = await api(`/api/${kind}/open5e-all/count?srd=${srd}`);
-      const where = srd ? t("aus dem 5e-SRD") : t("aus allen Open5e-Quellen");
+      const { count } = await api(`/api/${kind}/open5e-all/count?${query}`);
+      const where = scope === "wyrmdesk" ? t("aus den Wyrmdesk-Inhalten (SRD mit deutschen Texten)")
+        : srd ? t("aus dem 5e-SRD") : t("aus allen Open5e-Quellen");
       if (!confirm(t("{count} {what} {where} importieren?\nBereits vorhandene Namen werden übersprungen.", { count, what: label, where }))) {
         status.textContent = "";
         return;
       }
       status.textContent = t("Importiere {count} {what} … (kann bis zu einer Minute dauern)", { count, what: label });
-      const res = await api(`/api/${kind}/custom/import-open5e-all?srd=${srd}`, "POST");
+      const res = await api(`/api/${kind}/custom/import-open5e-all?${query}`, "POST");
       status.textContent = `✓ ${t("{added} importiert, {skipped} übersprungen (schon vorhanden)", { added: res.added, skipped: res.skipped })}`;
       await reload();
     } catch (err) {

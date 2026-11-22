@@ -21,6 +21,7 @@ from .characters import CharacterFields, character_row, get_character
 from .links import rename_links
 from . import public as player_api
 from .i18n import t as _t
+from .version import VERSION
 
 app = FastAPI(title="Wyrmdesk – Kampagnenbuch")
 app.include_router(library.router)
@@ -266,7 +267,7 @@ def get_app_settings():
     with get_conn() as conn:
         settings = get_settings(conn)
     return {**settings, "tracker_configured": bool(tracker.TRACKER_URL),
-            "deepl_configured": bool(translate._api_key())}
+            "deepl_configured": bool(translate._api_key()), "version": VERSION}
 
 
 @app.patch("/api/settings")
@@ -730,22 +731,27 @@ def export_content():
     """Classes/subclasses/peoples/backgrounds, items and spells as one JSON file, for the
     standalone Charaktererstellung, which has no live connection to this (LAN-only) tool."""
     with get_conn() as conn:
-        char_opts = char_options.list_options(conn, lean=False)
-        items = []
-        for r in conn.execute("SELECT * FROM custom_items ORDER BY name").fetchall():
-            d = row_to_dict(r)
-            d["stat_block"] = json.loads(d["stat_block"]) if d.get("stat_block") else None
-            d.pop("avatar_path", None)  # images aren't reachable from the other server
-            items.append(d)
-        spells = [row_to_dict(r) for r in conn.execute("SELECT * FROM custom_spells ORDER BY name").fetchall()]
-        # German texts beside the English ones (desc_de, name_de …), as far as translated.
-        mem = translate.Memory(conn)
-        char_opts = [translate.attach_option(o, mem) for o in char_opts]
-        items = [translate.attach_item(i, mem) for i in items]
-        spells = [translate.attach_spell(s, mem) for s in spells]
-    body = {"char_options": char_opts, "items": items, "spells": spells}
+        body = content_pack(conn)
     filename = f"kampagnenbuch-inhalte-{datetime.now().strftime('%Y-%m-%d_%H%M%S')}.json"
     return JSONResponse(body, headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+
+
+def content_pack(conn) -> dict:
+    """The library's part the Charaktererstellung uses (also tools/srd_export.py's pack for its open mode)."""
+    char_opts = char_options.list_options(conn, lean=False)
+    items = []
+    for r in conn.execute("SELECT * FROM custom_items ORDER BY name").fetchall():
+        d = row_to_dict(r)
+        d["stat_block"] = json.loads(d["stat_block"]) if d.get("stat_block") else None
+        d.pop("avatar_path", None)  # images aren't reachable from the other server
+        items.append(d)
+    spells = [row_to_dict(r) for r in conn.execute("SELECT * FROM custom_spells ORDER BY name").fetchall()]
+    # German texts beside the English ones (desc_de, name_de …), as far as translated.
+    mem = translate.Memory(conn)
+    char_opts = [translate.attach_option(o, mem) for o in char_opts]
+    items = [translate.attach_item(i, mem) for i in items]
+    spells = [translate.attach_spell(s, mem) for s in spells]
+    return {"char_options": char_opts, "items": items, "spells": spells}
 
 
 @app.post("/api/characters/import")
@@ -788,7 +794,7 @@ app.add_api_route("/api/characters/{char_id}/rest", player_api.player_rest, meth
 BACKUP_DB_NAME = "dmtool.db"
 # One database for Kampagnenbuch, tracker and battlemap: their pictures go along.
 BACKUP_FOLDERS = {"uploads": UPLOAD_DIR, "avatars": combat_db.AVATAR_DIR, "maps": map_db.MAP_DIR,
-                  "tokens": map_db.TOKEN_DIR}
+                  "tokens": map_db.TOKEN_DIR, "beamer_images": map_db.BEAMER_IMG_DIR}
 
 
 @app.get("/api/backup")
@@ -802,7 +808,9 @@ def download_backup():
 
 @app.post("/api/backup/restore")
 async def restore_backup(request: Request):
-    result = await backup.restore_zip(request, DB_PATH, BACKUP_DB_NAME, BACKUP_FOLDERS, "entries")
+    # ?force=1: the user confirmed restoring a backup from a newer Wyrmdesk (409 below otherwise).
+    result = await backup.restore_zip(request, DB_PATH, BACKUP_DB_NAME, BACKUP_FOLDERS, "entries",
+                                      force=request.query_params.get("force") == "1")
     # An older backup may lack columns added since, or (from before phase 2) the fights and maps:
     # those come from the old databases again, as on the first start.
     init_db()
@@ -832,4 +840,6 @@ async def dm_socket(ws: WebSocket):
 
 
 setup_common(app)
+# The handbook (also published on wyrmdesk.ch), opened from the "?" next to the part switcher.
+app.mount("/handbuch", StaticFiles(directory=str(APP_DIR / "handbuch_static"), html=True), name="handbuch")
 app.mount("/", StaticFiles(directory=str(APP_DIR / "static"), html=True), name="static")

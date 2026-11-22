@@ -6,6 +6,7 @@ there; nothing is deleted. The database as it was before the restore is kept as
 before-restore.db next to it, in case the wrong file was picked.
 """
 import asyncio
+import json
 import logging
 import os
 import shutil
@@ -19,6 +20,10 @@ from uuid import uuid4
 
 from fastapi import HTTPException, Request
 from .i18n import t as _t
+from .version import VERSION, parse
+
+# Written into every backup: the Wyrmdesk version that made it (older backups have none).
+MANIFEST = "wyrmdesk.json"
 
 
 def _copy_db(src_path: Path, dest_path: Path) -> None:
@@ -40,6 +45,7 @@ def make_zip(db_path: Path, db_name: str, folders: dict[str, Path]) -> Path:
     try:
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
             z.write(db_copy, db_name)
+            z.writestr(MANIFEST, json.dumps({"version": VERSION, "created": datetime.now().isoformat(timespec="seconds")}))
             for prefix, folder in folders.items():
                 for f in sorted(folder.iterdir()):
                     if f.is_file():
@@ -51,8 +57,11 @@ def make_zip(db_path: Path, db_name: str, folders: dict[str, Path]) -> Path:
 
 
 async def restore_zip(request: Request, db_path: Path, db_name: str, folders: dict[str, Path],
-                      required_table: str) -> dict:
-    """Replace the database with the one in the uploaded zip and add its images."""
+                      required_table: str, force: bool = False) -> dict:
+    """Replace the database with the one in the uploaded zip and add its images.
+
+    A backup from a newer Wyrmdesk is refused with 409 unless force: its database may hold what
+    this version doesn't know yet."""
     tmp = Path(tempfile.mkdtemp(prefix="restore-"))
     try:
         upload = tmp / "upload.zip"
@@ -67,6 +76,14 @@ async def restore_zip(request: Request, db_path: Path, db_name: str, folders: di
         with z:
             if db_name not in z.namelist():
                 raise HTTPException(400, _t("In der ZIP-Datei fehlt {name}. Ist es eine Sicherung dieses Tools?", name=db_name))
+            made_by = ""
+            if MANIFEST in z.namelist():
+                try:
+                    made_by = str(json.loads(z.read(MANIFEST)).get("version") or "")
+                except (ValueError, AttributeError):
+                    made_by = ""
+            if made_by and parse(made_by) > parse(VERSION) and not force:
+                raise HTTPException(409, _t("Die Sicherung stammt aus Wyrmdesk {backup}, hier läuft {here}. Besser zuerst Wyrmdesk aktualisieren: Eine ältere Version kennt nicht alles, was die neuere gespeichert hat.", backup=made_by, here=VERSION))
             new_db = tmp / "restore.db"
             with z.open(db_name) as src, new_db.open("wb") as out:
                 shutil.copyfileobj(src, out)

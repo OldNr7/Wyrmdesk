@@ -507,13 +507,14 @@ function optionSectionHtml(kind) {
       </div>
       <div class="form-row bulk-import" data-kind="${kind}" data-label="${k.title}">
         <select class="bulk-scope">
+          <option value="wyrmdesk">${t("Wyrmdesk-Inhalte: SRD mit deutschen Texten")}</option>
           <option value="srd">${t("Nur 5e-SRD (offizielle Grundregeln)")}</option>
           <option value="all">${t("Alle Open5e-Quellen (inkl. Drittanbieter)")}</option>
         </select>
         <button class="ghost bulk-btn">⇩ Alle ${k.title} importieren</button>
         <span class="muted bulk-status"></span>
       </div>
-      <p class="muted small">${t("Die Texte sind englisch (Open5e). SRD-Einträge erhalten deutsche Namen; 2014- und 2024-Fassung werden beide übernommen.")}</p>
+      <p class="muted small">${t("Die Wyrmdesk-Inhalte bringen deutsche Texte mit, über Open5e sind sie englisch. SRD-Einträge erhalten deutsche Namen; 2014- und 2024-Fassung werden beide übernommen.")}</p>
       <div class="opt-results list"></div>
     </details>
     ${DDB_KINDS.includes(kind) ? ddbPanelHtml() : ""}

@@ -154,6 +154,26 @@ docker compose down
 `dnd-local_battlemap_data` und `dnd-local_dmtool_data` und bleiben erhalten.
 Nie `docker compose down -v` ausführen: das löscht die Volumes und damit alle Daten.
 
+## Native App statt Docker (Kampagnenbuch)
+
+Für Windows und Linux gibt es das Kampagnenbuch (mit Tracker und Battlemap) auch als native,
+installationsfreie App ohne Docker: `dmtool/desktop` baut mit PyInstaller aus demselben,
+unveränderten Code (`dmtool/backend/app`) eine eigenständige `.exe` bzw. ein Linux-Programm. Zwei
+Fenster statt Browser-Tabs: „Wyrmdesk – Spielleiter“ (Kampagnenbuch, Tracker, Battlemap in einem
+Fenster) und „Wyrmdesk – Beamer“ (zieht man von Hand auf den Projektor/zweiten Bildschirm, dort
+per Klick ins Bild oder F11 randloses Vollbild, Esc beendet es). Die Spieleransicht bleibt eine normale Webseite im LAN
+(`http://<Rechner-IP>:8441/spieler/`), von jedem Gerät im Netzwerk aus im eigenen Browser erreichbar.
+Die App nutzt dieselben Ports wie der Docker-Stack (8440 Spielleiter, 8441 Beamer/Spieler), beide
+zugleich laufen also nicht; die App meldet das beim Start. Den Spielleiter-Teil (8440) erreicht nur
+der eigene Rechner, die alten Adressen (8420, 8421, 8430, 8431) gibt es in der App nicht.
+
+Die Daten liegen dabei nicht in einem Docker-Volume, sondern unter `~/.local/share/Wyrmdesk/`
+(Linux) bzw. `%LOCALAPPDATA%\Wyrmdesk\` (Windows). Build-Anleitung: `dmtool/desktop/README.md`.
+Voraussetzung ist die System-eigene Web-Engine (Windows: WebView2, meist über Edge vorhanden;
+Linux: WebKitGTK, meist Teil des Desktop-Unterbaus) - `pywebview` bringt anders als Electron keine
+eigene mit. Ein fertiges Installationspaket (mit Signatur) gibt es noch nicht, nur das rohe,
+lauffähige Programm aus dem Build.
+
 ## Daten übernehmen
 
 In jedem Tool unter „⚙ Einrichtung → Datensicherung“ eine Sicherung herunterladen und im anderen
@@ -190,6 +210,57 @@ beim Start und danach stündlich geprüft, aber nur wenn sich seit der letzten S
 geändert hat und diese mindestens 12 Stunden alt ist. Pro Tool bleiben die neuesten 14 erhalten.
 Wiederherstellen wie oben über „Sicherung wiederherstellen“. Den Ordner ab und zu auf ein anderes
 Laufwerk kopieren, dann übersteht er auch einen Defekt des Rechners.
+
+## Versionen und Releases
+
+Wyrmdesk hat eine Versionsnummer für alles (Kampagnenbuch, Charaktererstellung, native App), nach
+[Semantic Versioning](https://semver.org/lang/de/); was sich geändert hat, steht in
+[CHANGELOG.md](CHANGELOG.md). Die laufende Version zeigt das Kampagnenbuch unten in der Einrichtung,
+die Charaktererstellung unten in der Verwaltung.
+
+Jede Sicherung merkt sich die Version, die sie erstellt hat (`wyrmdesk.json` in der ZIP-Datei).
+Stammt eine Sicherung aus einer neueren Version als der laufenden, fragt das Wiederherstellen
+vorher nach: Besser zuerst Wyrmdesk aktualisieren.
+
+Ein Release:
+
+1. In `CHANGELOG.md` den Abschnitt „Unveröffentlicht“ zur neuen Nummer machen.
+2. Die Nummer in `VERSION` (Repo-Root) eintragen, dann `sh tools/check-shared.sh --copy` (kopiert sie
+   in beide Services).
+3. Committen, Tag setzen und pushen: `git tag -a v0.1.1 -m "Wyrmdesk 0.1.1"`, `git push origin main v0.1.1`.
+4. Aus diesem Stand die Pakete bauen und testen: Linux mit `sh dmtool/desktop/build-linux-packages.sh`
+   (`.deb` und AppImage), Windows nach `dmtool/desktop/WINDOWS.md` (Installer). Die drei Dateien aus
+   `dmtool/desktop/dist/packages/` an das Release zum Tag auf
+   [GitHub](https://github.com/OldNr7/Wyrmdesk/releases) anhängen; die Website verlinkt darauf.
+
+## Wyrmdesk-Inhalte (SRD mit deutschen Texten)
+
+Statt direkt von Open5e lässt sich die Bibliothek aus den **Wyrmdesk-Inhalten** füllen: dasselbe SRD
+(5.1 und 5.2), als Dateien auf wyrmdesk.ch, mit deutschen Texten für den Übersetzungsspeicher. In
+jeder Bibliotheksseite beim Massenimport „Wyrmdesk-Inhalte: SRD mit deutschen Texten“ wählen. Ein
+DeepL-Schlüssel ist dafür nicht nötig; Monster bekommen bei deutscher Oberfläche gleich den deutschen
+Wertekasten. Ein erneuter Import überspringt Vorhandenes und bringt neue Übersetzungen mit.
+
+Die Adresse ist `https://www.wyrmdesk.ch/inhalte/srd/`; zum Testen gegen eine andere Website
+`WYRMDESK_CONTENT_URL` setzen (z. B. in der `.env`).
+
+Erzeugt werden die Dateien mit `tools/srd_export.py` (Python-Umgebung des Kampagnenbuchs, z. B.
+`dmtool/desktop/.venv`), Ziel ist der Ordner `inhalte/srd` im Website-Repo. Das Skript holt die
+Einträge über den Open5e-Import des Kampagnenbuchs, nimmt vorhandene deutsche Zeilen aus früheren
+Läufen und auf Wunsch aus der Datenbank eines Kampagnenbuchs (`--memory`, nur lesend, nur Zeilen, die
+im SRD vorkommen) und übersetzt den Rest mit DeepL (`DEEPL_API_KEY`, höchstens `--max-chars` Zeichen
+pro Lauf). Waffen und natürliche Angriffe haben feste deutsche Namen (`FIXED_TERMS` in
+`translate.py`); sie gehen als Korrekturen mit und ersetzen beim Import auch ältere Fehlübersetzungen
+(„Club“ → „Verein“).
+
+```
+dmtool/desktop/.venv/bin/python tools/srd_export.py --out ../wyrmdesk-website/inhalte/srd \
+    --memory ~/.local/share/Wyrmdesk/dmtool.db --max-chars 450000
+```
+
+Dabei entsteht auch `charaktererstellung.json`, das Inhaltspaket für die offene Charaktererstellung
+(Klassen, Völker, Hintergründe, Talente, Gegenstände und Zauber mit deutschen Texten, nur SRD). Das
+Skript baut es in einer frischen, temporären Kampagnenbuch-Datenbank mit dem Code des Kampagnenbuchs.
 
 ## Deutsche Übersetzung der Bibliothek (DeepL)
 
@@ -250,6 +321,45 @@ ausgeblendet, und SRD-Einträge aus Open5e behalten ihre englischen Namen.
 
 Fehlende englische Texte zeigt `python tools/check-i18n.py` (mit `--add` werden sie leer in die
 Wörterbücher `lang/en.json` eingetragen; leere Einträge zeigen weiter den deutschen Text).
+
+## Charaktererstellung: Datei, Druck und Teilen-Link
+
+Auf jedem Charakterblatt der Charaktererstellung gibt es oben:
+- **🖨 Drucken / PDF**: das Blatt auf einer A4-Seite (ohne die Knöpfe fürs Spiel), dahinter die Zauber
+  des Charakters mit Beschreibung. Im Druckdialog des Browsers „Als PDF speichern“ wählen.
+- **⇩ Datei**: der Charakter als `.wyrmdesk.json`, im selben Format wie der Export der Spielleitung.
+- **🔗 Teilen**: ein Link nur für diesen Charakter (…/teilen/…), zum Herunterladen, ohne etwas ändern
+  zu können. Der Spieler kann ihn zurückziehen.
+
+Im Kampagnenbuch unter ⚙ Einrichtung → Charaktererstellung nimmt „⬆ Charaktere importieren“ die Datei,
+das Feld darunter den Teilen-Link. Den Link ruft die Seite des Kampagnenbuchs selbst ab (der Browser,
+nicht der Server), er funktioniert also auch in der nativen App, solange der Rechner ins Internet kommt.
+
+### Offener Modus (für alle, ohne Spielleitung)
+
+Mit `OPEN_MODE=1` ist die Charaktererstellung für alle offen, z. B. als `charakter.wyrmdesk.ch`. Auf der
+Startseite legt „Neuen Charakter erstellen“ eine eigene Sammlung an, deren Adresse der persönliche Link
+des Spielers ist (Lesezeichen; bis zu 5 Charaktere). Termine und eigene Bilder gibt es dort nicht. Eine
+Sammlung, die 30 Tage niemand geöffnet hat, wird samt Charakteren gelöscht.
+
+Als Inhalte lädt die Instanz die Wyrmdesk-Inhalte (`charaktererstellung.json`, nur SRD) beim ersten Start
+selbst und prüft sie täglich auf eine neue Fassung. In der Verwaltung lädt sie „Wyrmdesk-Inhalte laden“
+auch von Hand. **Nicht** den Export der eigenen Bibliothek hochladen: der kann gekaufte Inhalte (D&D
+Beyond) enthalten, und die wären dann öffentlich.
+
+Betrieb als eigener Stack neben der normalen Charaktererstellung, mit eigener Datenbank:
+
+```
+cd charcreator
+cp open.env.example open.env    # Passwort, Port, Fristen, Links zu Impressum/Datenschutz
+docker compose -f compose.open.yaml --env-file open.env up -d --build
+```
+
+Davor ein Reverse Proxy mit HTTPS. Er muss die Adresse des Besuchers in `X-Forwarded-For` anhängen
+(Nginx Proxy Manager tut das): Daran hängt die Begrenzung neuer Sammlungen pro Adresse und Stunde
+(`OPEN_MAX_NEW_PER_HOUR`). Weitere Grenzen: `OPEN_MAX_COLLECTIONS` (alle zusammen), `OPEN_MAX_CHARACTERS`
+(pro Sammlung), `OPEN_DAYS` (Frist). Die Datenschutzerklärung der Website muss die gespeicherten
+Charaktere erwähnen.
 
 ## Betrieb auf einem Server
 

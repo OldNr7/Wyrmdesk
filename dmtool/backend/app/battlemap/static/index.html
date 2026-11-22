@@ -4,6 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Battlemap · Wyrmdesk</title>
+  <link rel="icon" type="image/svg+xml" href="kb/shared/brand/favicon.svg" />
+  <link rel="apple-touch-icon" href="kb/shared/brand/apple-touch-icon.png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -46,9 +48,7 @@
 
       <section data-panel="sight">
         <h2>Sicht</h2>
-        <label class="row"><input type="checkbox" id="vision-enabled" /> Sichtlinien aktiv</label>
         <div class="tool-grid">
-          <button data-tool="viewer" title="Sichtpunkt setzen oder verschieben, nur für dich sichtbar (S)">👁 Sichtpunkt</button>
           <button data-tool="wall" title="Wand zeichnen: Punkte klicken, Doppelklick oder Enter beendet (W)">▬ Wand</button>
           <button data-tool="door" title="Tür: Anfang und Ende klicken (D)">🚪 Tür</button>
           <button data-tool="wall-erase" title="Wand oder Tür anklicken zum Löschen (X)">✂ Löschen</button>
@@ -56,7 +56,7 @@
         <label class="row"><input type="checkbox" id="show-walls" /> Wände anzeigen</label>
         <div id="wall-info" class="muted small"></div>
         <button id="btn-clear-walls" class="wide danger">Alle Wände löschen</button>
-        <div class="muted small" style="margin-top:8px">Türen mit „Auswahl" anklicken zum Öffnen und Schliessen. Was ein Sichtpunkt sieht, wird aufgedeckt und bleibt als erkundet sichtbar, gedimmt, solange es gerade niemand sieht.</div>
+        <div class="muted small" style="margin-top:8px">Türen mit „Auswahl" anklicken zum Öffnen und Schliessen. Sichtlinien und welche Spieler-Tokens sehen, stellst du unter „Tokens" ein.</div>
       </section>
 
       <section data-panel="tools">
@@ -80,31 +80,6 @@
         <label class="row"><input type="checkbox" id="fog-enabled" /> Fog of War aktiv</label>
       </section>
 
-      <section data-panel="tools">
-        <h2>Zauberbereiche</h2>
-        <input type="text" id="spell-search" placeholder="Zauber suchen, z.B. Fireball" autocomplete="off" />
-        <ul id="spell-results" class="list spell-results"></ul>
-        <div class="tool-grid">
-          <button data-tool="tpl-cone" title="Viertelkreis (Kegel): klicken setzt die Spitze, ziehen richtet aus">◔ Viertelkreis</button>
-          <button data-tool="tpl-circle" title="Kreis: klicken setzt den Mittelpunkt">◯ Kreis</button>
-          <button data-tool="tpl-square" title="Quadrat (Würfel): klicken setzt den Mittelpunkt">▢ Quadrat</button>
-          <button data-tool="tpl-line" title="Linie: klicken setzt den Anfang, ziehen richtet aus">━ Linie</button>
-        </div>
-        <div class="row">
-          <label><span id="tpl-size-label">Länge</span> <input type="number" id="tpl-size" min="5" step="5" class="narrow" /> ft</label>
-          <label id="tpl-width-wrap">Breite <input type="number" id="tpl-width" min="5" step="5" class="narrow" /> ft</label>
-        </div>
-        <div id="tpl-info" class="muted small"></div>
-        <div id="tpl-editor" hidden>
-          <label class="row"><input type="checkbox" id="tpl-on-player" /> Auf Beamer zeigen</label>
-          <div class="row buttons">
-            <button id="tpl-delete" class="danger" title="Entf">Bereich entfernen</button>
-          </div>
-        </div>
-        <button id="btn-tpl-clear" class="wide">Alle Zauberbereiche entfernen</button>
-        <div class="muted small" style="margin-top:8px">Bereich anklicken zum Auswählen und Verschieben. Viertelkreise und Linien am roten Griff drehen, Drehpunkt ist die Spitze bzw. der Anfang. Shift: in 15°-Schritten drehen, ohne Raster verschieben.</div>
-      </section>
-
       <section data-panel="areas">
         <h2>Bereiche <span class="muted small">(Stream Deck: Nummer)</span></h2>
         <ul id="area-list" class="list"></ul>
@@ -113,6 +88,8 @@
 
       <section data-panel="tokens">
         <h2>Tokens</h2>
+        <label class="row" title="Was die Spieler-Tokens mit eingeschalteter Sicht sehen, wird aufgedeckt und bleibt als erkundet sichtbar, gedimmt, solange es gerade niemand sieht. Wände und Türen unter „Sicht“."><input type="checkbox" id="vision-enabled" /> Sichtlinien aktiv</label>
+        <div id="vision-info" class="muted small"></div>
         <button id="btn-tokens-from-tracker" class="wide">Tokens aus Tracker-Encounter</button>
         <button id="btn-tokens-clear" class="wide danger">Alle Tokens entfernen</button>
         <ul id="token-list" class="list"></ul>
@@ -130,6 +107,7 @@
           </div>
           <label class="row">Tracker <select id="tok-combatant"></select></label>
           <label class="row"><input type="checkbox" id="tok-on-player" /> Auf Beamer zeigen (aus = Miniatur)</label>
+          <label class="row" id="tok-vision-row" title="Sichtlinien werden von diesem Token aus berechnet (nur Spieler-Tokens)"><input type="checkbox" id="tok-vision" /> 👁 Sicht</label>
           <div class="row buttons">
             <label class="button file-button">Bild…<input type="file" id="tok-image" accept="image/*" hidden /></label>
             <button id="tok-image-clear">Bild entfernen</button>
@@ -139,7 +117,7 @@
       </section>
 
       <section data-panel="tracker">
-        <h2>Tracker <span id="tracker-round" class="muted small"></span></h2>
+        <h2>Tracker <span class="info" title="Kämpfer anklicken für Trefferpunkte und Zustände. Kämpfer hinzufügen weiterhin im Combat Tracker. Nach einem Encounter-Wechsel die Tokens unter „Tokens&quot; übernehmen.">ⓘ</span> <span id="tracker-round" class="muted small"></span></h2>
         <div id="tracker-encounter-row" class="row">
           <select id="tracker-encounter" title="Encounter im Combat Tracker und in seiner Anzeige wechseln" style="flex:1;min-width:0"></select>
           <button id="btn-encounters-reload" title="Encounter-Liste neu laden">⟳</button>
@@ -156,7 +134,33 @@
           </div>
         </div>
         <ul id="tracker-list" class="combatants"></ul>
-        <div class="muted small" style="margin-top:8px">Kämpfer anklicken für Trefferpunkte und Zustände. Kämpfer hinzufügen weiterhin im Combat Tracker. Nach einem Encounter-Wechsel die Tokens unter „Tokens" übernehmen.</div>
+      </section>
+
+      <!-- Spell areas: under the tracker, folded away until needed (state remembered, app.js). -->
+      <section data-panel="tracker" class="needs-scene">
+        <details id="spell-details">
+          <summary><h2>Zauberbereiche <span class="info" title="Bereich anklicken zum Auswählen und Verschieben. Viertelkreise und Linien am roten Griff drehen, Drehpunkt ist die Spitze bzw. der Anfang. Shift: in 15°-Schritten drehen, ohne Raster verschieben.">ⓘ</span></h2></summary>
+          <input type="text" id="spell-search" placeholder="Zauber suchen, z.B. Fireball" autocomplete="off" />
+          <ul id="spell-results" class="list spell-results"></ul>
+          <div class="tool-grid icons">
+            <button data-tool="tpl-cone" title="Viertelkreis (Kegel): klicken setzt die Spitze, ziehen richtet aus">◔</button>
+            <button data-tool="tpl-circle" title="Kreis: klicken setzt den Mittelpunkt">◯</button>
+            <button data-tool="tpl-square" title="Quadrat (Würfel): klicken setzt den Mittelpunkt">▢</button>
+            <button data-tool="tpl-line" title="Linie: klicken setzt den Anfang, ziehen richtet aus">━</button>
+          </div>
+          <div class="row">
+            <label><span id="tpl-size-label">Länge</span> <input type="number" id="tpl-size" min="5" step="5" class="narrow" /> ft</label>
+            <label id="tpl-width-wrap">Breite <input type="number" id="tpl-width" min="5" step="5" class="narrow" /> ft</label>
+          </div>
+          <div id="tpl-info" class="muted small"></div>
+          <div id="tpl-editor" hidden>
+            <label class="row"><input type="checkbox" id="tpl-on-player" /> Auf Beamer zeigen</label>
+            <div class="row buttons">
+              <button id="tpl-delete" class="danger" title="Entf">Bereich entfernen</button>
+            </div>
+          </div>
+          <button id="btn-tpl-clear" class="wide">Alle Zauberbereiche entfernen</button>
+        </details>
       </section>
     </aside>
 

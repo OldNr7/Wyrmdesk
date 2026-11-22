@@ -19,6 +19,7 @@
   style.textContent = `
     .kb-nav { display: inline-flex; gap: 2px; margin: 0 6px; padding: 2px; border-radius: 7px;
       background: rgba(0, 0, 0, 0.18); flex-shrink: 0; }
+    .kb-logo { display: block; width: 28px; height: 28px; margin-right: -4px; }
     .kb-nav a { padding: 3px 10px; border-radius: 5px; font-size: 13px; line-height: 1.5; white-space: nowrap;
       color: var(--leather-text, #f3dca0); text-decoration: none; opacity: 0.8; }
     .kb-nav a:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); text-decoration: none; }
@@ -31,6 +32,11 @@
     .kb-nav a span::after { content: attr(data-label); font-weight: 600; height: 0; overflow: hidden; visibility: hidden; }
     /* The campaign dropdown, same size in all three parts. */
     header #campaign, header #campaign-select { width: 220px; max-width: 220px; font-size: 14px; }
+    /* The handbook, right after the switcher. */
+    .kb-help { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px;
+      margin-left: -2px; border-radius: 50%; flex-shrink: 0; font-weight: 700; font-size: 14px; line-height: 1;
+      color: var(--leather-text, #f3dca0); background: rgba(0, 0, 0, 0.18); text-decoration: none; opacity: 0.8; }
+    .kb-help:hover { opacity: 1; background: rgba(255, 255, 255, 0.12); text-decoration: none; }
     @media (max-width: 900px) { .kb-nav a span { display: none; } header h1 { width: auto; } }`;
   document.head.append(style);
 
@@ -48,9 +54,32 @@
     }
     nav.append(a);
   }
+  // The handbook in the UI language, at the chapter of the current part; a new tab, so a running
+  // fight or scene stays open. "zurueck" lets the handbook offer the way back to this part.
+  const de = window.UI_DE !== false;
+  const chapter = { "": de ? "kampagnenbuch" : "campaign-book", "tracker/": "tracker", "map/": de ? "karte" : "map" }[current];
+  const help = document.createElement("a");
+  help.className = "kb-help";
+  help.href = `${base}handbuch/${de ? "de" : "en"}/?zurueck=${encodeURIComponent(current || "start")}#${chapter}`;
+  help.target = "_blank";
+  help.rel = "noopener";
+  help.textContent = "?";
+  help.title = t("Handbuch");
+  help.setAttribute("aria-label", t("Handbuch"));
+
+  // The Wyrmdesk logo in front of the title (decorative, the title names the part).
+  const logo = document.createElement("img");
+  logo.className = "kb-logo";
+  logo.src = base + "shared/brand/wyrmdesk-logo-dunkel.svg";
+  logo.alt = "";
+  logo.width = logo.height = 28;
   const place = () => {
     const h1 = document.querySelector("header h1");
-    if (h1) h1.after(nav);
+    if (h1) {
+      h1.before(logo);
+      h1.after(nav);
+      nav.after(help);
+    }
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", place);
   else place();

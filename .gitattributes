@@ -1,0 +1,3 @@
+# Windows tools need CRLF (cmd, Inno Setup); checked out like that on every system.
+*.bat text eol=crlf
+*.iss text eol=crlf

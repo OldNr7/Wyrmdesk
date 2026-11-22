@@ -1,23 +1,31 @@
 """DM-only: manage campaigns (and their player links), upload the content pack exported
 from the Kampagnenbuch, export characters players have finished, and propose session dates.
 """
-import base64
 import json
 import re
 import secrets
 from datetime import datetime
-from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from . import content
 from .auth import require_admin
-from .db import UPLOAD_DIR, get_conn, row_to_dict
+from .export import avatar_export
+from .db import get_conn, row_to_dict
 from .player import _delete_image
+from .i18n import t
 from .security import hash_password
+from .version import VERSION
 
 router = APIRouter(prefix="/api/admin", dependencies=[Depends(require_admin)])
+
+
+@router.get("/version")
+def version():
+    """Shown at the foot of the admin page (behind the password: no version for the public)."""
+    return {"version": VERSION}
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -119,12 +127,31 @@ def content_status():
             "items": conn.execute("SELECT COUNT(*) AS n FROM items").fetchone()["n"],
             "spells": conn.execute("SELECT COUNT(*) AS n FROM spells").fetchone()["n"],
         }
-        uploaded_at = conn.execute("SELECT value FROM app_settings WHERE key = 'content_uploaded_at'").fetchone()
-        return {**counts, "uploaded_at": uploaded_at["value"] if uploaded_at else None}
+        setting = lambda key: (r["value"] if (r := conn.execute("SELECT value FROM app_settings WHERE key = ?", (key,)).fetchone()) else None)
+        return {**counts, "uploaded_at": setting("content_uploaded_at"), "source": setting("content_source"),
+                "wyrmdesk_url": content.CONTENT_URL}
 
 
 @router.post("/content")
 def upload_content(body: ContentPackIn):
+    store_content(body.model_dump(), "upload")
+    return content_status()
+
+
+@router.post("/content/wyrmdesk")
+def load_wyrmdesk_content():
+    """The SRD with German texts from the website (content.py), instead of a pack of one's own library."""
+    try:
+        pack, generated = content.fetch_pack()
+    except Exception:
+        raise HTTPException(502, t("Wyrmdesk-Inhalte nicht erreichbar ({url}).", url=content.CONTENT_URL))
+    store_content(pack, f"wyrmdesk:{generated}")
+    return content_status()
+
+
+def store_content(body: dict, source: str) -> None:
+    """Replaces the content with a pack (the Kampagnenbuch's export, or the website's)."""
+    body = ContentPackIn(**body)
     with get_conn() as conn:
         conn.execute("DELETE FROM char_options")
         conn.execute("DELETE FROM items")
@@ -157,12 +184,9 @@ def upload_content(body: ContentPackIn):
                  int(s.get("concentration") or 0), int(s.get("ritual") or 0), s.get("higher_level"),
                  s.get("desc"), s.get("notes"), s.get("desc_de"), s.get("higher_level_de"), s.get("material_de")),
             )
-        conn.execute(
-            "INSERT INTO app_settings (key, value) VALUES ('content_uploaded_at', ?) "
-            "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
-            (datetime.now().isoformat(timespec="seconds"),),
-        )
-    return content_status()
+        for key, value in (("content_uploaded_at", datetime.now().isoformat(timespec="seconds")), ("content_source", source)):
+            conn.execute("INSERT INTO app_settings (key, value) VALUES (?, ?) "
+                         "ON CONFLICT(key) DO UPDATE SET value = excluded.value", (key, value))
 
 
 # ---------- characters ----------
@@ -181,30 +205,6 @@ def list_characters(campaign_id: Optional[int] = None):
         return [row_to_dict(r) for r in rows]
 
 
-# The placeholder pictures per class (made by tools/creation-icons.py); the Kampagnenbuch has the same set.
-CLASS_PORTRAITS = Path(__file__).parent / "shared_static" / "class-portraits"
-
-
-def _portrait_class(stat_block: dict) -> Optional[str]:
-    """English class name of the sheet, if there is a placeholder picture for it."""
-    key = str(stat_block.get("class_key") or "")
-    ref = stat_block.get("class_ref") or {}
-    en = str(ref.get("name_en") or ref.get("name") or "").strip().lower() if key.startswith("lib:") else key
-    return en if en and (CLASS_PORTRAITS / f"{en}.svg").is_file() else None
-
-
-def _avatar_export(avatar_path: Optional[str], stat_block: dict) -> dict:
-    """The portrait goes into the export itself (base64), since the Kampagnenbuch can't reach this
-    server's /uploads. Its avatar_path is dropped: it would point to a file the other side lacks.
-    Without a picture of its own the character shows its class's here; the export then names the
-    class (avatar_class), and the Kampagnenbuch takes that picture from its own copy of the set."""
-    path = UPLOAD_DIR / avatar_path.rsplit("/", 1)[-1] if avatar_path else None
-    if path and path.is_file():
-        return {"avatar_path": None, "avatar_name": path.name, "avatar_data": base64.b64encode(path.read_bytes()).decode("ascii")}
-    cls = _portrait_class(stat_block)
-    return {"avatar_path": None, **({"avatar_class": cls} if cls else {})}
-
-
 @router.get("/characters/export")
 def export_characters(campaign_id: Optional[int] = None):
     """Finished characters, in the shape the Kampagnenbuch's import expects."""
@@ -219,7 +219,7 @@ def export_characters(campaign_id: Optional[int] = None):
         for r in rows:
             d = row_to_dict(r)
             d["stat_block"] = json.loads(d["stat_block"]) if d["stat_block"] else {}
-            d.update(_avatar_export(d.get("avatar_path"), d["stat_block"]))
+            d.update(avatar_export(d.get("avatar_path"), d["stat_block"]))
             out.append(d)
         conn.execute(
             "UPDATE characters SET exported_at = ? WHERE status = 'fertig'" + (" AND campaign_id = ?" if campaign_id is not None else ""),

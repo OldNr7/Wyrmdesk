@@ -139,6 +139,21 @@ def _apply(conn, it: dict, mem: translate.Memory) -> bool:
     return True
 
 
+def germanize_monsters(conn, ids: list[int]) -> int:
+    """The German stat block for these monsters where the memory has all their lines (the English
+    one kept in stat_block_en, as a translation here does). Returns how many."""
+    if not ids:
+        return 0
+    mem = translate.Memory(conn)
+    done = 0
+    marks = ",".join("?" * len(ids))
+    for r in conn.execute(f"SELECT id, stat_block FROM custom_monsters WHERE id IN ({marks})", ids).fetchall():
+        sb = json.loads(r["stat_block"] or "{}")
+        if _monster_texts(sb):
+            done += _apply(conn, {"kind": "monster", "id": r["id"], "stat_block": sb}, mem)
+    return done
+
+
 @router.post("/api/translate/content")
 async def translate_content(body: ContentIn):
     with get_conn() as conn:

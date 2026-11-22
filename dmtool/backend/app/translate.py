@@ -35,6 +35,7 @@ router = APIRouter()
 # Rule terms DeepL should always render the way the sheets (and the German rulebooks) say them.
 GLOSSARY = {
     "saving throw": "Rettungswurf", "saving throws": "Rettungswürfe", "Saving Throws": "Rettungswürfe",
+    "feat": "Talent", "feats": "Talente", "Feat": "Talent", "Feats": "Talente", "Origin feat": "Herkunftstalent",
     "Armor Class": "Rüstungsklasse", "hit points": "Trefferpunkte", "Hit Points": "Trefferpunkte",
     "hit point maximum": "Trefferpunktemaximum", "temporary hit points": "temporäre Trefferpunkte",
     "Hit Dice": "Trefferwürfel", "Hit Die": "Trefferwürfel", "hit die": "Trefferwürfel",
@@ -68,6 +69,33 @@ GLOSSARY = {
     "grappled": "gepackt", "incapacitated": "kampfunfähig", "paralyzed": "gelähmt", "petrified": "versteinert",
     "poisoned": "vergiftet", "prone": "liegend", "restrained": "festgesetzt", "stunned": "betäubt",
     "unconscious": "bewusstlos", "exhaustion": "Erschöpfung",
+}
+
+# The SRD weapons by their German names. On its own a name is easily mistranslated ("Club" ->
+# "Verein", "Mace" -> "Pfefferspray", "Sling" -> "Tragegurt"), so they are glossary terms as well.
+WEAPONS_DE = {
+    "Club": "Knüppel", "Dagger": "Dolch", "Greatclub": "Zweihandknüppel", "Handaxe": "Handbeil",
+    "Javelin": "Wurfspeer", "Light Hammer": "Leichter Hammer", "Mace": "Streitkolben", "Quarterstaff": "Kampfstab",
+    "Sickle": "Sichel", "Spear": "Speer", "Light Crossbow": "Leichte Armbrust", "Dart": "Wurfpfeil",
+    "Shortbow": "Kurzbogen", "Sling": "Schleuder", "Battleaxe": "Streitaxt", "Flail": "Flegel", "Glaive": "Glefe",
+    "Greataxe": "Zweihandaxt", "Greatsword": "Zweihandschwert", "Halberd": "Hellebarde", "Lance": "Lanze",
+    "Longsword": "Langschwert", "Maul": "Zweihandhammer", "Morningstar": "Morgenstern", "Pike": "Pike",
+    "Rapier": "Rapier", "Scimitar": "Krummsäbel", "Shortsword": "Kurzschwert", "Trident": "Dreizack",
+    "War Pick": "Kriegspicke", "Warhammer": "Kriegshammer", "Whip": "Peitsche", "Blowgun": "Blasrohr",
+    "Hand Crossbow": "Handarmbrust", "Heavy Crossbow": "Schwere Armbrust", "Longbow": "Langbogen",
+}
+GLOSSARY.update(WEAPONS_DE)
+
+# Whole texts with a fixed German form, wherever they stand alone (a monster's attack, a table
+# cell): the weapons, and natural attacks DeepL leaves English or gets wrong without context.
+# The Wyrmdesk-Inhalte ship them as corrections (manual), so they also fix older translations.
+FIXED_TERMS = {
+    **WEAPONS_DE,
+    "Slam": "Hieb", "Gore": "Aufspießen", "Sting": "Stachel", "Pseudopod": "Pseudopodium", "Rend": "Zerfleischen",
+    "Hoof": "Huf", "Hooves": "Hufe", "Bite": "Biss", "Claw": "Klaue", "Claws": "Klauen", "Talons": "Krallen",
+    "Tail": "Schwanz", "Tentacle": "Tentakel", "Tentacles": "Tentakel", "Fist": "Faust", "Ram": "Rammen",
+    "Beak": "Schnabel", "Horns": "Hörner", "Tusk": "Hauer", "Wing Attack": "Flügelangriff",
+    "Unarmed Strike": "Waffenloser Schlag", "Multiattack": "Mehrfachangriff",
 }
 
 BATCH_TEXTS = 50  # DeepL: at most 50 texts per request
@@ -431,6 +459,20 @@ async def _translate_lines(client: httpx.AsyncClient, lines: list[str], glossary
         done += d
         skipped += s
     return done, skipped
+
+
+def store_lines(conn, pairs: list[tuple[str, str]], fixed: list[tuple[str, str]] = ()) -> int:
+    """Adds ready translations (English line, German line) to the memory, e.g. those of the
+    Wyrmdesk-Inhalte (wyrmdesk_content.py). Lines already there (DeepL or corrected) stay as they are.
+    fixed: whole texts with a set German form (FIXED_TERMS), stored as corrections, so they win over
+    an older line translation ("Club" -> "Verein"); a correction made here by hand stays."""
+    now = datetime.now().isoformat(timespec="seconds")
+    before = conn.total_changes
+    sql = ("INSERT INTO translations (source_hash, source, text_de, manual, updated_at) VALUES (?, ?, ?, ?, ?) "
+           "ON CONFLICT(source_hash) DO NOTHING")
+    conn.executemany(sql, [(_hash(en), en, de, 0, now) for en, de in pairs if en and de])
+    conn.executemany(sql, [(_manual_hash(en), en, de, 1, now) for en, de in fixed if en and de])
+    return conn.total_changes - before
 
 
 # ---------- API ----------

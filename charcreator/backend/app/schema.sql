@@ -11,6 +11,9 @@ CREATE TABLE IF NOT EXISTS campaigns (
     token TEXT NOT NULL UNIQUE,
     -- Optional extra password (salted hash, see security.py), checked in addition to the token.
     password_hash TEXT,
+    -- Open mode (open_mode.py): a player's own collection, deleted after OPEN_DAYS days without use.
+    is_open INTEGER NOT NULL DEFAULT 0,
+    last_active TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -74,6 +77,8 @@ CREATE TABLE IF NOT EXISTS characters (
     notes TEXT,
     stat_block TEXT NOT NULL DEFAULT '{}',
     avatar_path TEXT,
+    -- Share link (share.py): download of this one character, NULL while there is none.
+    share_token TEXT,
     -- Equipping gear (and HP, once play starts) changes these outside the sheet editor, same
     -- split as the Kampagnenbuch's characters table.
     current_hp INTEGER,

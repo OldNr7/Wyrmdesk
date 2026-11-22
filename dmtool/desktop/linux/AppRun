@@ -1,0 +1,4 @@
+#!/bin/sh
+# Entry point of the AppImage: the PyInstaller app folder lies under usr/wyrmdesk.
+HERE=$(dirname "$(readlink -f "$0")")
+exec "$HERE/usr/wyrmdesk/wyrmdesk" "$@"

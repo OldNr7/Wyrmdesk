@@ -164,3 +164,7 @@ label.row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .dates-list .date-counts .maybe { color: var(--warn); }
 .dates-list .date-counts .no { color: var(--accent); }
 .dates-list li.highlight { background: var(--secret); }
+
+/* Wyrmdesk logo in the header */
+header { display: flex; align-items: center; gap: 12px; }
+.brand-logo { display: block; width: 36px; height: 36px; flex-shrink: 0; }

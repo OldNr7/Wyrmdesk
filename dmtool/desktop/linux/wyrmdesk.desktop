@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Wyrmdesk
+Comment=Kampagnenbuch, Combat Tracker und Battlemap für Spielleiter
+Comment[en]=Campaign book, combat tracker and battle map for game masters
+Exec=wyrmdesk
+Icon=wyrmdesk
+StartupWMClass=wyrmdesk
+Terminal=false
+Categories=Game;RolePlaying;

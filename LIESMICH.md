@@ -229,7 +229,8 @@ Ein Release:
    in beide Services).
 3. Committen, Tag setzen und pushen: `git tag -a v0.1.1 -m "Wyrmdesk 0.1.1"`, `git push origin main v0.1.1`.
 4. Aus diesem Stand die Pakete bauen und testen: Linux mit `sh dmtool/desktop/build-linux-packages.sh`
-   (`.deb` und AppImage), Windows nach `dmtool/desktop/WINDOWS.md` (Installer). Die drei Dateien aus
+   (`.deb` und AppImage, braucht Docker; ein CI-Runner kann dasselbe Skript beim Push des Tags
+   ausführen), Windows nach `dmtool/desktop/WINDOWS.md` (Installer). Die drei Dateien aus
    `dmtool/desktop/dist/packages/` an das Release zum Tag auf
    [GitHub](https://github.com/OldNr7/Wyrmdesk/releases) anhängen; die Website verlinkt darauf.
 
@@ -254,7 +255,7 @@ pro Lauf). Waffen und natürliche Angriffe haben feste deutsche Namen (`FIXED_TE
 („Club“ → „Verein“).
 
 ```
-dmtool/desktop/.venv/bin/python tools/srd_export.py --out ../wyrmdesk-website/inhalte/srd \
+dmtool/desktop/.venv/bin/python tools/srd_export.py --out ../wyrmdesk-webseite/inhalte/srd \
     --memory ~/.local/share/Wyrmdesk/dmtool.db --max-chars 450000
 ```
 

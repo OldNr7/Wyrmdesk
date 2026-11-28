@@ -1,0 +1,186 @@
+/* Wyrmdesk-Look wie auf wyrmdesk.ch, gemeinsam für Kampagnenbuch, Tracker und Karte: Schriften,
+   Farben und der dunkle Rahmen (Kopfzeile, Themenleiste #rail, Liste #panel). Jeder Teil lädt diese
+   Datei nach seinem eigenen style.css; dort bleibt, was nur ihn betrifft (Inhalt als Pergament).
+   Schriften: SIL Open Font License, siehe NOTICE.md. Adressen relativ zu dieser Datei, damit sie
+   unter /shared/ (Kampagnenbuch) und /tracker/kb/shared/, /map/kb/shared/ gleich funktionieren. */
+
+@font-face { font-family: "Cinzel"; src: url("fonts/cinzel-latin-wght.woff2") format("woff2"); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: "Alegreya"; src: url("fonts/alegreya-latin-wght.woff2") format("woff2"); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("fonts/alegreya-sans-latin-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("fonts/alegreya-sans-latin-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("fonts/alegreya-sans-latin-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+
+:root {
+  --font-head: "Cinzel", "Trajan Pro", Georgia, serif;
+  --font-serif: "Alegreya", Georgia, serif;
+  --font-sans: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+
+  /* Farben von wyrmdesk.ch */
+  --night-950: #0d0a08;
+  --night-900: #14100d;
+  --night-800: #1d1916;
+  --night-700: #26211d;
+  --night-600: #2f2822;
+  --parchment-200: #efe6d6;
+  --parchment-300: #ddd0bb;
+  --parchment-500: #ab9d8e;
+  --wine-600: #74211a;
+  --wine-500: #8e2a20;
+  --ember-400: #ea8a7b;
+  --ember-600: #c9533f;
+  --gold-200: #f3dca8;
+  --gold-300: #e8c57e;
+  --gold-400: #d8ae5a;
+  --gold-500: #b8892e;
+  --leather-600: #5a3324;
+
+  /* Pergament (der Inhalt); die Teile können einzelne Werte selbst setzen */
+  --accent: #8e2a20;
+  --gold: #b8892e;
+  --heading: #5e1a14;
+  --on-accent: #fff8ec;
+}
+
+body { font-family: var(--font-sans); }
+::selection { background: var(--wine-500); color: #fbf6ec; }
+
+/* ---------- Rahmen: Nacht ---------- */
+
+header, #rail, #panel {
+  color-scheme: dark;
+  --bg: var(--night-900);
+  --panel: var(--night-800);
+  --panel-alt: var(--night-700);
+  --border: rgb(184 137 46 / 0.25);
+  --text: var(--parchment-200);
+  --muted: var(--parchment-500);
+  --heading: var(--gold-200);
+  --link: var(--gold-300);
+  --accent-2: var(--gold-500);
+  --shadow: rgba(0, 0, 0, 0.6);
+  --danger-text: var(--ember-400);
+  --leather-text: var(--gold-200);
+  --leather-muted: var(--parchment-500);
+  color: var(--text);
+}
+
+header {
+  position: relative;
+  z-index: 20;
+  font-size: 14px; /* die Kopfzeile ist dicht belegt */
+  background: linear-gradient(180deg, var(--night-950), #17110d);
+  border-bottom: 1px solid rgb(184 137 46 / 0.3);
+  box-shadow: 0 6px 18px -8px rgb(0 0 0 / 0.7);
+}
+header::after {
+  /* goldene Linie, die zur Mitte hin leuchtet */
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-400) 50%, transparent);
+  opacity: 0.55;
+  pointer-events: none;
+}
+header h1 {
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-200);
+  text-shadow: 0 0 16px rgb(216 174 90 / 0.35);
+}
+header .kb-logo {
+  padding: 2px;
+  border-radius: 50%;
+  border: 1px solid rgb(216 174 90 / 0.5);
+  background: radial-gradient(circle at 35% 30%, var(--leather-600), var(--night-900));
+  box-shadow: 0 0 14px -4px rgb(216 174 90 / 0.5);
+}
+/* Umschalter Kampagnenbuch, Kampf, Karte (nav.js) */
+header .kb-nav { background: rgb(0 0 0 / 0.35); border: 1px solid rgb(184 137 46 / 0.2); }
+header .kb-nav a { color: var(--parchment-300); }
+header .kb-nav a.on {
+  background: linear-gradient(135deg, var(--ember-600), var(--wine-500) 60%, var(--wine-600));
+  color: #fff8ec;
+  box-shadow: 0 0 0 1px rgb(232 197 126 / 0.35) inset, 0 4px 14px -6px rgb(224 112 95 / 0.7);
+}
+header .kb-help { color: var(--gold-200); border: 1px solid rgb(216 174 90 / 0.4); background: rgb(0 0 0 / 0.3); }
+header a { color: var(--gold-200); }
+header .muted, header .small { color: var(--parchment-500); }
+
+/* Felder und Knöpfe in der Kopfzeile; :where hält die Regeln schwach, damit die Klassen der Teile
+   (.on, .active, .tab-btn …) weiter gelten. */
+:where(header) :where(input, select) {
+  background: rgb(13 10 8 / 0.6);
+  border: 1px solid rgb(184 137 46 / 0.35);
+  color: var(--parchment-200);
+}
+:where(header) input::placeholder { color: var(--parchment-500); }
+:where(header) :where(input, select):focus { outline: none; border-color: var(--gold-300); box-shadow: 0 0 0 2px rgb(216 174 90 / 0.2); }
+:where(header) :where(button, .button) {
+  background: rgb(13 10 8 / 0.45);
+  border: 1px solid rgb(216 174 90 / 0.45);
+  color: var(--gold-200);
+}
+:where(header) :where(button, .button):hover { background: rgb(216 174 90 / 0.12); border-color: var(--gold-300); }
+:where(header) button.ghost { background: transparent; border-color: transparent; color: var(--parchment-300); }
+:where(header) button.ghost:hover { color: var(--gold-200); border-color: rgb(216 174 90 / 0.4); }
+header button.toggle.on, #btn-setup.on {
+  background: linear-gradient(135deg, var(--ember-600), var(--wine-500) 60%, var(--wine-600));
+  border-color: var(--wine-600);
+  color: #fff8ec;
+}
+header mark, #panel mark { background: var(--gold-300); color: var(--night-900); }
+
+/* Themenleiste */
+#rail {
+  background: linear-gradient(180deg, var(--night-900), var(--night-950));
+  border-right: 1px solid rgb(184 137 46 / 0.22);
+}
+#rail button { color: var(--parchment-300); border-radius: 8px; }
+#rail button:hover { background: rgb(216 174 90 / 0.08); color: var(--gold-200); }
+#rail button.open {
+  background: radial-gradient(circle at 50% 30%, rgb(90 51 36 / 0.9), rgb(29 25 22 / 0.9));
+  border-color: rgb(216 174 90 / 0.6);
+  color: var(--gold-200);
+  box-shadow: 0 0 16px -6px rgb(216 174 90 / 0.6);
+}
+#rail hr { border-top-color: rgb(184 137 46 / 0.25); }
+#rail, #panel { scrollbar-color: rgb(184 137 46 / 0.35) transparent; }
+
+/* Liste daneben */
+#panel {
+  background: linear-gradient(180deg, var(--night-800), var(--night-900));
+  border-right: 1px solid rgb(184 137 46 / 0.22);
+}
+#panel .panel-head h2, #panel h2, #panel h3 { font-family: var(--font-head); color: var(--gold-300); letter-spacing: 0.08em; }
+:where(#panel) :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea) {
+  background: rgb(13 10 8 / 0.55);
+  border-color: rgb(184 137 46 / 0.3);
+  color: var(--parchment-200);
+}
+:where(#panel) input::placeholder { color: var(--parchment-500); }
+:where(#panel) :where(button, .button) { background: rgb(13 10 8 / 0.4); border-color: rgb(184 137 46 / 0.35); color: var(--parchment-200); }
+:where(#panel) :where(button, .button):hover { border-color: var(--gold-300); color: var(--gold-200); }
+#panel .list li:hover { background: rgb(216 174 90 / 0.08); }
+#panel .list li.active { background: rgb(216 174 90 / 0.12); box-shadow: inset 3px 0 0 var(--gold-400); }
+#panel .li-title { color: var(--parchment-200); }
+#panel .list li.active .li-title { color: var(--gold-200); }
+#panel .list li.list-group-head { color: var(--gold-300); }
+#panel .chip.on { background: var(--gold-500); border-color: var(--gold-400); color: var(--night-950); }
+#panel .badge { background: rgb(13 10 8 / 0.4); }
+#panel .badge.good { color: #8fd694; border-color: rgb(111 191 115 / 0.5); }
+#panel .badge.bad { color: var(--ember-400); border-color: rgb(224 112 95 / 0.5); }
+#panel .badge.open { color: var(--gold-300); border-color: rgb(216 174 90 / 0.5); }
+
+/* ---------- Knöpfe ---------- */
+
+button.primary {
+  background: linear-gradient(135deg, var(--ember-600), var(--wine-500) 60%, var(--wine-600));
+  border-color: var(--wine-600);
+  color: #fff8ec;
+  font-weight: 700;
+  box-shadow: 0 0 0 1px rgb(232 197 126 / 0.3) inset, 0 3px 10px -4px rgb(142 42 32 / 0.6);
+}
+button.primary:hover { color: #fff8ec; box-shadow: 0 0 0 1px rgb(243 220 168 / 0.55) inset, 0 6px 16px -4px rgb(224 112 95 / 0.7); }

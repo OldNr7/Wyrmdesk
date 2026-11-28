@@ -1,29 +1,32 @@
 :root {
-  /* Elfenbein und Tinte: helles Papier, dunkle Tinte, Lederleiste oben; Drachenblut-Rot (accent),
-     Bronze für Flächen (accent-2), Gold für Linien. Der Beamer bleibt dunkel (eigene Werte dort). */
+  /* Pergament für den Inhalt. Schriften, Farben von wyrmdesk.ch und der dunkle Rahmen (Kopfzeile,
+     Themenleiste, Listen) kommen aus /shared/wyrmdesk.css, gemeinsam mit Tracker und Karte. */
   color-scheme: light;
-  --bg: #f5f0e6;
-  --panel: #fffdf8;
-  --panel-alt: #ece4d4;
-  --border: #d6c8ad;
+  --bg: #f3ecdf;
+  --panel: #fbf6ec;
+  --panel-alt: #ece2d0;
+  --border: #d9c9a9;
   --text: #2a2520;
-  --muted: #74695a;
-  --accent: #8c2a24;
+  --muted: #76695a;
+  --accent: #8e2a20;
   --accent-2: #8a5d1f;
-  --gold: #b08a2a;
-  --heading: #5c2e1a;
+  --gold: #b8892e;
+  --heading: #5e1a14;
   --good: #3f6b22;
   --warn: #b8661a;
   --danger-text: #a3302a;
-  --font-head: Georgia, "Palatino Linotype", "Book Antiqua", serif;
-  --link: #2f5d62;
+  --font-head: "Cinzel", "Trajan Pro", Georgia, serif;
+  --font-serif: "Alegreya", Georgia, serif;
+  --font-sans: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --link: #7a2a1c;
   --secret: #f6e3df;
-  --on-accent: #fff;
-  --leather: #5c2e1a;
-  --leather-border: #4a2414;
-  --leather-text: #f3dca0;
-  --leather-muted: #e2c9a8;
-  --shadow: rgba(60, 40, 20, 0.2);
+  --on-accent: #fff8ec;
+  --leather: #14100d;
+  --leather-border: #3e352e;
+  --leather-text: #f3dca8;
+  --leather-muted: #ab9d8e;
+  --shadow: rgba(40, 25, 15, 0.25);
+
 }
 
 * { box-sizing: border-box; }
@@ -36,8 +39,8 @@ body {
   flex-direction: column;
   background: var(--bg);
   color: var(--text);
-  font-family: "Segoe UI", system-ui, sans-serif;
-  font-size: 14px;
+  font-family: var(--font-sans);
+  font-size: 15px;
 }
 
 h1, h2 { font-family: var(--font-head); }
@@ -519,3 +522,57 @@ iframe.doc-pdf { width: 100%; height: 78vh; border: 1px solid var(--border); bor
 .template-list .tpl-name { font-weight: 600; }
 .template-list .row { margin-top: 4px; }
 .template-from { margin: 4px 0 10px; }
+
+/* =====================================================================================
+   Wyrmdesk-Look (wie wyrmdesk.ch): Rahmen als Nacht mit Gold, Inhalt als Pergament.
+   ===================================================================================== */
+
+/* ---------- Inhalt: Pergament ---------- */
+
+#content {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at top left, rgb(255 255 255 / 0.55), transparent 55%),
+    radial-gradient(ellipse at bottom right, rgb(171 140 100 / 0.22), transparent 55%);
+  background-attachment: local;
+  box-shadow: inset 8px 0 18px -10px rgb(0 0 0 / 0.45);
+}
+.head-main h1, .journal-entry h2, .prose h2, .prose h3, #modal h2 {
+  font-family: var(--font-head);
+  color: var(--heading);
+  letter-spacing: 0.03em;
+}
+.head-main h1 { font-size: 27px; font-weight: 700; }
+.prose { font-family: var(--font-serif); font-size: 16px; line-height: 1.6; }
+.summary { font-family: var(--font-serif); font-size: 16.5px; color: #5a4a3c; }
+.field > h3, .card > h3, .charsheet-head h3 {
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+.prose blockquote { font-family: var(--font-serif); font-style: italic; border-left-color: var(--gold); background: rgb(184 137 46 / 0.1); }
+.card {
+  background: linear-gradient(160deg, #fffbf3, var(--panel));
+  border-color: rgb(184 137 46 / 0.45);
+  border-radius: 10px;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 6px 18px -12px rgb(60 35 20 / 0.5);
+}
+.portrait { border: 1px solid rgb(184 137 46 / 0.6); box-shadow: 0 0 0 4px var(--panel), 0 0 0 5px rgb(184 137 46 / 0.35), 0 10px 24px -12px rgb(0 0 0 / 0.5); }
+.chip-link { border-color: rgb(184 137 46 / 0.45); background: #fffbf3; }
+.chip-link:hover { border-color: var(--gold); text-decoration: none; box-shadow: 0 0 10px -4px rgb(184 137 46 / 0.6); }
+.tabs button.on { color: var(--heading); border-bottom-color: var(--accent); }
+.tabs button { font-family: var(--font-head); font-size: 13px; letter-spacing: 0.06em; }
+
+/* Einrichtung, Dialoge: Pergament mit goldenem Rahmen */
+#setup { background: var(--panel); border-left: 1px solid rgb(184 137 46 / 0.5); }
+#setup section h2, .setup-head h2 { font-family: var(--font-head); letter-spacing: 0.08em; color: var(--heading); }
+.setup-head { background: linear-gradient(180deg, var(--panel-alt), var(--panel)); }
+#modal-backdrop { background: rgb(13 10 8 / 0.65); backdrop-filter: blur(2px); }
+#modal {
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgb(184 137 46 / 0.6), 0 0 0 6px var(--night-800), 0 0 0 7px rgb(184 137 46 / 0.4), 0 30px 60px -20px rgb(0 0 0 / 0.8);
+}
+

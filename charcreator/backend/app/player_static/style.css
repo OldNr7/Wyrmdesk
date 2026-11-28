@@ -1,40 +1,93 @@
+/* Charaktererstellung im Stil von wyrmdesk.ch: Nacht am Lagerfeuer. Dunkler Grund, Glut und Gold als
+   Akzente, Cinzel für Titel. Das Charakterblatt und der Assistent bleiben Pergament (charsheet.css,
+   geteilt mit dem Kampagnenbuch, darum dort nichts ändern); hier bekommen sie nur Rahmen und Schrift.
+   Schriften liegen in fonts/ auf diesem Server (SIL Open Font License, siehe NOTICE.md). */
+
+@font-face { font-family: "Cinzel"; src: url("/fonts/cinzel-latin-wght.woff2") format("woff2"); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: "Alegreya"; src: url("/fonts/alegreya-latin-wght.woff2") format("woff2"); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("/fonts/alegreya-sans-latin-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("/fonts/alegreya-sans-latin-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("/fonts/alegreya-sans-latin-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+
 :root {
-  /* Elfenbein und Tinte: helles Papier, dunkle Tinte, Lederleiste oben; Drachenblut-Rot (accent),
-     Bronze für Flächen (accent-2), Gold für Linien. Der Beamer bleibt dunkel (eigene Werte dort). */
-  color-scheme: light;
-  --bg: #f5f0e6;
-  --panel: #fffdf8;
-  --panel-alt: #ece4d4;
-  --border: #d6c8ad;
-  --text: #2a2520;
-  --muted: #74695a;
-  --accent: #8c2a24;
-  --accent-2: #8a5d1f;
-  --gold: #b08a2a;
-  --heading: #5c2e1a;
-  --good: #3f6b22;
-  --warn: #b8661a;
-  --danger-text: #a3302a;
-  --font-head: Georgia, "Palatino Linotype", "Book Antiqua", serif;
-  --link: #2f5d62;
-  --secret: #f6e3df;
-  --on-accent: #fff;
-  --leather: #5c2e1a;
-  --leather-border: #4a2414;
-  --leather-text: #f3dca0;
-  --leather-muted: #e2c9a8;
-  --shadow: rgba(60, 40, 20, 0.2);
-  --icon-bg: #2a221a;
+  color-scheme: dark;
+  /* Farben wie auf wyrmdesk.ch */
+  --night-950: #0d0a08;
+  --night-900: #14100d;
+  --night-800: #1d1916;
+  --night-700: #26211d;
+  --night-600: #2f2822;
+  --night-500: #3e352e;
+  --parchment-100: #f5efe4;
+  --parchment-200: #efe6d6;
+  --parchment-300: #ddd0bb;
+  --parchment-500: #ab9d8e;
+  --wine-600: #74211a;
+  --wine-500: #8e2a20;
+  --ember-400: #ea8a7b;
+  --ember-500: #e0705f;
+  --ember-600: #c9533f;
+  --gold-200: #f3dca8;
+  --gold-300: #e8c57e;
+  --gold-400: #d8ae5a;
+  --gold-500: #b8892e;
+  --leather-700: #3a2219;
+  --leather-600: #5a3324;
+
+  /* Namen, die auch calendar.css (Termine) benutzt */
+  --bg: var(--night-900);
+  --panel: var(--night-800);
+  --panel-alt: var(--night-700);
+  --border: rgb(184 137 46 / 0.28);
+  --text: var(--parchment-200);
+  --muted: var(--parchment-500);
+  --accent: var(--wine-500);
+  --accent-2: var(--gold-500);
+  --gold: var(--gold-400);
+  --heading: var(--gold-200);
+  --good: #6fbf73;
+  --warn: #e0a040;
+  --danger-text: var(--ember-400);
+  --link: var(--gold-300);
+  --on-accent: #fff8ec;
+  --shadow: rgba(0, 0, 0, 0.6);
+
+  --font-display: "Cinzel", "Trajan Pro", Georgia, serif;
+  --font-serif: "Alegreya", Georgia, serif;
+  --font-head: var(--font-display);
+  --font-sans: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }
 
+html { background: var(--night-900); }
+
 body {
   margin: 0;
-  background: var(--bg);
+  min-height: 100vh;
+  overflow-x: clip;
   color: var(--text);
-  font-family: "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 1.06rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--night-900);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgb(142 42 32 / 0.16), transparent 50%),
+    radial-gradient(ellipse at 90% 30%, rgb(184 137 46 / 0.08), transparent 45%),
+    radial-gradient(ellipse at 50% 120%, rgb(224 112 95 / 0.14), transparent 55%);
+  background-attachment: fixed;
 }
+
+::selection { background: var(--wine-500); color: #fbf6ec; }
+
+/* Glut, die aufsteigt (embers.js); hinter allem, ohne Klicks */
+#embers { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }
+
+a { color: var(--link); text-decoration-color: rgb(184 137 46 / 0.45); text-underline-offset: 4px; transition: color 0.2s; }
+a:hover { color: var(--gold-200); }
+
+/* ---------- Kopfzeile ---------- */
 
 .top { position: sticky; top: 0; z-index: 10; }
 
@@ -43,137 +96,247 @@ header {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  background: var(--leather);
-  border-bottom: 2px solid var(--accent);
-  font-family: var(--font-head);
-  color: var(--leather-text);
+  padding: 10px 20px;
+  background: rgb(13 10 8 / 0.86);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgb(184 137 46 / 0.25);
+  box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.7);
+  color: var(--gold-200);
+}
+header::after {
+  /* Goldene Linie, die zur Mitte hin leuchtet */
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-400) 50%, transparent);
+  opacity: 0.6;
+}
+.top { position: sticky; }
+.top header { position: relative; }
+
+#campaign-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.02rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-200);
+  text-shadow: 0 0 18px rgb(216 174 90 / 0.35);
 }
 
 .spacer { flex: 1; }
 
-/* Only the page's own controls (header, list, password): the character sheet styles its fields
-   itself, as in the Kampagnenbuch's player view. */
+/* Wyrmdesk-Logo in der Kopfzeile, wie ein Siegel */
+.brand-logo {
+  display: block;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  padding: 3px;
+  border-radius: 50%;
+  border: 1px solid rgb(216 174 90 / 0.5);
+  background: radial-gradient(circle at 35% 30%, var(--leather-600), var(--night-900));
+  box-shadow: 0 0 0 3px rgb(13 10 8 / 0.6), 0 0 18px -4px rgb(216 174 90 / 0.5);
+}
+
+/* ---------- Knöpfe und Felder ---------- */
+
+/* Nur die Bedienelemente der Seite (Kopfzeile, Liste, Passwort, Dialoge): das Charakterblatt gestaltet
+   seine Felder selbst, wie in der Spieleransicht des Kampagnenbuchs. */
 .new-char-form input, .password-gate input, header select, button {
   font: inherit;
   color: var(--text);
-  border-radius: 6px;
-  padding: 7px 12px;
+  border-radius: 999px;
+  padding: 7px 14px;
 }
 
-.new-char-form input, .password-gate input, header select {
-  background: var(--panel);
-  border: 1px solid var(--border);
+.new-char-form input, .password-gate input, header select, .copy-row input {
+  background: rgb(13 10 8 / 0.55);
+  border: 1px solid rgb(184 137 46 / 0.35);
+  color: var(--parchment-100);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
+.new-char-form input::placeholder, .password-gate input::placeholder { color: var(--parchment-500); }
+.new-char-form input:focus, .password-gate input:focus, header select:focus, .copy-row input:focus {
+  outline: none;
+  border-color: var(--gold-300);
+  box-shadow: 0 0 0 3px rgb(216 174 90 / 0.18);
+}
+header select, header .ui-lang-switch { padding: 4px 8px; border-radius: 8px; font-size: 0.85rem; background: rgb(13 10 8 / 0.55); color: var(--gold-200); }
 
 button {
-  background: var(--accent);
-  border: 1px solid var(--accent);
+  position: relative;
+  overflow: hidden;
+  border: 0;
   color: var(--on-accent);
+  background: linear-gradient(135deg, var(--ember-600), var(--wine-500) 60%, var(--wine-600));
+  box-shadow: 0 0 0 1px rgb(232 197 126 / 0.35) inset, 0 6px 20px -8px rgb(224 112 95 / 0.6);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   cursor: pointer;
-  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
 }
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgb(243 220 168 / 0.6) inset, 0 10px 28px -6px rgb(224 112 95 / 0.8);
+}
+button:disabled { opacity: 0.55; cursor: default; }
+button:focus-visible { outline: 2px solid var(--gold-300); outline-offset: 2px; }
 
-button.ghost { background: transparent; border-color: var(--border); color: var(--text); }
-header button.ghost { color: var(--leather-text); border-color: var(--leather-muted); }
+button.ghost {
+  background: rgb(13 10 8 / 0.4);
+  border: 1px solid rgb(216 174 90 / 0.5);
+  color: var(--gold-200);
+  box-shadow: none;
+}
+button.ghost:hover:not(:disabled) { background: rgb(216 174 90 / 0.12); border-color: var(--gold-300); box-shadow: 0 0 20px -6px rgb(216 174 90 / 0.5); }
+header button { padding: 6px 14px; font-size: 0.72rem; }
 button[hidden] { display: none; }
 
-/* The sheet gets the full width (up to its own 1180px), like the Kampagnenbuch's player view, so
-   it shows three columns there too; only the character list stays narrow. */
-main { padding: 8px 16px 32px; }
-main .char-sheet { margin: 8px auto; }
+/* Der grosse Knopf mit Glanz, der darüber streicht */
+.btn-epic { padding: 14px 30px; font-size: 0.92rem; letter-spacing: 0.16em; }
+.btn-epic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgb(255 236 200 / 0.35) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 3.5s linear infinite;
+  pointer-events: none;
+}
 
-.empty { color: var(--muted); text-align: center; margin-top: 48px; }
+/* ---------- Seite ---------- */
+
+/* Das Blatt bekommt die volle Breite (bis zu seinen eigenen 1180px), wie in der Spieleransicht des
+   Kampagnenbuchs, damit es auch hier drei Spalten zeigt; nur die Charakterliste bleibt schmal. */
+main { padding: 12px 16px 40px; }
+main .char-sheet {
+  margin: 16px auto;
+  /* Pergament mit goldenem Doppelrahmen wie auf wyrmdesk.ch */
+  box-shadow: 0 0 0 1px rgb(184 137 46 / 0.5), 0 0 0 7px rgb(29 25 22 / 0.9), 0 0 0 8px rgb(184 137 46 / 0.35), 0 40px 80px -30px rgb(0 0 0 / 0.9);
+  animation: rise 0.6s ease-out both;
+}
+
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0.04em; color: var(--gold-200); text-wrap: balance; }
+
+.empty { color: var(--muted); text-align: center; margin-top: 48px; font-family: var(--font-serif); font-style: italic; font-size: 1.1em; }
 
 .status {
-  margin: 8px 16px 0;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: var(--panel);
+  max-width: 900px;
+  margin: 12px auto 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--night-800);
+  border: 1px solid var(--border);
 }
 .status.ok { border-left: 4px solid var(--good); }
-.status.error { border-left: 4px solid var(--accent); }
+.status.error { border-left: 4px solid var(--ember-500); }
 .status[hidden] { display: none; }
 
-/* ---------- character list ---------- */
+/* Karten: dunkles Leder mit goldener Kante, wie die Karten auf wyrmdesk.ch */
+.landing, .char-list li, .new-char-form, .dates-link, .password-gate, .date-card, #dates-calendar {
+  background: linear-gradient(160deg, rgb(58 34 25 / 0.6), rgb(20 16 13 / 0.88));
+  border: 1px solid rgb(184 137 46 / 0.25);
+  box-shadow: 0 1px 0 rgb(243 220 168 / 0.06) inset, 0 20px 40px -24px rgb(0 0 0 / 0.8);
+}
+
+/* ---------- Charakterliste ---------- */
 
 .char-list {
   list-style: none;
   padding: 0;
-  margin: 16px 0;
+  margin: 20px 0;
 }
 
 .char-list li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  margin-bottom: 8px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  gap: 14px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  border-radius: 16px;
   cursor: pointer;
+  transition: transform 0.35s, border-color 0.35s, box-shadow 0.35s;
+  animation: rise 0.5s ease-out both;
 }
-.char-list li:hover { border-color: var(--gold); }
+.char-list li:nth-child(2) { animation-delay: 0.06s; }
+.char-list li:nth-child(3) { animation-delay: 0.12s; }
+.char-list li:nth-child(4) { animation-delay: 0.18s; }
+.char-list li:nth-child(5) { animation-delay: 0.24s; }
+.char-list li:hover {
+  transform: translateY(-3px);
+  border-color: rgb(216 174 90 / 0.6);
+  box-shadow: 0 1px 0 rgb(243 220 168 / 0.12) inset, 0 30px 60px -24px rgb(0 0 0 / 0.9), 0 0 40px -10px rgb(216 174 90 / 0.35);
+}
 
 .char-list .char-pic {
   flex: 0 0 auto;
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgb(216 174 90 / 0.55);
   object-fit: cover;
-  background: var(--panel-alt);
+  background: radial-gradient(circle at 35% 30%, var(--leather-600), var(--night-900));
+  box-shadow: 0 0 0 3px rgb(13 10 8 / 0.6), 0 0 20px -4px rgb(216 174 90 / 0.45);
 }
+.char-list li:hover .char-pic { animation: glow-pulse 1.8s ease-in-out infinite; }
 .char-list .char-pic.no-pic {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-head);
-  font-size: 1.3em;
-  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 1.4em;
+  font-weight: 700;
+  color: var(--gold-200);
 }
 .char-list .char-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.char-list .name { font-weight: 600; }
-.char-list .facts { color: var(--muted); font-size: 0.88em; }
+.char-list .name { font-family: var(--font-display); font-weight: 700; font-size: 1.1em; letter-spacing: 0.04em; color: var(--gold-200); }
+.char-list .facts { color: var(--parchment-300); font-family: var(--font-serif); font-style: italic; font-size: 0.95em; }
 .char-list .player { color: var(--muted); font-size: 0.9em; }
 
 .badge {
-  font-size: 0.8em;
-  padding: 2px 8px;
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
 }
-.badge.fertig { color: var(--good); border-color: var(--good); }
-.badge.draft { color: var(--warn); border-color: var(--warn); }
+.badge.fertig { color: #8fd694; border-color: rgb(111 191 115 / 0.5); background: rgb(111 191 115 / 0.12); }
+.badge.draft { color: var(--gold-300); border-color: rgb(216 174 90 / 0.5); background: rgb(216 174 90 / 0.1); }
 
 .new-char-form {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-top: 16px;
-  padding: 16px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 16px;
 }
 .new-char-form input { flex: 1 1 160px; }
 
 .dates-link {
   display: block;
   width: 100%;
-  margin-top: 12px;
-  padding: 12px 16px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  font-weight: 600;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  color: var(--gold-200);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-align: center;
+  text-decoration: none;
+  transition: border-color 0.3s, transform 0.3s;
 }
-.dates-link:hover { border-color: var(--gold); }
+.dates-link:hover { border-color: rgb(216 174 90 / 0.6); transform: translateY(-2px); }
 
-/* ---------- Termine (session date poll) ---------- */
+/* ---------- Termine (Umfrage für Spieltermine) ---------- */
 
 .dates-page { max-width: 560px; margin: 0 auto; }
 
@@ -186,42 +349,36 @@ main .char-sheet { margin: 8px auto; }
 }
 .name-field select, .name-field input {
   flex: 1 1 220px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  background: rgb(13 10 8 / 0.55);
+  border: 1px solid rgb(184 137 46 / 0.35);
+  border-radius: 10px;
   padding: 7px 12px;
   font: inherit;
   color: var(--text);
 }
 .name-field input[hidden] { display: none; }
 
-/* A bordered card around the grid, so the legend below it reads as a caption under the
-   calendar, not as part of it. */
+/* Eine Karte um das Raster, damit die Legende darunter als Beschriftung zum Kalender liest. */
 #dates-calendar {
   position: relative;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 12px;
   margin-bottom: 0;
 }
 .cal-legend { margin: 14px 0 20px; padding-top: 10px; border-top: 1px solid var(--border); }
 
-/* Read-only: who answered what for a day. Answering itself happens in the popover the
-   calendar opens (.date-popover, .vote-buttons below), not here. */
+/* Nur lesen: wer an einem Tag was geantwortet hat. Geantwortet wird im Popover des Kalenders. */
 .dates-list { list-style: none; margin: 20px 0 0; padding: 0; }
 
 .date-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 12px 16px;
   margin-bottom: 10px;
 }
-.date-card.mark-open { background: var(--panel-alt); border-color: var(--accent-2); }
-.date-card.mark-yes { background: color-mix(in srgb, var(--good) 25%, var(--panel)); border-color: var(--good); }
-.date-card.mark-maybe { background: color-mix(in srgb, var(--warn) 25%, var(--panel)); border-color: var(--warn); }
-.date-card.mark-no { background: color-mix(in srgb, var(--accent) 20%, var(--panel)); border-color: var(--accent); }
+.date-card.mark-open { border-color: var(--gold-500); }
+.date-card.mark-yes { background: color-mix(in srgb, var(--good) 18%, var(--night-800)); border-color: var(--good); }
+.date-card.mark-maybe { background: color-mix(in srgb, var(--warn) 18%, var(--night-800)); border-color: var(--warn); }
+.date-card.mark-no { background: color-mix(in srgb, var(--ember-500) 18%, var(--night-800)); border-color: var(--ember-500); }
 .date-card .date-head {
   display: flex;
   justify-content: space-between;
@@ -229,7 +386,7 @@ main .char-sheet { margin: 8px auto; }
   gap: 8px;
   flex-wrap: wrap;
 }
-.date-card .date-title { font-weight: 600; }
+.date-card .date-title { font-weight: 700; color: var(--gold-200); }
 .date-card .date-note { color: var(--muted); font-size: 0.9em; }
 
 .date-popover-note-text { color: var(--muted); font-size: 0.9em; }
@@ -237,40 +394,39 @@ main .char-sheet { margin: 8px auto; }
 .vote-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
 .vote-buttons button {
   flex: 1 1 auto;
-  background: var(--panel-alt);
+  background: var(--night-700);
   border: 1px solid var(--border);
+  box-shadow: none;
   color: var(--text);
   padding: 7px 4px;
-  font-size: 0.92em;
+  font-size: 0.8em;
 }
-.vote-buttons button.active.yes { background: var(--good); border-color: var(--good); color: var(--on-accent); }
-.vote-buttons button.active.maybe { background: var(--warn); border-color: var(--warn); color: var(--on-accent); }
-.vote-buttons button.active.no { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.vote-buttons button.active.yes { background: var(--good); border-color: var(--good); color: #0d0a08; }
+.vote-buttons button.active.maybe { background: var(--warn); border-color: var(--warn); color: #0d0a08; }
+.vote-buttons button.active.no { background: var(--wine-500); border-color: var(--ember-500); color: var(--on-accent); }
 
 .vote-list { font-size: 0.85em; color: var(--muted); }
 .vote-list .yes { color: var(--good); }
 .vote-list .maybe { color: var(--warn); }
-.vote-list .no { color: var(--accent); }
+.vote-list .no { color: var(--ember-400); }
 .date-card .vote-list { margin-top: 8px; }
 
-/* ---------- campaign password ---------- */
+/* ---------- Kampagnen-Passwort ---------- */
 
 .password-gate {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 320px;
-  margin: 64px auto 0;
-  padding: 20px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  gap: 12px;
+  max-width: 340px;
+  margin: 72px auto 0;
+  padding: 24px;
+  border-radius: 16px;
   text-align: center;
 }
-.password-gate p { margin: 0; color: var(--muted); }
+.password-gate p { margin: 0; color: var(--parchment-300); }
 .password-gate .status { margin: 0; }
 
-/* The list page stays narrow and centered; the sheet takes the full width (see main above). */
+/* Die Liste bleibt schmal und mittig; das Blatt nimmt die volle Breite (siehe main oben). */
 .char-list, .new-char-form, .dates-link, main > .empty {
   max-width: 900px;
   margin-left: auto;
@@ -278,74 +434,285 @@ main .char-sheet { margin: 8px auto; }
 }
 
 @media (max-width: 600px) {
-  header { padding: 8px; }
+  header { padding: 8px 10px; }
+  #campaign-name { font-size: 0.88rem; letter-spacing: 0.08em; }
   main { padding: 4px 6px 24px; }
+  main .char-sheet { box-shadow: 0 0 0 1px rgb(184 137 46 / 0.5), 0 20px 40px -20px rgb(0 0 0 / 0.9); }
 }
 
-/* Wyrmdesk logo in the header */
-.brand-logo { display: block; width: 28px; height: 28px; flex-shrink: 0; }
+/* ---------- offener Modus: Startseite, persönlicher Link, Teilen ---------- */
 
-/* ---------- open mode (start page, the player's own link), share link ---------- */
+.open-note { max-width: 900px; margin: 16px auto 4px; }
 
-.landing, .open-note { max-width: 640px; margin: 24px auto; }
+/* Startseite: Held mit Siegel, Titel in Gold und drei Schritten wie eine Questreihe */
+.hero {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 56px 16px 28px;
+  text-align: center;
+  animation: rise 0.8s ease-out both;
+}
+.hero::before {
+  /* Glut hinter dem Siegel */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  width: 360px;
+  height: 360px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgb(224 112 95 / 0.28), transparent 62%);
+  filter: blur(10px);
+  z-index: -1;
+  animation: glow-pulse 5s ease-in-out infinite;
+}
+.hero-seal {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  border: 1px solid rgb(216 174 90 / 0.6);
+  background: radial-gradient(circle at 35% 30%, var(--leather-600), var(--night-950));
+  box-shadow: 0 0 0 6px rgb(13 10 8 / 0.7), 0 0 0 7px rgb(184 137 46 / 0.35), 0 0 60px -6px rgb(216 174 90 / 0.55);
+  animation: float 7s ease-in-out infinite;
+}
+.hero-seal img { width: 76px; height: 76px; }
+.eyebrow {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--ember-400);
+}
+.hero h1 {
+  margin: 0 0 14px;
+  font-size: clamp(1.15rem, 5.6vw, 3.2rem);
+  padding: 0 0.1em;
+  line-height: 1.08;
+  font-weight: 800;
+  background: linear-gradient(180deg, #fbf0d0 10%, var(--gold-300) 55%, var(--gold-500));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 24px rgb(216 174 90 / 0.3));
+}
+.hero .lead {
+  max-width: 600px;
+  margin: 0 auto 26px;
+  font-family: var(--font-serif);
+  font-size: 1.22rem;
+  line-height: 1.5;
+  color: var(--parchment-100);
+}
+.hero .back { margin: 16px 0 0; }
+
+.quest {
+  list-style: none;
+  max-width: 980px;
+  margin: 8px auto 0;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+.quest li {
+  position: relative;
+  padding: 26px 20px 20px;
+  border-radius: 18px;
+  text-align: center;
+  background: linear-gradient(160deg, rgb(58 34 25 / 0.6), rgb(20 16 13 / 0.88));
+  border: 1px solid rgb(184 137 46 / 0.25);
+  box-shadow: 0 1px 0 rgb(243 220 168 / 0.06) inset, 0 20px 40px -24px rgb(0 0 0 / 0.8);
+  transition: transform 0.4s, border-color 0.4s, box-shadow 0.4s;
+  animation: rise 0.7s ease-out both;
+}
+.quest li:nth-child(2) { animation-delay: 0.12s; }
+.quest li:nth-child(3) { animation-delay: 0.24s; }
+.quest li:hover {
+  transform: translateY(-5px);
+  border-color: rgb(216 174 90 / 0.6);
+  box-shadow: 0 1px 0 rgb(243 220 168 / 0.12) inset, 0 30px 60px -24px rgb(0 0 0 / 0.9), 0 0 40px -10px rgb(216 174 90 / 0.35);
+}
+.quest-num {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  border: 1px solid rgb(216 174 90 / 0.55);
+  background: radial-gradient(circle at 35% 30%, var(--leather-600), var(--night-900));
+  box-shadow: 0 0 0 4px rgb(13 10 8 / 0.6), 0 0 24px -4px rgb(216 174 90 / 0.45);
+  font-family: var(--font-serif);
+  font-variant-numeric: lining-nums;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--gold-200);
+}
+.quest li:hover .quest-num { animation: glow-pulse 1.8s ease-in-out infinite; }
+.quest h2 { margin: 0 0 8px; font-size: 1.1rem; }
+.quest p { margin: 0; color: var(--parchment-300); line-height: 1.5; }
+
+.landing-foot { max-width: 640px; margin: 28px auto 0; padding: 0 16px; text-align: center; }
+
+/* Teilen-Seite (was die Spielleitung öffnet) */
 .landing {
-  padding: 20px 24px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  max-width: 640px;
+  margin: 40px auto;
+  padding: 26px 28px;
+  border-radius: 18px;
+  animation: rise 0.6s ease-out both;
 }
-.landing h1, .landing h2 { font-family: var(--font-head); color: var(--heading); margin: 0 0 10px; }
-.landing h2 { font-size: 1.1em; margin-top: 18px; }
-.landing p { line-height: 1.5; }
-.landing #open-new { font-size: 1.05em; padding: 10px 18px; margin: 6px 0 10px; }
-.hint { color: var(--muted); font-size: 0.9em; }
-a { color: var(--link); }
+.landing h1, .landing h2 { margin: 0 0 10px; }
+.landing h1 { font-size: 1.9rem; }
+.landing h2 { font-size: 1.1em; margin-top: 22px; color: var(--gold-300); }
+.landing p { line-height: 1.55; }
+
+.hint { color: var(--muted); font-size: 0.92em; }
 a.button {
   display: inline-block;
-  padding: 7px 12px;
-  border-radius: 6px;
-  background: var(--accent);
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--ember-600), var(--wine-500) 60%, var(--wine-600));
+  box-shadow: 0 0 0 1px rgb(232 197 126 / 0.35) inset, 0 6px 20px -8px rgb(224 112 95 / 0.6);
   color: var(--on-accent);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   text-decoration: none;
+  transition: transform 0.2s;
 }
+a.button:hover { transform: translateY(-1px); color: var(--on-accent); }
 
 .open-note {
-  max-width: 900px;
-  margin: 12px auto 4px;
-  padding: 10px 14px;
-  background: var(--panel);
-  border: 1px solid var(--gold);
-  border-left: 4px solid var(--gold);
-  border-radius: 6px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgb(58 34 25 / 0.7), rgb(20 16 13 / 0.9));
+  border: 1px solid rgb(216 174 90 / 0.45);
+  border-left: 4px solid var(--gold-400);
+  box-shadow: 0 0 30px -12px rgb(216 174 90 / 0.4);
 }
-.open-note p { margin: 0 0 8px; line-height: 1.45; }
+.open-note p { margin: 0 0 10px; line-height: 1.5; }
+.open-note b { color: var(--gold-200); font-family: var(--font-display); letter-spacing: 0.04em; }
 
-.copy-row { display: flex; gap: 6px; }
+.copy-row { display: flex; gap: 8px; }
 .copy-row input {
   flex: 1;
   min-width: 0;
   font: inherit;
   font-size: 0.9em;
-  padding: 6px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text);
+  padding: 7px 12px;
+  border-radius: 999px;
 }
 
 #share-dialog {
   max-width: 520px;
   width: calc(100% - 32px);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--panel);
+  border: 1px solid rgb(184 137 46 / 0.5);
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--leather-700), var(--night-900));
   color: var(--text);
-  padding: 18px 20px;
+  padding: 20px 22px;
+  box-shadow: 0 0 0 6px rgb(13 10 8 / 0.8), 0 0 0 7px rgb(184 137 46 / 0.3), 0 40px 80px -20px rgb(0 0 0 / 0.9);
 }
-#share-dialog::backdrop { background: rgba(30, 20, 10, 0.45); }
-#share-dialog h2 { font-family: var(--font-head); color: var(--heading); margin: 0 0 8px; font-size: 1.2em; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+#share-dialog::backdrop { background: rgb(8 6 4 / 0.7); backdrop-filter: blur(3px); }
+#share-dialog h2 { margin: 0 0 10px; font-size: 1.25em; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 
-#site-foot { text-align: center; font-size: 0.85em; color: var(--muted); padding: 0 16px 24px; }
+#site-foot {
+  text-align: center;
+  font-size: 0.85em;
+  color: var(--muted);
+  padding: 8px 16px 28px;
+  letter-spacing: 0.04em;
+}
+#site-foot a { color: var(--parchment-500); }
+#site-foot a:hover { color: var(--gold-200); }
 #site-foot[hidden] { display: none; }
+
+/* ---------- Assistent und Erklärungen (Pergament aus charsheet.css, hier nur Rahmen und Schrift) ---------- */
+
+/* Pergament ist hell: Auswahllisten, Felder und Häkchen dort hell zeichnen (sonst schwarze Schrift auf
+   der dunklen Liste, die der Browser bei color-scheme: dark aufklappt). */
+.cs-popup, main .char-sheet, .pc-print { color-scheme: light; }
+.cs-popup select option, main .char-sheet select option { background: #fffaf0; color: #2b2118; }
+
+.cs-popup {
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px rgb(184 137 46 / 0.6), 0 0 0 7px rgb(29 25 22 / 0.95), 0 0 0 8px rgb(184 137 46 / 0.4), 0 40px 90px -20px rgb(0 0 0 / 0.95);
+}
+.cs-popup[open] { animation: rise 0.35s ease-out both; }
+.cs-popup::backdrop { background: rgb(8 6 4 / 0.72); backdrop-filter: blur(3px); }
+.cs-popup-body h3 { font-family: var(--font-display); color: #5c2e1a; letter-spacing: 0.03em; }
+.cs-popup a, main .char-sheet a { color: #2f5d62; }
+/* Die Knöpfe im Pergament gestaltet charsheet.css; die allgemeinen Knopf-Regeln oben nicht übernehmen */
+.cs-popup button, main .char-sheet button {
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  overflow: visible;
+}
+.cs-popup button:not(.lu-next):not(.wz-tile):not(.wz-chip), main .char-sheet button { box-shadow: none; }
+.cs-popup button:hover:not(:disabled), main .char-sheet button:hover:not(:disabled) { transform: none; }
+.lu .lu-steps li.now { color: #8e2a20; }
+.lu .lu-next {
+  background: linear-gradient(135deg, var(--ember-600), var(--wine-500) 60%, var(--wine-600));
+  border-color: var(--wine-600);
+  color: #fff8ec;
+}
+.lu .wz-tile:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgb(60 40 20 / 0.25), 0 0 0 1px #b08a2a; }
+
+/* ---------- Bewegung ---------- */
+
+/* Kalender (calendar.css): Tage und Monatspfeile nicht als Glut-Knöpfe, Zahlen in Alegreya (Cinzel-Ziffern lesen sich schlecht) */
+.cal-day {
+  font-family: var(--font-serif);
+  font-variant-numeric: lining-nums;
+  font-size: 0.95rem;
+  letter-spacing: normal;
+  text-transform: none;
+  border-radius: 8px;
+  box-shadow: none;
+}
+.cal-day:hover:not(:disabled) { transform: none; box-shadow: 0 0 14px -4px rgb(216 174 90 / 0.5); }
+.cal-title { letter-spacing: 0.08em; color: var(--gold-200); }
+.cal-nav {
+  padding: 2px 12px;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  background: rgb(13 10 8 / 0.4);
+  border: 1px solid rgb(216 174 90 / 0.5);
+  color: var(--gold-200);
+  box-shadow: none;
+}
+
+/* Im engen Popup des Kalenders normale Schrift statt Grossbuchstaben */
+.date-popover button {
+  padding: 5px 10px;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+}
+.date-popover .date-popover-actions button { padding: 5px 10px; font-size: 0.86rem; }
+.date-popover input { border-radius: 10px; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+@keyframes glow-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

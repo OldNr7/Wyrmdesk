@@ -804,14 +804,20 @@ function renderLanding() {
   const back = storage((s) => s.getItem(OPEN_KEY));
   document.getElementById("campaign-name").textContent = t("Charaktererstellung");
   appEl.innerHTML = `
-    <div class="landing">
+    <section class="hero">
+      <div class="hero-seal"><img src="/shared/brand/wyrmdesk-logo-dunkel.svg" alt="" width="76" height="76"></div>
+      <p class="eyebrow">Wyrmdesk</p>
       <h1>${t("Charaktererstellung")}</h1>
-      <p>${t("Erstelle Schritt für Schritt einen Charakter für die 5. Edition, mit den freien Grundregeln (SRD). Ohne Anmeldung.")}</p>
-      <p>${t("Am Ende druckst du das Charakterblatt oder speicherst es als PDF, lädst den Charakter als Datei herunter oder schickst deiner Spielleitung einen Link, mit dem sie ihn in Wyrmdesk übernimmt.")}</p>
-      <button type="button" id="open-new">${t("Neuen Charakter erstellen")}</button>
-      ${back ? `<p><a href="/k/${encodeURIComponent(back)}">${t("Zurück zu deinen Charakteren auf diesem Gerät")}</a></p>` : ""}
-      <p class="hint">${t("Deine Charaktere werden auf diesem Server gespeichert und {days} Tage nach der letzten Nutzung gelöscht.", { days: site.days })}</p>
-    </div>`;
+      <p class="lead">${t("Erstelle Schritt für Schritt einen Charakter für die 5. Edition, mit den freien Grundregeln (SRD). Ohne Anmeldung.")}</p>
+      <button type="button" id="open-new" class="btn-epic">${t("Neuen Charakter erstellen")}</button>
+      ${back ? `<p class="back"><a href="/k/${encodeURIComponent(back)}">${t("Zurück zu deinen Charakteren auf diesem Gerät")}</a></p>` : ""}
+    </section>
+    <ol class="quest">
+      <li><span class="quest-num">1</span><h2>${t("Volk und Klasse")}</h2><p>${t("Wähle aus den Völkern und Klassen der Grundregeln, jede mit Bild und kurzer Beschreibung.")}</p></li>
+      <li><span class="quest-num">2</span><h2>${t("Attribute und Ausrüstung")}</h2><p>${t("Der Assistent führt dich durch Hintergrund, Attribute, Fertigkeiten und Ausrüstung und rechnet die Werte für dich aus.")}</p></li>
+      <li><span class="quest-num">3</span><h2>${t("Ab an den Spieltisch")}</h2><p>${t("Am Ende druckst du das Charakterblatt oder speicherst es als PDF, lädst den Charakter als Datei herunter oder schickst deiner Spielleitung einen Link, mit dem sie ihn in Wyrmdesk übernimmt.")}</p></li>
+    </ol>
+    <p class="hint landing-foot">${t("Deine Charaktere werden auf diesem Server gespeichert und {days} Tage nach der letzten Nutzung gelöscht.", { days: site.days })}</p>`;
   document.getElementById("open-new").addEventListener("click", async (e) => {
     e.target.disabled = true;
     try {

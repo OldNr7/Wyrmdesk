@@ -12,6 +12,22 @@ Neue Einträge kommen laufend unter „Unveröffentlicht“; beim Release bekomm
 
 ## Unveröffentlicht
 
+## 0.2.0 – Wyrmdesk-Look und Kampagnen als Datei
+
+- **Kampagnenbuch:** Vorlagen als Datei weitergeben und einspielen (Einrichtung → Vorlagen): eine ZIP-Datei
+  mit allen Bildern, Karten und Dokumenten, standardmässig ohne Spielercharaktere und mit zurückgesetztem
+  Spielstand. So lassen sich Kampagnen von wyrmdesk.ch übernehmen.
+- **Kampagnenbuch:** «Kampagne als Vorlage sichern…» brach mit einem Fehler ab.
+
+- **Kampagnenbuch, Tracker und Karte:** im Stil von wyrmdesk.ch: Kopfzeile, Themenleisten und Listen
+  dunkel mit Gold, der Inhalt Pergament, Titel in Cinzel; im Tracker leuchtet der aktive Zug golden.
+  Charakterblatt unverändert.
+- **Beamer und Spieleransicht:** Handouts mit goldenem Titel und Pergament im Goldrahmen; die
+  Spieleransicht dunkel wie die Charaktererstellung, das Blatt im goldenen Rahmen.
+
+- **Charaktererstellung:** im Stil von wyrmdesk.ch, dunkel mit Glut und Gold, neue Startseite im
+  offenen Modus, auch die Verwaltung. Charakterblatt und Assistent bleiben Pergament.
+
 ## 0.1.0 – erste Vorabversion
 
 Erster veröffentlichter Stand, als Docker-Stack und als native App (Windows, Linux).

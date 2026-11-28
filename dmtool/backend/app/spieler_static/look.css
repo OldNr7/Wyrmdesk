@@ -1,0 +1,41 @@
+/* Spieleransicht im Stil von wyrmdesk.ch, wie die Charaktererstellung: dunkle Seite mit Glut und Gold,
+   das Charakterblatt bleibt Pergament (charsheet.css) im goldenen Rahmen. Nach /shared/wyrmdesk.css
+   geladen, das Schriften, Farben und die dunkle Kopfzeile bringt. */
+
+body {
+  color: var(--parchment-200);
+  background-color: var(--night-900);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgb(142 42 32 / 0.16), transparent 50%),
+    radial-gradient(ellipse at 90% 30%, rgb(184 137 46 / 0.08), transparent 45%),
+    radial-gradient(ellipse at 50% 120%, rgb(224 112 95 / 0.12), transparent 55%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+html { background: var(--night-900); }
+
+header { padding: 10px 16px; }
+/* Bearbeiten und Speichern glühen wie die Hauptknöpfe auf wyrmdesk.ch */
+header #edit-btn, header #save-btn {
+  background: linear-gradient(135deg, var(--ember-600), var(--wine-500) 60%, var(--wine-600));
+  border-color: var(--wine-600);
+  color: #fff8ec;
+  box-shadow: 0 0 0 1px rgb(232 197 126 / 0.3) inset;
+}
+header button.ghost.active { background: rgb(216 174 90 / 0.18); border-color: var(--gold-300); color: var(--gold-200); }
+#initiative { background: var(--night-950); border-bottom: 1px solid rgb(184 137 46 / 0.3); }
+
+/* Das Blatt: Pergament mit goldenem Doppelrahmen; Felder und Auswahllisten hell */
+main .char-sheet {
+  color-scheme: light;
+  box-shadow: 0 0 0 1px rgb(184 137 46 / 0.5), 0 0 0 7px rgb(29 25 22 / 0.9), 0 0 0 8px rgb(184 137 46 / 0.35), 0 30px 60px -24px rgb(0 0 0 / 0.9);
+}
+.cs-popup { color-scheme: light; }
+
+.empty { color: var(--parchment-500); font-family: var(--font-serif); font-style: italic; font-size: 1.1em; }
+.status { background: var(--night-800); color: var(--parchment-200); border: 1px solid rgb(184 137 46 / 0.28); }
+
+@media (max-width: 600px) {
+  header { padding: 8px; }
+  main .char-sheet { box-shadow: 0 0 0 1px rgb(184 137 46 / 0.5), 0 16px 32px -16px rgb(0 0 0 / 0.9); }
+}

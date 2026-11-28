@@ -1,6 +1,6 @@
 """Exports the SRD (5.1 and 5.2) as the "Wyrmdesk-Inhalte" for the website, with German texts.
 
-    python tools/srd_export.py --out ../wyrmdesk-website/inhalte/srd             # export
+    python tools/srd_export.py --out ../wyrmdesk-webseite/inhalte/srd             # export
     python tools/srd_export.py --out … --dry-run                                  # only count
     python tools/srd_export.py --out … --memory ~/.local/share/Wyrmdesk/dmtool.db  # reuse translations
     DEEPL_API_KEY=… python tools/srd_export.py --out … --max-chars 400000          # translate the rest
@@ -242,7 +242,7 @@ def write(out: Path, entries: dict[str, list[dict]], lines: dict[str, str], need
 
 async def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--out", required=True, type=Path, help="Zielordner (z. B. ../wyrmdesk-website/inhalte/srd)")
+    ap.add_argument("--out", required=True, type=Path, help="Zielordner (z. B. ../wyrmdesk-webseite/inhalte/srd)")
     ap.add_argument("--memory", type=Path, help="Datenbank eines Kampagnenbuchs mit Übersetzungen (nur lesend)")
     ap.add_argument("--max-chars", type=int, default=0, help="höchstens so viele Zeichen über DeepL (0 = keine)")
     ap.add_argument("--dry-run", action="store_true", help="nur zählen, nichts schreiben")

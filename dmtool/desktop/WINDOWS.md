@@ -6,6 +6,16 @@ gebaut. Ergebnis: `dist\packages\Wyrmdesk-Setup-<Version>.exe`, ein Installer oh
 
 ## Stand (bitte nachführen)
 
+**28.11.2026, Version 0.2.0** (Tag `v0.2.0`, gleiche Werkzeuge wie 0.1.0). Ohne Änderungen an
+`wyrmdesk.spec` und den Requirements:
+
+1. ✅ `build-windows.bat` baut `dist\packages\Wyrmdesk-Setup-0.2.0.exe` (26 MB), ProductVersion „0.2.0“.
+   Der neue Look (`shared_static/wyrmdesk.css` mit Schriften) und `app.campaign_file` sind im Build.
+2. ✅ Installer von Hand getestet: läuft, darunter der neue Look in allen Teilen, die Kampagnen-Datei
+   (Export einer Vorlage als Datei im App-Fenster, Einspielen über „Vorlage aus Datei…“).
+
+Die Linux-Pakete zu 0.2.0 baut der CI-Runner beim Push des Tags.
+
 **22.11.2026, Version 0.1.0, erster Build auf Windows 11** (Python 3.12, PyInstaller 6.22.3,
 Inno Setup 6.7.3). Ohne Änderungen am Code:
 
@@ -23,8 +33,7 @@ Inno Setup 6.7.3). Ohne Änderungen am Code:
 6. ✅ Die ganze Liste unter „Testen“ mit dem Installer von Hand durchgegangen, alles in Ordnung
    (Installation, SmartScreen, Startmenü, Firewall, Sicherung, Handbuch, Vollbild, Update, Deinstallation).
 
-**Noch offen:** Release 0.1.0 erst, wenn auch die Linux-Pakete aus demselben Commit gebaut und
-getestet sind (siehe „Danach“).
+Release 0.1.0 erschienen, mit den Linux-Paketen aus demselben Commit.
 
 Was hier erledigt oder geändert wurde, in diesem Abschnitt festhalten und committen.
 

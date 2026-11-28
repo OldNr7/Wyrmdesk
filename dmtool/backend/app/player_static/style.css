@@ -33,18 +33,21 @@ body.sideways #stage { width: 100vh; height: 100vw; }
 
 #title {
   margin: 0;
-  font-family: Georgia, "Palatino Linotype", serif;
+  font-family: var(--font-head);
   font-size: 4.5vmin;
-  font-weight: normal;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-align: center;
+  /* goldener Titel wie auf wyrmdesk.ch */
+  color: #f3dca8;
+  text-shadow: 0 0 3vmin rgb(216 174 90 / 0.45), 0 0.3vmin 0.6vmin rgb(0 0 0 / 0.8);
 }
 #title:empty { display: none; }
 
 /* Room left under the title: the full height minus title line and gap. */
 #frame { --room: calc(100cqh - 10vmin); width: 100%; display: flex; gap: 4vmin; align-items: center; justify-content: center; }
 #title:empty + #frame { --room: 100cqh; }
-#image { max-width: 100%; max-height: var(--room); object-fit: contain; border-radius: 6px; box-shadow: 0 0 40px rgba(0, 0, 0, 0.8); }
+#image { max-width: 100%; max-height: var(--room); object-fit: contain; border-radius: 6px; box-shadow: 0 0 0 0.15vmin rgb(184 137 46 / 0.6), 0 0 40px rgba(0, 0, 0, 0.8); }
 #image[hidden], #text[hidden] { display: none; }
 #frame.both #image { max-width: 55%; }
 
@@ -53,15 +56,19 @@ body.sideways #stage { width: 100vh; height: 100vw; }
   max-height: var(--room);
   overflow: hidden;
   padding: 3vmin 4vmin;
-  background: #efe3c4;
+  background:
+    radial-gradient(ellipse at top left, rgb(255 255 255 / 0.45), transparent 60%),
+    radial-gradient(ellipse at bottom right, rgb(171 140 100 / 0.25), transparent 55%),
+    #f1e6cc;
   color: #2b2116;
-  border-radius: 4px;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
-  font-family: Georgia, "Palatino Linotype", serif;
+  border-radius: 6px;
+  /* Pergament mit goldenem Doppelrahmen */
+  box-shadow: 0 0 0 0.15vmin rgb(184 137 46 / 0.7), 0 0 0 1vmin #1d1916, 0 0 0 1.15vmin rgb(184 137 46 / 0.45), 0 0 40px rgba(0, 0, 0, 0.8);
+  font-family: var(--font-serif);
   font-size: 2.6vmin;
   line-height: 1.5;
 }
-#text h2, #text h3 { margin: 0 0 1vmin; }
+#text h2, #text h3 { margin: 0 0 1vmin; font-family: var(--font-head); color: #5e1a14; letter-spacing: 0.04em; }
 #text p { margin: 0 0 1.2vmin; }
 #text img { max-width: 100%; }
 #text blockquote { margin: 0; font-style: italic; }

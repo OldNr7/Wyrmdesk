@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/shared/charsheet.css" />
   <link rel="stylesheet" href="library.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/shared/wyrmdesk.css" />
 </head>
 <body>
   <header>
@@ -327,6 +328,9 @@
         <div class="muted small">Ein Schnappschuss der Kampagne mit allem darin (Einträge, Sessions, Zeitleiste, Charaktere,
           Encounter, Karten), um sie für eine andere Gruppe beliebig oft neu zu beginnen.</div>
         <button id="btn-save-template" class="wide">Kampagne als Vorlage sichern…</button>
+        <label class="button wide">⇧ Vorlage aus Datei…
+          <input type="file" id="template-import" accept=".zip,application/zip" hidden />
+        </label>
         <ul id="template-list" class="template-list"></ul>
       </section>
 

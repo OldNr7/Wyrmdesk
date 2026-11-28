@@ -273,5 +273,10 @@
   "⇩ Datei": "⇩ File",
   "„{name}“ endgültig löschen?": "Delete “{name}” for good?",
   "🗑 Löschen": "🗑 Delete",
-  "Wyrmdesk Version {v}": "Wyrmdesk version {v}"
+  "Wyrmdesk Version {v}": "Wyrmdesk version {v}",
+  "Volk und Klasse": "Species and class",
+  "Wähle aus den Völkern und Klassen der Grundregeln, jede mit Bild und kurzer Beschreibung.": "Choose from the species and classes of the basic rules, each with a picture and a short description.",
+  "Attribute und Ausrüstung": "Abilities and equipment",
+  "Der Assistent führt dich durch Hintergrund, Attribute, Fertigkeiten und Ausrüstung und rechnet die Werte für dich aus.": "The assistant guides you through background, abilities, skills and equipment and works out the numbers for you.",
+  "Ab an den Spieltisch": "Off to the table"
 }

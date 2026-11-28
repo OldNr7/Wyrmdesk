@@ -31,6 +31,16 @@ The class portraits (`shared_static/class-portraits/*.svg`) and the icons of the
 by Lorc, Delapouite and other contributors, licensed under
 [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
 
+## Fonts
+
+The Charaktererstellung and the Kampagnenbuch use the fonts of wyrmdesk.ch, served from their own
+server (`charcreator/backend/app/player_static/fonts/`, `dmtool/backend/app/shared_static/fonts/`, Latin
+subsets from [Fontsource](https://fontsource.org)):
+[Cinzel](https://github.com/NDISCOVER/Cinzel-Font) © The Cinzel Project Authors,
+[Alegreya](https://github.com/huertatipografica/Alegreya) and
+[Alegreya Sans](https://github.com/huertatipografica/Alegreya-Sans) © The Alegreya Project Authors,
+all licensed under the [SIL Open Font License 1.1](https://openfontlicense.org).
+
 ## Libraries
 
 | Library | Where | License |

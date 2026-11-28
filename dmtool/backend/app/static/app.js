@@ -2062,6 +2062,8 @@ async function renderTemplates() {
     h("div", { class: "row" },
       h("button", { class: "small-btn", onclick: () => { toggleSetup(false); openWorldModal({ create: true, templateId: tpl.id }); } },
         t("Neue Kampagne daraus…")),
+      h("button", { class: "small-btn", title: t("Vorlage als Datei weitergeben (z. B. für wyrmdesk.ch oder einen anderen Rechner)"),
+        onclick: () => openTemplateExport(tpl) }, t("⇩ Als Datei")),
       h("button", { class: "small-btn danger", title: t("Vorlage löschen"), onclick: async () => {
         if (!confirm(t("Vorlage „{name}“ löschen?\n\nKampagnen, die daraus entstanden sind, bleiben.", { name: tpl.name }))) return;
         await api("DELETE", `/api/templates/${tpl.id}`);
@@ -2075,8 +2077,50 @@ async function saveTemplate() {
   await flushSaves();
   const name = prompt(t("Name der Vorlage aus „{name}“:", { name: S.campaign.name }), `${S.campaign.name} (${t("Vorlage {date}", { date: new Date().toLocaleDateString(UI_LOCALE) })})`)?.trim();
   if (!name) return;
-  const t = await api("POST", `/api/campaigns/${S.campaign.id}/templates`, { name });
-  toast(`Vorlage „${t.name}“ gesichert: ${templateCounts(t.counts)}.`);
+  const tpl = await api("POST", `/api/campaigns/${S.campaign.id}/templates`, { name });
+  toast(t("Vorlage „{name}“ gesichert: {counts}.", { name: tpl.name, counts: templateCounts(tpl.counts) }));
+  renderTemplates();
+}
+
+// A template as a file (campaign_file.py): by default without the player characters and with the play
+// reset, so it can go on the website as it is.
+function openTemplateExport(tpl) {
+  const withChars = h("input", { type: "checkbox" });
+  const keepPlay = h("input", { type: "checkbox" });
+  const download = () => {
+    const q = new URLSearchParams({ with_characters: withChars.checked ? "1" : "0", reset: keepPlay.checked ? "0" : "1" });
+    const a = h("a", { href: `/api/templates/${tpl.id}/export?${q}`, download: "" });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    closeModal();
+  };
+  openModal(h("div", {},
+    h("h2", {}, t("Vorlage als Datei")),
+    h("p", { class: "muted small" }, t("Eine ZIP-Datei mit der Kampagne und allen Bildern, Karten und Dokumenten darin. Einspielen in einem anderen Kampagnenbuch unter Einrichtung → Vorlagen → Vorlage aus Datei.")),
+    h("label", { class: "choice" }, withChars, h("span", {}, h("b", {}, t("Spielercharaktere mitgeben")), h("br"),
+      h("span", { class: "muted small" }, t("Mit den Namen der Spielerinnen und Spieler. Zum Weitergeben an andere besser weglassen."))) ),
+    h("label", { class: "choice" }, keepPlay, h("span", {}, h("b", {}, t("Spielstand behalten")), h("br"),
+      h("span", { class: "muted small" }, t("Sonst wie neu: nichts den Spielern bekannt, Sessions geplant, Nebel zu, Kämpfe am Anfang."))) ),
+    h("p", { class: "small" }, t("Nur eigene oder frei verwendbare Inhalte weitergeben: keine Texte und Bilder aus gekauften Büchern oder von D&D Beyond.")),
+    h("div", { class: "modal-actions" },
+      h("button", { onclick: closeModal }, t("Abbrechen")),
+      h("button", { class: "primary", onclick: download }, t("⇩ Herunterladen")))));
+}
+
+async function importTemplateFile(e) {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  toast(t("Datei wird eingelesen…"));
+  const resp = await fetch("/api/templates/import", { method: "POST", body: file });
+  if (!resp.ok) {
+    let detail = resp.statusText;
+    try { detail = (await resp.json()).detail || detail; } catch { /* not json */ }
+    return toast(typeof detail === "string" ? detail : t("Die Datei konnte nicht eingelesen werden."), true);
+  }
+  const tpl = await resp.json();
+  toast(t("Vorlage „{name}“ eingelesen: {counts}.", { name: tpl.name, counts: templateCounts(tpl.counts) }));
   renderTemplates();
 }
 
@@ -2258,6 +2302,7 @@ function wireStatic() {
   $("#btn-world").addEventListener("click", () => { if (S.campaign) openWorldModal({ create: false }); });
   $("#btn-new-campaign").addEventListener("click", () => openWorldModal({ create: true }));
   $("#btn-save-template").addEventListener("click", saveTemplate);
+  $("#template-import").addEventListener("change", importTemplateFile);
   document.querySelectorAll('input[name="editor"]').forEach((r) => r.addEventListener("change", async () => {
     await flushSaves();
     S.settings = await api("PATCH", "/api/settings", { editor: r.value });

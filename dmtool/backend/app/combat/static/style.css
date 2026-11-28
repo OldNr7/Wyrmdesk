@@ -717,3 +717,91 @@ header nav:not(.kb-nav) { gap: 6px; }
 .campaign-switcher { gap: 6px; padding-right: 0; border-right: none; }
 .campaign-switcher select, .campaign-switcher select option { border-color: var(--border); font-size: 14px; }
 header select option { font-weight: normal; }
+
+/* =====================================================================================
+   Wyrmdesk-Look (wie wyrmdesk.ch, Rahmen aus kb/shared/wyrmdesk.css): Inhalt als Pergament.
+   ===================================================================================== */
+
+:root {
+  color-scheme: light;
+  --bg: #f3ecdf;
+  --panel: #fbf6ec;
+  --panel-alt: #f1e8d8;
+  --border: #d9c9a9;
+  --muted: #76695a;
+  --accent-2: #8a5d1f;
+  --turn: #d8ae5a;
+}
+
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at top left, rgb(255 255 255 / 0.55), transparent 55%),
+    radial-gradient(ellipse at bottom right, rgb(171 140 100 / 0.22), transparent 55%);
+  background-attachment: fixed;
+  font-size: 15px;
+}
+
+/* Kopfzeile: Kampagne und Reiter Encounter/Anzeige */
+.campaign-switcher { border-right-color: rgb(184 137 46 / 0.3); }
+header .tab-btn { padding: 6px 14px; border-color: rgb(216 174 90 / 0.4); color: var(--parchment-300); }
+header .tab-btn.active {
+  background: linear-gradient(135deg, var(--ember-600), var(--wine-500) 60%, var(--wine-600));
+  border-color: var(--wine-600);
+  color: #fff8ec;
+}
+header .danger.icon-btn { color: var(--ember-400); border-color: rgb(224 112 95 / 0.45); }
+
+/* Überschriften */
+.panel h3, .encounter-sidebar h3, .modal h3, .collapsible > summary h3, .round-info, #setup section h2, .setup-head h2 {
+  font-family: var(--font-head);
+  color: var(--heading);
+  letter-spacing: 0.06em;
+}
+.round-info { font-weight: 700; }
+
+/* Karten */
+.panel, .encounter-sidebar {
+  background: linear-gradient(160deg, #fffbf3, var(--panel));
+  border: 1px solid rgb(184 137 46 / 0.45);
+  border-radius: 12px;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 8px 20px -14px rgb(60 35 20 / 0.55);
+}
+.encounter-sidebar-item.active { border-color: var(--wine-500); box-shadow: 0 0 0 1px var(--wine-500) inset, 0 0 14px -6px rgb(142 42 32 / 0.5); }
+
+/* Knöpfe: Bronze, gefährliche in Glut-Rot */
+button {
+  background: linear-gradient(160deg, #a06d26, var(--accent-2));
+  box-shadow: 0 0 0 1px rgb(243 220 168 / 0.25) inset;
+  color: #fff8ec;
+  transition: box-shadow 0.15s, filter 0.15s;
+}
+button:hover { filter: none; box-shadow: 0 0 0 1px rgb(243 220 168 / 0.5) inset, 0 4px 12px -4px rgb(138 93 31 / 0.6); }
+button.danger {
+  background: linear-gradient(135deg, var(--ember-600), var(--wine-500) 60%, var(--wine-600));
+}
+button.ghost { box-shadow: none; }
+
+/* Kämpfer: aktiver Zug leuchtet golden */
+.combatant-row {
+  background: linear-gradient(160deg, #fffbf3, var(--panel-alt));
+  border-color: rgb(184 137 46 / 0.35);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.combatant-row.active-turn {
+  border-color: var(--gold-400);
+  box-shadow: 0 0 0 2px var(--gold-400) inset, 0 0 22px -6px rgb(216 174 90 / 0.8);
+  background: linear-gradient(160deg, #fff8e6, #f5e7c6);
+}
+.combatant-row.monster { border-left-color: var(--wine-500); }
+.combatant-name { font-family: var(--font-serif); font-size: 16px; font-weight: 700; }
+.combatant-init input { font-family: var(--font-serif); font-variant-numeric: lining-nums; font-size: 1.2rem; }
+
+/* Einrichtung und Dialoge: Pergament mit goldenem Rahmen */
+#setup { border-left: 1px solid rgb(184 137 46 / 0.5); }
+.modal-overlay { background: rgb(13 10 8 / 0.65); backdrop-filter: blur(2px); }
+.modal {
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgb(184 137 46 / 0.6), 0 0 0 6px var(--night-800), 0 0 0 7px rgb(184 137 46 / 0.4), 0 30px 60px -20px rgb(0 0 0 / 0.8);
+}

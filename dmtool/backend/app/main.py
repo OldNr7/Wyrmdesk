@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.background import BackgroundTask
 
-from . import (backup, book_import, char_import, char_options, content_translate, ddb_import, internal, library, live,
+from . import (backup, book_import, campaign_file, char_import, char_options, content_translate, ddb_import, internal, library, live,
                merge, templates, tracker, translate)
 from .battlemap import db as map_db
 from .combat import db as combat_db
@@ -30,6 +30,7 @@ app.include_router(ddb_import.router)
 app.include_router(book_import.router)
 app.include_router(content_translate.router)
 app.include_router(translate.router)
+app.include_router(campaign_file.router)  # before templates: /api/templates/import is no template id
 app.include_router(templates.router)
 
 ENTRY_TYPES = {"pc", "npc", "place", "location", "faction", "item", "quest", "decision", "handout"}

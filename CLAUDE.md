@@ -75,8 +75,9 @@ Betrieb (URLs, Start/Stop, Backups, lokale vs. Server-Instanz): [LIESMICH.md](LI
   `LIESMICH.md` → „Versionen und Releases“.
 - Das Handbuch (DE/EN mit Screenshots) liegt in `dmtool/backend/app/handbuch_static`, in der App unter
   `/handbuch/` (Knopf „?“ aus `shared_static/nav.js`, springt zum Kapitel des aktuellen Teils). Die
-  Website (`wyrmdesk-website`) holt es per `build.py --sync-handbook`. Kapitel-Anker (`kampagnenbuch`/
-  `campaign-book`, `tracker`, `karte`/`map`) nicht umbenennen, ohne `nav.js` anzupassen.
+  Website (Repo `wyrmdesk-webseite`) holt es per `sh tools/sync-handbuch.sh` und liefert es unter
+  `/handbuch/` aus. Kapitel-Anker (`kampagnenbuch`/`campaign-book`, `tracker`, `karte`/`map`) nicht
+  umbenennen, ohne `nav.js` anzupassen.
 - Trennung Charakterblatt (`max_hp`/`ac`/`notes`/`stat_block`, mit `updated_at`-Versionsprüfung) vs.
   Spielzustand (`current_hp`/`temp_hp`/`play_state`, ändert sich während des Spiels) ist Absicht, nicht
   Zufall — nicht vermischen.
@@ -119,3 +120,8 @@ Niemals `docker compose down -v` (löscht alle Daten). Details zu Backups/Restor
 
 Branch `main`. Vor dem Start einer Änderung `git status`/`git pull` prüfen. Private Betriebsnotizen
 (eigener Server, Remote) liegen, falls vorhanden, im nicht eingecheckten Ordner `privat/`.
+
+Das Repo ist öffentlich. In eingecheckte Dateien kommen **keine persönlichen Daten**: keine Namen,
+E-Mail-Adressen, eigenen Server, IP-Adressen, Hostnamen oder Pfade aus dem eigenen Benutzerordner,
+auch nicht als Beispiel (dafür `example.org`, `localhost`). Vor jeder Veröffentlichung den Ablauf in
+`privat/SERVER.md` befolgen (falls vorhanden), inklusive der Prüfung dort.
